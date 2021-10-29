@@ -3,6 +3,8 @@ package com.barley.parser;
 import com.barley.ast.BinaryAST;
 import com.barley.ast.ConstantAST;
 import com.barley.ast.UnaryAST;
+import com.barley.runtime.AtomTable;
+import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyString;
 import com.barley.utils.AST;
@@ -99,7 +101,15 @@ public final class Parser {
             match(TokenType.RPAREN);
             return result;
         }
-        throw new RuntimeException("Unknown expression");
+        if (match(TokenType.ATOM)) {
+            int atom = addAtom(current.getText());
+            return new ConstantAST(new BarleyAtom(atom));
+        }
+        throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+    }
+
+    private int addAtom(String atom) {
+        return AtomTable.put(atom);
     }
 
     private Token consume(TokenType type, String text) {

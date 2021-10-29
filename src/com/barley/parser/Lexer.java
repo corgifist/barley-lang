@@ -220,7 +220,7 @@ public final class Lexer {
         char[] charArray = str.toCharArray();
 
         for(int i=0; i < charArray.length; i++){
-            if( !Character.isLowerCase(charArray[i]))
+            if( !Character.isLowerCase(charArray[i]) && !(charArray[i] == '_'))
                 return false;
         }
         return true;
