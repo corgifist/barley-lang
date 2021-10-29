@@ -2,6 +2,7 @@ package com.barley.runtime;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 
 public class BarleyNumber implements BarleyValue {
 
@@ -23,6 +24,19 @@ public class BarleyNumber implements BarleyValue {
     @Override
     public BigDecimal asFloat() {
         return number;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BarleyNumber that = (BarleyNumber) o;
+        return Objects.equals(number, that.number);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number);
     }
 
     @Override

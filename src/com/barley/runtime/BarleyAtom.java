@@ -4,6 +4,7 @@ import com.barley.utils.BarleyException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 
 public class BarleyAtom implements BarleyValue {
 
@@ -21,6 +22,19 @@ public class BarleyAtom implements BarleyValue {
     @Override
     public BigDecimal asFloat() {
         throw new BarleyException("BadArithmetic", "Cannot cast ATOM to a NUMBER");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BarleyAtom that = (BarleyAtom) o;
+        return pos == that.pos;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos);
     }
 
     @Override

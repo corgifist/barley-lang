@@ -4,6 +4,7 @@ import com.barley.utils.BarleyException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class BarleyString implements BarleyValue {
 
@@ -25,6 +26,19 @@ public class BarleyString implements BarleyValue {
     @Override
     public BigDecimal asFloat() {
         throw new BarleyException("BadArithmetic", "Cannot cast STRING to a NUMBER");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BarleyString that = (BarleyString) o;
+        return Arrays.equals(string, that.string);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(string);
     }
 
     @Override

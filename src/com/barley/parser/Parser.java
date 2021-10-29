@@ -1,8 +1,6 @@
 package com.barley.parser;
 
-import com.barley.ast.BinaryAST;
-import com.barley.ast.ConstantAST;
-import com.barley.ast.UnaryAST;
+import com.barley.ast.*;
 import com.barley.runtime.AtomTable;
 import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyNumber;
@@ -40,7 +38,21 @@ public final class Parser {
     }
 
     private AST expression() {
-        return additive();
+        return assignment();
+    }
+
+    private AST assignment() {
+        AST result = additive();
+
+        while (true) {
+            if (match(TokenType.EQ)) {
+                result = new BindAST(result, additive());
+                continue;
+            }
+            break;
+        }
+
+        return result;
     }
 
     private AST additive() {
@@ -100,6 +112,9 @@ public final class Parser {
             AST result = expression();
             match(TokenType.RPAREN);
             return result;
+        }
+        if (match(TokenType.VAR)) {
+            return new ExtractBindAST(current.getText());
         }
         if (match(TokenType.ATOM)) {
             int atom = addAtom(current.getText());
