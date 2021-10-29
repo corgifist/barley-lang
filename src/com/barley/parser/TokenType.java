@@ -2,9 +2,8 @@ package com.barley.parser;
 
 public enum TokenType {
 
-    INT,
+    NUMBER,
     STRING,
-    FLOAT,
 
     PLUS,
     MINUS,
@@ -31,6 +30,8 @@ public enum TokenType {
     RBRACE, // }
     LBRACKET,
     RBRACKET,
+
+    DOT,
 
     VAR , ATOM, EOF
 }

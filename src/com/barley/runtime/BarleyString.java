@@ -9,12 +9,12 @@ public class BarleyString implements BarleyValue {
 
     private byte[] string;
 
-    private BarleyString(String str) {
-        this(str.getBytes());
-    }
-
     public BarleyString(byte[] string) {
         this.string = string;
+    }
+
+    public BarleyString(String s) {
+        this(s.getBytes());
     }
 
     @Override

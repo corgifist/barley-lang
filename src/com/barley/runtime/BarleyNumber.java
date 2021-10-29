@@ -7,16 +7,12 @@ public class BarleyNumber implements BarleyValue {
 
     BigDecimal number;
 
-    private BarleyNumber(double value) {
-        number = BigDecimal.valueOf(value);
-    }
-
-    private BarleyNumber(long value) {
-        number = BigDecimal.valueOf(value);
-    }
-
     public BarleyNumber(BigDecimal number) {
         this.number = number;
+    }
+
+    public BarleyNumber(double v) {
+        this(BigDecimal.valueOf(v));
     }
 
     @Override

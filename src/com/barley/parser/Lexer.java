@@ -10,7 +10,7 @@ import java.util.Map;
 
 public final class Lexer {
 
-    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],";
+    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.";
     private static final Map<String, TokenType> OPERATORS;
     static {
         OPERATORS = new HashMap<>();
@@ -37,6 +37,7 @@ public final class Lexer {
         OPERATORS.put("]", TokenType.RBRACKET);
         OPERATORS.put(",", TokenType.COMMA);
         OPERATORS.put("->", TokenType.STABBER);
+        OPERATORS.put(".", TokenType.DOT);
     }
 
     private static final Map<String, TokenType> KEYWORDS;
@@ -169,12 +170,7 @@ public final class Lexer {
             buffer.append(current);
             current = next();
         }
-        try {
-            Integer.parseInt(buffer.toString());
-            addToken(TokenType.INT, buffer.toString());
-        } catch (NumberFormatException ex) {
-            addToken(TokenType.FLOAT, buffer.toString());
-        }
+        addToken(TokenType.NUMBER, buffer.toString());
     }
 
 
