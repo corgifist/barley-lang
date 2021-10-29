@@ -49,8 +49,8 @@ public class BindAST implements AST {
                     if (right.equals(l));
                     else throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
                 } else if (pattern1 instanceof ListPattern) {
-                    AST l = new ListAST(((ListPattern) pattern1).getArr());
-                    processPattern((ListPattern) pattern1, l);
+                    if (!((right instanceof BarleyList))) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                    processPattern(pattern1, new ConstantAST(right));
                 }
             }
             return;
