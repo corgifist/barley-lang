@@ -23,6 +23,10 @@ public class ListAST implements AST {
         return new BarleyList(arr);
     }
 
+    public LinkedList<AST> getArray() {
+        return array;
+    }
+
     @Override
     public String toString() {
         return array.toString();
