@@ -1,2 +1,3 @@
-# barley-lang
-Something like Erlang on JVM =D
+# Barley
+
+There is no intresting here yet.
