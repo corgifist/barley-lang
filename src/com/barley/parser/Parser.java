@@ -11,6 +11,7 @@ import com.barley.utils.Token;
 
 import javax.print.attribute.standard.NumberUp;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public final class Parser {
@@ -100,6 +101,15 @@ public final class Parser {
         return primary();
     }
 
+    private AST list() {
+        LinkedList<AST> array = new LinkedList<>();
+        while (!(match(TokenType.RBRACKET))) {
+            array.add(expression());
+            match(TokenType.COMMA);
+        }
+        return new ListAST(array);
+    }
+
     private AST primary() {
         final Token current = get(0);
         if (match(TokenType.NUMBER)) {
@@ -119,6 +129,10 @@ public final class Parser {
         if (match(TokenType.ATOM)) {
             int atom = addAtom(current.getText());
             return new ConstantAST(new BarleyAtom(atom));
+        }
+
+        if (match(TokenType.LBRACKET)) {
+            return list();
         }
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
     }

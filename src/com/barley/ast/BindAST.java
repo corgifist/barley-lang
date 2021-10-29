@@ -42,6 +42,8 @@ public class BindAST implements AST {
             return new VariablePattern(ast.toString());
         } else if (ast instanceof ConstantAST) {
             return new ConstantPattern(ast.execute());
+        } else if (ast instanceof BindAST) {
+            return new ConstantPattern(ast.execute());
         } else throw new BarleyException("BadMatch", "invalid pattern in bind ast");
     }
 }
