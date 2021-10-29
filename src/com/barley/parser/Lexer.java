@@ -127,7 +127,7 @@ public final class Lexer {
                 continue;
             }
             if (current == '"') break;
-            if (current == '\0') throw new BarleyException("CompileError", "Reached end of file while parsing text string");
+            if (current == '\0') throw new BarleyException("BadCompiler", "Reached end of file while parsing text string");
             buffer.append(current);
             current = next();
         }
@@ -152,7 +152,8 @@ public final class Lexer {
         if (KEYWORDS.containsKey(word)) {
             addToken(KEYWORDS.get(word));
         } else {
-            addToken(TokenType.WORD, word);
+            if (isStringLowerCase(word)) addToken(TokenType.ATOM, word);
+            else addToken(TokenType.VAR, word);
         }
     }
 
@@ -161,14 +162,19 @@ public final class Lexer {
         char current = peek(0);
         while (true) {
             if (current == '.') {
-                if (buffer.indexOf(".") != -1) throw new BarleyException("CompileError", "Invalid float number");
+                if (buffer.indexOf(".") != -1) throw new BarleyException("BadCompiler", "Invalid float number");
             } else if (!Character.isDigit(current)) {
                 break;
             }
             buffer.append(current);
             current = next();
         }
-        addToken(TokenType.NUMBER, buffer.toString());
+        try {
+            Integer.parseInt(buffer.toString());
+            addToken(TokenType.INT, buffer.toString());
+        } catch (NumberFormatException ex) {
+            addToken(TokenType.FLOAT, buffer.toString());
+        }
     }
 
 
@@ -211,5 +217,15 @@ public final class Lexer {
 
     private void addToken(TokenType type, String text) {
         tokens.add(new Token(type, text, line));
+    }
+
+    private static boolean isStringLowerCase(String str){
+        char[] charArray = str.toCharArray();
+
+        for(int i=0; i < charArray.length; i++){
+            if( !Character.isLowerCase(charArray[i]))
+                return false;
+        }
+        return true;
     }
 }
