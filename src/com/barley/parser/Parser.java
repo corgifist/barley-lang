@@ -4,6 +4,7 @@ import com.barley.ast.BinaryAST;
 import com.barley.ast.ConstantAST;
 import com.barley.ast.UnaryAST;
 import com.barley.runtime.BarleyNumber;
+import com.barley.runtime.BarleyString;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Token;
@@ -95,6 +96,10 @@ public final class Parser {
             AST result = expression();
             match(TokenType.RPAREN);
             return result;
+        }
+
+        if (match(TokenType.STRING)) {
+            return new ConstantAST(new BarleyString(current.getText()));
         }
         throw new RuntimeException("Unknown expression");
     }
