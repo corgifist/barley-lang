@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public final class Lexer {
 
     private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.";
