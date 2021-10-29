@@ -27,6 +27,6 @@ public class BarleyNumber implements BarleyValue {
 
     @Override
     public String toString() {
-        return number.toString();
+        return number.remainder(BigDecimal.valueOf(1)).equals(BigDecimal.valueOf(0.0)) ? String.valueOf(number.longValue()) : number.toString();
     }
 }

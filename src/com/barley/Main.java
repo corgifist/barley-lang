@@ -6,6 +6,6 @@ import com.barley.utils.Handler;
 public class Main {
 
     public static void main(String[] args) {
-        Handler.handle("2234972 + \"string\".");
+        Handler.console();
     }
 }

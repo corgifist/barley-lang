@@ -9,6 +9,7 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Token;
 
+import javax.print.attribute.standard.NumberUp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,11 +46,11 @@ public final class Parser {
 
         while (true) {
             if (match(TokenType.PLUS)) {
-                result = new BinaryAST(result, unary(), '+');
+                result = new BinaryAST(result, multiplicative(), '+');
                 continue;
             }
             if (match(TokenType.MINUS)) {
-                result = new BinaryAST(result, unary(), '-');
+                result = new BinaryAST(result, multiplicative(), '-');
                 continue;
             }
             break;
@@ -81,9 +82,7 @@ public final class Parser {
         if (match(TokenType.MINUS)) {
             return new UnaryAST(primary(), '-');
         }
-        if (match(TokenType.PLUS)) {
-            return primary();
-        }
+
         return primary();
     }
 
@@ -92,14 +91,13 @@ public final class Parser {
         if (match(TokenType.NUMBER)) {
             return new ConstantAST(new BarleyNumber(Double.parseDouble(current.getText())));
         }
+        if (match(TokenType.STRING)) {
+            return new ConstantAST(new BarleyString(current.getText()));
+        }
         if (match(TokenType.LPAREN)) {
             AST result = expression();
             match(TokenType.RPAREN);
             return result;
-        }
-
-        if (match(TokenType.STRING)) {
-            return new ConstantAST(new BarleyString(current.getText()));
         }
         throw new RuntimeException("Unknown expression");
     }
