@@ -15,4 +15,9 @@ public class ConstantAST implements AST {
     public BarleyValue execute() {
         return constant;
     }
+
+    @Override
+    public String toString() {
+        return constant.toString();
+    }
 }

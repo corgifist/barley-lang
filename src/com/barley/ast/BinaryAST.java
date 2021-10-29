@@ -6,7 +6,7 @@ import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
-public class BinaryAST implements AST {
+public class BinaryAST implements AST{
 
     private final AST expr1, expr2;
     private char op;
@@ -53,4 +53,5 @@ public class BinaryAST implements AST {
     public String toString() {
         return String.format("%s %s %s", expr1, op, expr2);
     }
+
 }

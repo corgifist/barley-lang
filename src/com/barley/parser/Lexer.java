@@ -162,7 +162,7 @@ public final class Lexer {
         final StringBuilder buffer = new StringBuilder();
         char current = peek(0);
         while (true) {
-            if (current == '.') {
+            if (current == '.' && Character.isDigit(peek(1))) {
                 if (buffer.indexOf(".") != -1) throw new BarleyException("BadCompiler", "Invalid float number");
             } else if (!Character.isDigit(current)) {
                 break;
