@@ -1,10 +1,9 @@
 package com.barley.ast;
 
-import com.barley.runtime.BarleyAtom;
-import com.barley.runtime.BarleyFunction;
-import com.barley.runtime.BarleyValue;
-import com.barley.runtime.Modules;
+import com.barley.runtime.*;
 import com.barley.utils.AST;
+import com.barley.utils.BarleyException;
+import com.barley.utils.Function;
 
 public class RemoteAST implements AST {
 
@@ -17,7 +16,9 @@ public class RemoteAST implements AST {
 
     @Override
     public BarleyValue execute() {
-        return new BarleyFunction(Modules.get(module.execute().toString()).get(target.execute().toString()));
+        if (!(Modules.isExists(module.toString()))) throw new BarleyException("BadArg", "module '" + module.toString() + "' is not compiled or doesn't exists");
+        Function a = Modules.get(module.execute().toString()).get(target.execute().toString());
+        return new BarleyFunction(a);
     }
 
     @Override

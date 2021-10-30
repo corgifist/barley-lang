@@ -2,10 +2,7 @@ package com.barley.parser;
 
 import com.barley.ast.*;
 import com.barley.runtime.*;
-import com.barley.utils.AST;
-import com.barley.utils.BarleyException;
-import com.barley.utils.Clause;
-import com.barley.utils.Token;
+import com.barley.utils.*;
 
 import javax.print.attribute.standard.NumberUp;
 import java.util.ArrayList;
@@ -17,7 +14,7 @@ public final class Parser {
 
     private static final Token EOF = new Token(TokenType.EOF, "", -1);
 
-    public HashMap<String, UserFunction> methods;
+    public HashMap<String, Function> methods;
 
     private final List<Token> tokens;
     private final int size;
@@ -74,7 +71,7 @@ public final class Parser {
         clause.setResult(expression());
         ArrayList<Clause> clauses = new ArrayList<>();
         if (methods.containsKey(name)) {
-            clauses.addAll(methods.get(name).getClauses());
+            clauses.addAll(((UserFunction) methods.get(name)).getClauses());
         }
         clauses.add(clause);
         methods.put(name, new UserFunction(clauses));

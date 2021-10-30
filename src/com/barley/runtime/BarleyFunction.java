@@ -9,13 +9,13 @@ import java.util.Objects;
 
 public class BarleyFunction implements BarleyValue, Function {
 
-    private UserFunction function;
+    private Function function;
 
-    public BarleyFunction(UserFunction function) {
+    public BarleyFunction(Function function) {
         this.function = function;
     }
 
-    public UserFunction getFunction() {
+    public Function getFunction() {
         return function;
     }
 
