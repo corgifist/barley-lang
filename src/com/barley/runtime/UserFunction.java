@@ -46,9 +46,13 @@ public class UserFunction implements Function {
                     boolean isEquals = p.getConstant().equals(arg);
                     if (isEquals);
                     else br = true;
-
                 }
             }
+            if (clause.getGuard() != null) {
+                if ((clause.getGuard().execute()).toString() == "true");
+                else continue;
+            }
+
             if (br) {
                 br = false;
                 continue;
@@ -57,7 +61,6 @@ public class UserFunction implements Function {
             break;
         }
         BarleyValue result = toExecute.execute();
-        System.out.println(result);
         if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
         for (String var : toDelete) {
             Table.remove(var);
@@ -97,6 +100,10 @@ public class UserFunction implements Function {
 
     public ArrayList<Clause> getClauses() {
         return clauses;
+    }
+
+    private int addAtom(String atom) {
+        return AtomTable.put(atom);
     }
 
     @Override

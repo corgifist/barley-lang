@@ -1,8 +1,6 @@
 package com.barley.ast;
 
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyString;
-import com.barley.runtime.BarleyValue;
+import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
@@ -39,6 +37,11 @@ public class BinaryAST implements AST{
             case '*': return new BarleyNumber(number1 * number2);
             case '/': return new BarleyNumber(number1 / number2);
             case '+': return new BarleyNumber(number1 + number2);
+            case '>': return new BarleyAtom(addAtom(String.valueOf(number1 > number2)));
+            case '<': return new BarleyAtom(addAtom(String.valueOf(number1 < number2)));
+            case 't': return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
+            case 'g': return new BarleyAtom(addAtom(String.valueOf(number1 >= number2)));
+            case '=': return new BarleyAtom(addAtom(String.valueOf(number1 == number2)));
             default:
                badArith();
         }
@@ -52,6 +55,10 @@ public class BinaryAST implements AST{
     @Override
     public String toString() {
         return String.format("%s %s %s", expr1, op, expr2);
+    }
+
+    private int addAtom(String atom) {
+        return AtomTable.put(atom);
     }
 
 }

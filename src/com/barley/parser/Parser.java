@@ -86,16 +86,41 @@ public final class Parser {
     }
 
     private AST assignment() {
-        AST result = additive();
+        AST result = conditional();
 
         while (true) {
             if (match(TokenType.EQ)) {
-                result = new BindAST(result, additive());
+                result = new BindAST(result, conditional());
                 continue;
             }
             break;
         }
 
+        return result;
+    }
+
+    private AST conditional() {
+        AST result = additive();
+
+        if (match(TokenType.LT)) {
+            return new BinaryAST(result, additive(), '<');
+        }
+
+        if (match(TokenType.GT)) {
+            return new BinaryAST(result, additive(), '>');
+        }
+
+        if (match(TokenType.LTEQ)) {
+            return new BinaryAST(result, additive(), 't');
+        }
+
+        if (match(TokenType.GTEQ)) {
+            return new BinaryAST(result, additive(), 'g');
+        }
+
+        if (match(TokenType.EQEQ)) {
+            return new BinaryAST(result, additive(), '=');
+        }
         return result;
     }
 
@@ -210,7 +235,9 @@ public final class Parser {
 
     private Clause clause() {
         ArrayList<AST> args = arguments();
-        return new Clause(args, null, null);
+        AST guard = null;
+        if (match(TokenType.WHEN)) guard = expression();
+        return new Clause(args, guard, null);
     }
 
     private int line() {
