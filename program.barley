@@ -1,15 +1,16 @@
 -module(test).
 
-start() ->
-    receive barley:spawn(0) -> Rest + Message.
-
-call(Pid, Value) ->
-    Pid ! Value.
-
 main() ->
-    Pid = start(),
-    io:writeln(Pid),
-    call(Pid, 6),
-    call(Pid, 4),
-    io:writeln(barley:extract_pid(Pid)).
+    Table = bts:new(),
+    io:writeln(Table),
+    bts:insert(Table, "key", 15),
+    bts:insert(Table, "key2", 17)
+    io:writeln(bts:tabtolist(Table)),
+    io:writeln(bts:member(Table, "key")),
+    io:writeln(bts:member(Table, "key_")),
+    io:writeln(bts:lookup(Table, "key")),
+    io:writeln(bts:lookup(Table, "key2"))
+    bts:remove(Table, "key"),
+    io:writeln(bts:tabtolist(Table)).
+
 

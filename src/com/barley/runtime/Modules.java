@@ -7,9 +7,7 @@ import com.barley.utils.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class Modules {
 
@@ -70,9 +68,64 @@ public class Modules {
         modules.put("io", io);
     }
 
+    private static void initBts() {
+        HashMap<String, Function> bts = new HashMap<>();
+        bts.put("new", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyReference(new HashMap<BarleyValue, BarleyValue>());
+        });
+        bts.put("insert", args -> {
+            Arguments.check(3, args.length);
+            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            ((HashMap<BarleyValue, BarleyValue>) ref.getRef()).put(args[1], args[2]);
+            return ref;
+        });
+        bts.put("tabtolist", args -> {
+            Arguments.check(1, args.length);
+            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (Map.Entry<BarleyValue, BarleyValue> entry : map.entrySet()) {
+                LinkedList<BarleyValue> temporal = new LinkedList<>();
+                temporal.add(entry.getKey());
+                temporal.add(entry.getValue());
+                result.add(new BarleyList(temporal));
+            }
+            return new BarleyList(result);
+        });
+
+        bts.put("member", args -> {
+            Arguments.check(2, args.length);
+            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            return new BarleyAtom(AtomTable.put(String.valueOf(map.containsKey(args[1]))));
+        });
+        bts.put("lookup", args -> {
+            Arguments.check(2, args.length);
+            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            return map.get(args[1]);
+        });
+        bts.put("remove", args -> {
+            Arguments.check(2, args.length);
+            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            map.remove(args[1]);
+            return ref;
+        });
+
+        put("bts", bts);
+    }
+
     public static void init() {
         HashMap<String, Function> shell = new HashMap<>();
         initIo();
+        initBts();
         shell.put("reparse", (args -> {
             Arguments.check(1, args.length);
             try {
