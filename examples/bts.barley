@@ -1,0 +1,14 @@
+-module(test).
+
+main() ->
+    Table = bts:new(),
+    io:writeln(Table),
+    bts:insert(Table, "key", 15),
+    bts:insert(Table, "key2", 17)
+    io:writeln(bts:tabtolist(Table)),
+    io:writeln(bts:member(Table, "key")),
+    io:writeln(bts:member(Table, "key_")),
+    io:writeln(bts:lookup(Table, "key")),
+    io:writeln(bts:lookup(Table, "key2"))
+    bts:remove(Table, "key"),
+    io:writeln(bts:tabtolist(Table)).
