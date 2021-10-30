@@ -81,13 +81,10 @@ public class UserFunction implements Function {
             BarleyValue obj = list.getList().get(i);
             if (p instanceof VariablePattern) {
                 VariablePattern c = (VariablePattern) p;
-                if (Table.isExists(c.getVariable())) {
-                    BarleyValue left = Table.get(c.getVariable());
-                    if (!(left.equals(obj))) return false;
-                } else Table.set(c.getVariable(), obj);
+                Table.set(c.getVariable(), obj);
             } else if (p instanceof ConstantPattern) {
                 ConstantPattern c = (ConstantPattern) p;
-                if (c.getConstant().equals(obj)) return false;
+                if (!(c.getConstant().equals(obj))) return false;
             } else if (p instanceof ListPattern) {
                 ListPattern c = (ListPattern) p;
                 processList(c, obj);
