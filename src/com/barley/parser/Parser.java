@@ -40,8 +40,17 @@ public final class Parser {
             result.add(expr);
             consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
         }
-        if (module.equals(null)) throw new BarleyException("BadCompiler", "module name isn't exists or invalid");
         Modules.put(module, methods);
+        return result;
+    }
+
+    public List<AST> parseExpr() {
+        final List<AST> result = new ArrayList<>();
+        while (!match(TokenType.EOF)) {
+            AST expr = expression();
+            result.add(expr);
+            consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
+        }
         return result;
     }
 
@@ -56,7 +65,7 @@ public final class Parser {
                 consume(TokenType.RPAREN, "expected ')' after module name");
             }
             return new ConstantAST(new BarleyNumber(0));
-        } else throw new BarleyException("BadCompiler", "error at '" + current + "' at line " + current.getLine());
+        } else throw new BarleyException("BadCompiler", "bad declaration '" + current + "'");
     }
 
     private AST method(String name) {
@@ -129,10 +138,38 @@ public final class Parser {
 
     private AST unary() {
         if (match(TokenType.MINUS)) {
-            return new UnaryAST(primary(), '-');
+            return new UnaryAST(call(), '-');
         }
 
-        return primary();
+        return call();
+    }
+
+    private AST call() {
+        AST result = remote();
+
+        while (true) {
+            if (lookMatch(0,TokenType.LPAREN)) {
+                ArrayList<AST> args = arguments();
+                result = new CallAST(result, args);
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    private AST remote() {
+        AST result = primary();
+
+        while (true) {
+            if (match(TokenType.COLON)) {
+                result = new RemoteAST(result, primary());
+                continue;
+            }
+            break;
+        }
+
+        return result;
     }
 
     private AST list() {
@@ -192,6 +229,10 @@ public final class Parser {
 
     private int addAtom(String atom) {
         return AtomTable.put(atom);
+    }
+
+    private boolean lookMatch(int pos, TokenType type) {
+        return get(pos).getType() == type;
     }
 
     private Token consume(TokenType type, String text) {

@@ -16,18 +16,15 @@ public class Handler {
 
     private static String RUNTIME_VERSION = "0.1";
 
-    public static void handle(String input) {
+    public static void handle(String input, boolean isExpr) {
         try {
             Lexer lexer = new Lexer(input);
             List<Token> tokens = lexer.tokenize();
             Parser parser = new Parser(tokens);
-            List<AST> nodes = parser.parse();
+            List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             for (AST node : nodes) {
                 System.out.println(node.execute());
             }
-            UserFunction sum = Modules.get("m").get("sum");
-            sum.execute(new BarleyValue[] {new BarleyNumber(3), new BarleyNumber(5)});
-            sum.execute(new BarleyValue[] {new BarleyNumber(6)});
         } catch (BarleyException ex) {
             System.out.printf("** exception error: %s\n", ex.getText());
             int count = CallStack.getCalls().size();
@@ -46,7 +43,7 @@ public class Handler {
         while (true) {
             System.out.print(">>>");
             try {
-                Handler.handle(br.readLine());
+                Handler.handle(br.readLine(), true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -55,7 +52,7 @@ public class Handler {
 
     public static void file(String path) {
         try {
-            Handler.handle(SourceLoader.readSource(path));
+            Handler.handle(SourceLoader.readSource(path), false);
         } catch (IOException e) {
             e.printStackTrace();
         }

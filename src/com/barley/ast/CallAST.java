@@ -13,8 +13,9 @@ public class CallAST implements AST {
     private AST obj;
     private ArrayList<AST> args;
 
-    public CallAST(AST obj) {
+    public CallAST(AST obj, ArrayList<AST> args) {
         this.obj = obj;
+        this.args = args;
     }
 
     @Override
@@ -35,5 +36,10 @@ public class CallAST implements AST {
         } finally {
             return result;
         }
+    }
+
+    @Override
+    public String toString() {
+        return obj.toString() + args;
     }
 }

@@ -14,6 +14,7 @@ import com.barley.utils.Clause;
 import com.barley.utils.Function;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class UserFunction implements Function {
@@ -26,32 +27,38 @@ public class UserFunction implements Function {
 
     @Override
     public BarleyValue execute(BarleyValue... args) {
+        boolean found = false;;
         AST toExecute = null;
         ArrayList<String> toDelete = new ArrayList<>();
         for (int i = 0; i < clauses.size(); i++) {
+            if (found) break;
             Clause clause = clauses.get(i);
             ArrayList<Pattern> patterns = patterns(clause.getArgs());
             if (patterns.size() != args.length) continue;
             for (int k = 0; k < patterns.size(); k++) {
                 Pattern pattern = patterns.get(k);
                 BarleyValue arg = args[k];
+                System.out.println(pattern);
+                System.out.println(arg);
                 if (pattern instanceof VariablePattern) {
                     VariablePattern p = (VariablePattern) pattern;
                     Table.set(p.getVariable(), arg);
                     toDelete.add(p.getVariable());
                 } else if (pattern instanceof ConstantPattern) {
+                    System.out.println("in constant");
                     ConstantPattern p = (ConstantPattern) pattern;
-                    if (p.getConstant().equals(arg));
-                    else continue;
+                    if (arg.equals(p.getConstant())) continue;
+                    else break;
                 }
             }
             toExecute = clause.getResult();
+            found = true;
         }
         BarleyValue result = toExecute.execute();
+        if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
         for (String var : toDelete) {
             Table.remove(var);
         }
-        System.out.println(result);
         return result;
     }
 
