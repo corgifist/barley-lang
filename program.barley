@@ -1,7 +1,4 @@
 -module(m).
 
-sum(A, B) -> A + B.
-sum(A) -> A + A.
-
-greet("corgi") -> "hi, cute corgi!".
-greet(Person) -> "hi, " + Person.
+is_zero(0) -> true.
+is_zero() -> false.

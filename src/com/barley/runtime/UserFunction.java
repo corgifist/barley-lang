@@ -27,34 +27,37 @@ public class UserFunction implements Function {
 
     @Override
     public BarleyValue execute(BarleyValue... args) {
-        boolean found = false;;
+        boolean br = false;
         AST toExecute = null;
         ArrayList<String> toDelete = new ArrayList<>();
         for (int i = 0; i < clauses.size(); i++) {
-            if (found) break;
             Clause clause = clauses.get(i);
             ArrayList<Pattern> patterns = patterns(clause.getArgs());
             if (patterns.size() != args.length) continue;
             for (int k = 0; k < patterns.size(); k++) {
                 Pattern pattern = patterns.get(k);
                 BarleyValue arg = args[k];
-                System.out.println(pattern);
-                System.out.println(arg);
                 if (pattern instanceof VariablePattern) {
                     VariablePattern p = (VariablePattern) pattern;
                     Table.set(p.getVariable(), arg);
                     toDelete.add(p.getVariable());
                 } else if (pattern instanceof ConstantPattern) {
-                    System.out.println("in constant");
                     ConstantPattern p = (ConstantPattern) pattern;
-                    if (arg.equals(p.getConstant())) continue;
-                    else break;
+                    boolean isEquals = p.getConstant().equals(arg);
+                    if (isEquals);
+                    else br = true;
+
                 }
             }
+            if (br) {
+                br = false;
+                continue;
+            }
             toExecute = clause.getResult();
-            found = true;
+            break;
         }
         BarleyValue result = toExecute.execute();
+        System.out.println(result);
         if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
         for (String var : toDelete) {
             Table.remove(var);
