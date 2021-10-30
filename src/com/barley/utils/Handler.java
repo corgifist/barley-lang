@@ -4,6 +4,7 @@ import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
 import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyValue;
+import com.barley.runtime.Modules;
 import com.barley.runtime.UserFunction;
 
 import java.io.BufferedReader;
@@ -24,7 +25,7 @@ public class Handler {
             for (AST node : nodes) {
                 System.out.println(node.execute());
             }
-            UserFunction sum = parser.methods.get("sum");
+            UserFunction sum = Modules.get("m").get("sum");
             sum.execute(new BarleyValue[] {new BarleyNumber(3), new BarleyNumber(5)});
             sum.execute(new BarleyValue[] {new BarleyNumber(6)});
         } catch (BarleyException ex) {

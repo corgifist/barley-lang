@@ -41,7 +41,7 @@ public final class Parser {
             consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
         }
         if (module.equals(null)) throw new BarleyException("BadCompiler", "module name isn't exists or invalid");
-        System.out.println(methods);
+        Modules.put(module, methods);
         return result;
     }
 
