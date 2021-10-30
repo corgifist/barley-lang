@@ -1,4 +1,3 @@
 -module(m).
 
-is_negative(N) when N < 0 -> negative.
-is_negative(N) -> positive.
+sum_list([A, B, C]) -> A + B + C.

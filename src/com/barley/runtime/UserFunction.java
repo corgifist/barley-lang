@@ -16,6 +16,7 @@ import com.barley.utils.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class UserFunction implements Function {
 
@@ -46,6 +47,9 @@ public class UserFunction implements Function {
                     boolean isEquals = p.getConstant().equals(arg);
                     if (isEquals);
                     else br = true;
+                } else if (pattern instanceof ListPattern) {
+                    ListPattern p = (ListPattern) pattern;
+                    br = !(processList(p, arg));
                 }
             }
             if (clause.getGuard() != null) {
@@ -66,6 +70,30 @@ public class UserFunction implements Function {
             Table.remove(var);
         }
         return result;
+    }
+    private boolean processList(ListPattern pattern, BarleyValue val) {
+        if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");
+        BarleyList list = (BarleyList) val;
+        if (list.getList().size() != pattern.getArr().size())
+            return false;
+        for (int i = 0; i < pattern.getArr().size(); i++) {
+            Pattern p = pattern(pattern.getArr().get(i));
+            BarleyValue obj = list.getList().get(i);
+            if (p instanceof VariablePattern) {
+                VariablePattern c = (VariablePattern) p;
+                if (Table.isExists(c.getVariable())) {
+                    BarleyValue left = Table.get(c.getVariable());
+                    if (!(left.equals(obj))) return false;
+                } else Table.set(c.getVariable(), obj);
+            } else if (p instanceof ConstantPattern) {
+                ConstantPattern c = (ConstantPattern) p;
+                if (c.getConstant().equals(obj)) return false;
+            } else if (p instanceof ListPattern) {
+                ListPattern c = (ListPattern) p;
+                processList(c, obj);
+            }
+        }
+        return true;
     }
 
     private ArrayList<Pattern> patterns(ArrayList<AST> asts) {
