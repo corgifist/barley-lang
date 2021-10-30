@@ -34,7 +34,17 @@ public class Modules {
             System.exit(0);
             return new BarleyAtom(AtomTable.put("exit"));
         });
-        put("shell", shell);
+        shell.put("spawn", args -> {
+            PidValues pid = new PidValues(getRandomNumber(0, 300), getRandomNumber(0, 300), getRandomNumber(0, 300));
+            BarleyPID p = new BarleyPID(pid);
+            ProcessTable.put(p);
+            return p;
+        });
+        put("barley", shell);
+    }
+
+    public static int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
     }
 
     public static void put(String name, HashMap<String, Function> methods) {

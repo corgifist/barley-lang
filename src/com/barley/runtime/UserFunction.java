@@ -49,7 +49,7 @@ public class UserFunction implements Function {
                     else br = true;
                 } else if (pattern instanceof ListPattern) {
                     ListPattern p = (ListPattern) pattern;
-                    br = !(processList(p, arg));
+                    br = !(processList(p, arg, toDelete));
                 }
             }
             if (clause.getGuard() != null) {
@@ -71,7 +71,7 @@ public class UserFunction implements Function {
         }
         return result;
     }
-    private boolean processList(ListPattern pattern, BarleyValue val) {
+    private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
         if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");
         BarleyList list = (BarleyList) val;
         if (list.getList().size() != pattern.getArr().size())
@@ -82,12 +82,13 @@ public class UserFunction implements Function {
             if (p instanceof VariablePattern) {
                 VariablePattern c = (VariablePattern) p;
                 Table.set(c.getVariable(), obj);
+                toDelete.add(c.getVariable());
             } else if (p instanceof ConstantPattern) {
                 ConstantPattern c = (ConstantPattern) p;
                 if (!(c.getConstant().equals(obj))) return false;
             } else if (p instanceof ListPattern) {
                 ListPattern c = (ListPattern) p;
-                processList(c, obj);
+                processList(c, obj, toDelete);
             }
         }
         return true;

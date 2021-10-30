@@ -51,6 +51,17 @@ public final class Parser {
         return result;
     }
 
+    private AST block() {
+        ArrayList<AST> block = new ArrayList<>();
+        while (true) {
+            if (lookMatch(0, TokenType.DOT)) break;
+            block.add(expression());
+            match(TokenType.COMMA);
+        }
+
+        return new BlockAST(block);
+    }
+
     private AST declaration() {
         Token current = get(0);
         if (match(TokenType.ATOM)) {
@@ -68,7 +79,7 @@ public final class Parser {
     private AST method(String name) {
         Clause clause = clause();
         consume(TokenType.STABBER, "error at '" + name + "' declaration");
-        clause.setResult(expression());
+        clause.setResult(block());
         ArrayList<Clause> clauses = new ArrayList<>();
         if (methods.containsKey(name)) {
             clauses.addAll(((UserFunction) methods.get(name)).getClauses());
