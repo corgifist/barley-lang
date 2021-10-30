@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class Lexer {
 
-    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.";
+    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.|";
     private static final Map<String, TokenType> OPERATORS;
     static {
         OPERATORS = new HashMap<>();
@@ -33,12 +33,15 @@ public final class Lexer {
         OPERATORS.put("{", TokenType.LBRACE);
         OPERATORS.put("}", TokenType.RBRACE);
         OPERATORS.put(":", TokenType.COLON);
+        OPERATORS.put("|", TokenType.BAR);
         OPERATORS.put("#", TokenType.SHARP);
         OPERATORS.put("[", TokenType.LBRACKET);
         OPERATORS.put("]", TokenType.RBRACKET);
         OPERATORS.put(",", TokenType.COMMA);
         OPERATORS.put("->", TokenType.STABBER);
         OPERATORS.put(".", TokenType.DOT);
+        OPERATORS.put("||", TokenType.BARBAR);
+        OPERATORS.put("::", TokenType.CC);
     }
 
     private static final Map<String, TokenType> KEYWORDS;
@@ -47,6 +50,9 @@ public final class Lexer {
         KEYWORDS.put("module", TokenType.MODULE);
         KEYWORDS.put("when", TokenType.WHEN);
         KEYWORDS.put("receive", TokenType.RECIEVE);
+        KEYWORDS.put("case", TokenType.CASE);
+        KEYWORDS.put("of", TokenType.OF);
+        KEYWORDS.put("end", TokenType.END);
     }
 
     private final String input;

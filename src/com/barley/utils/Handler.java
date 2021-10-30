@@ -64,4 +64,18 @@ public class Handler {
             if(dot != -1) { version = version.substring(0, dot); }
         } return Integer.parseInt(version);
     }
+
+    public static void loadCore() {
+        String[] scripts = new String[] {
+                "lib/lists.barley"
+        };
+
+        for (String str : scripts) {
+            try {
+                Handler.handle(SourceLoader.readSource(str), false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

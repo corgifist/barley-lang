@@ -26,7 +26,6 @@ public class BarleyAtom implements BarleyValue {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BarleyAtom that = (BarleyAtom) o;
         return pos == that.pos;

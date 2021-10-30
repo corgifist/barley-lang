@@ -15,6 +15,18 @@ public class BarleyList implements BarleyValue {
         this.list = list;
     }
 
+    public BarleyList(int size) {
+        LinkedList<BarleyValue> result = new LinkedList<>();
+        for (int i = 0; i < size; i++) {
+            result.add(null);
+        }
+        this.list = result;
+    }
+
+    public void set(int index, BarleyValue value) {
+        list.set(index, value);
+    }
+
     public LinkedList<BarleyValue> getList() {
         return list;
     }

@@ -1,13 +1,7 @@
 package com.barley.runtime;
 
-import com.barley.ast.BindAST;
-import com.barley.ast.ConstantAST;
-import com.barley.ast.ExtractBindAST;
-import com.barley.ast.ListAST;
-import com.barley.patterns.ConstantPattern;
-import com.barley.patterns.ListPattern;
-import com.barley.patterns.Pattern;
-import com.barley.patterns.VariablePattern;
+import com.barley.ast.*;
+import com.barley.patterns.*;
 import com.barley.utils.*;
 
 import java.util.ArrayList;
@@ -49,11 +43,19 @@ public class UserFunction implements Function {
                     } else if (pattern instanceof ListPattern) {
                         ListPattern p = (ListPattern) pattern;
                         br = !(processList(p, arg, toDelete));
+                    } else if (pattern instanceof ConsPattern) {
+                        ConsPattern p = (ConsPattern) pattern;
+                        if (!(arg instanceof BarleyList)) {
+                            br = true;
+                            break;
+                        }
+                        Table.set(p.getLeft(), head((BarleyList) arg));
+                        Table.set(p.getRight(), tail((BarleyList) arg));
                     }
                 }
                 if (clause.getGuard() != null) {
-                    if ((clause.getGuard().execute()).toString() == "true");
-                    else continue;
+                    if ((clause.getGuard().execute()).toString().equals("true"));
+                    else br = true;
                 }
 
                 if (br) {
@@ -101,6 +103,11 @@ public class UserFunction implements Function {
             } else if (p instanceof ListPattern) {
                 ListPattern c = (ListPattern) p;
                 processList(c, obj, toDelete);
+            } else if (p instanceof ConsPattern) {
+                ConsPattern c = (ConsPattern) p;
+                if (!(obj instanceof BarleyList)) return false;
+                Table.set(c.getLeft(), head((BarleyList) obj));
+                Table.set(c.getRight(), tail((BarleyList) obj));
             }
         }
         return true;
@@ -123,7 +130,10 @@ public class UserFunction implements Function {
             return new ConstantPattern(ast.execute());
         } else if (ast instanceof ListAST) {
             return new ListPattern(((ListAST) ast).getArray());
-        } else throw new BarleyException("BadMatch", "invalid pattern in function");
+        } else if (ast instanceof ConsAST) {
+            ConsAST cons = (ConsAST) ast;
+            return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
+        } else throw new BarleyException("BadMatch", "invalid pattern in function clause");
     }
 
     private LinkedList<Pattern> pattern(ListPattern pattern) {
@@ -134,6 +144,19 @@ public class UserFunction implements Function {
         }
 
         return patterns;
+    }
+
+    private BarleyValue head(BarleyList list) {
+        return list.getList().get(0);
+    }
+
+    private BarleyValue tail(BarleyList list) {
+        List<BarleyValue> arr = list.getList().subList(1, list.getList().size());
+        LinkedList<BarleyValue> result = new LinkedList<>();
+        for (BarleyValue val : arr) {
+            result.add(val);
+        }
+        return new BarleyList(result);
     }
 
     public ArrayList<Clause> getClauses() {

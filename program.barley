@@ -1,16 +1,24 @@
 -module(test).
 
+incr(X) -> X + 1.
+
+is_negative(A) when A < 0 -> true.
+is_negative(A) -> false.
+
+sum(A, B) -> A + B.
+
+print_sum(A) -> io:writeln(A + A).
+
 main() ->
-    Table = bts:new(),
-    io:writeln(Table),
-    bts:insert(Table, "key", 15),
-    bts:insert(Table, "key2", 17)
-    io:writeln(bts:tabtolist(Table)),
-    io:writeln(bts:member(Table, "key")),
-    io:writeln(bts:member(Table, "key_")),
-    io:writeln(bts:lookup(Table, "key")),
-    io:writeln(bts:lookup(Table, "key2"))
-    bts:remove(Table, "key"),
-    io:writeln(bts:tabtolist(Table)).
+    io:writeln(lists:filter(test:is_negative, [-8, 1, -9])),
+    io:writeln(lists:map(test:incr, [1, 2, 3]))
+    io:writeln(lists:reduce(test:sum, [1, 2, 3, 4, 5], 0)),
+    io:writeln(lists:append([1, 2, 3], 4)),
+    io:writeln(lists:concat([1, 2, "lol"])),
+    io:writeln(lists:duplicate(xx, 5)),
+    lists:foreach(test:print_sum, [1, 2, 3])
+    io:writeln(lists:last([1, 2, 4])),
+    io:writeln(lists:nth([1, 2, 3, 4], 1)),
+    io:writeln(lists:reverse([1, 2, 3])).
 
 

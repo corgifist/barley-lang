@@ -98,7 +98,20 @@ public final class Parser {
     }
 
     private AST expression() {
-        return assignment();
+        return generator();
+    }
+
+    private AST generator() {
+        AST generator = assignment();
+
+        if (match(TokenType.BARBAR)) {
+            String var = consume(TokenType.VAR, "expected var name after '||' at line " + line()).getText();
+            consume(TokenType.STABBER, "expected '->' after var name at line " + line());
+            AST iterable = assignment();
+            return new GeneratorAST(generator, var, iterable);
+        }
+
+        return generator;
     }
 
     private AST assignment() {
@@ -174,6 +187,10 @@ public final class Parser {
 
             if (match(TokenType.BANG)) {
                 result = new ProcessCallAST(result, unary());
+            }
+
+            if (match(TokenType.BAR)) {
+                result = new ConsAST(result, unary());
             }
             break;
         }
@@ -252,8 +269,75 @@ public final class Parser {
             return list();
         }
 
+        if (match(TokenType.CASE)) {
+            return match();
+        }
+
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+    }
+
+    private CaseAST match() {
+        final AST expression = expression();
+        consume(TokenType.STABBER, "expected '->' after '" + expression + "' in case-of expr at line " + line());
+        final List<CaseAST.Pattern> patterns = new ArrayList<>();
+        while (!match(TokenType.END)) {
+            consume(TokenType.OF, "expected 'of' in case-of clauses at line " + line());
+            CaseAST.Pattern pattern = null;
+            final Token current = get(0);
+            if (match(TokenType.NUMBER)) {
+                // case 0.5:
+                pattern = new CaseAST.ConstantPattern(new
+                        BarleyNumber(Double.parseDouble(current.getText()))
+                );
+            } else if (match(TokenType.STRING)) {
+                // case "text":
+                pattern = new CaseAST.ConstantPattern(
+                        new BarleyString(current.getText())
+                );
+            } else if (match(TokenType.VAR)) {
+                // case value:
+                pattern = new CaseAST.VariablePattern(current.getText());
+            } else if (match(TokenType.ATOM)) {
+                pattern = new CaseAST.ConstantPattern(new BarleyAtom(addAtom(current.getText())));
+            } else if (match(TokenType.LBRACKET)) {
+                // case [x :: xs]:
+                final  CaseAST.ListPattern listPattern = new CaseAST.ListPattern();
+                while (!match(TokenType.RBRACKET)) {
+                    listPattern.add(consume(TokenType.VAR, "expected var name in list pattern at line " + line()).getText());
+                    match(TokenType.CC);
+                }
+                pattern = listPattern;
+            } else if (match(TokenType.LPAREN)) {
+                // case (1, 2):
+                final CaseAST.TuplePattern tuplePattern = new CaseAST.TuplePattern();
+                while (!match(TokenType.RPAREN)) {
+                    if ("_".equals(get(0).getText())) {
+                        tuplePattern.addAny();
+                        consume(TokenType.VAR, "expected var name in tuple pattern at line " + line());
+                    } else {
+                        tuplePattern.add(expression());
+                    }
+                    match(TokenType.COMMA);
+                }
+                pattern = tuplePattern;
+            }
+
+            if (pattern == null) {
+                throw new BarleyException("BadCompiler", "wrong pattern in case-of expression at line " + line());
+            }
+            if (match(TokenType.WHEN)) {
+                // case e when e > 0:
+                pattern.optCondition = expression();
+            }
+
+            consume(TokenType.COLON, "expected ':' after clause");
+            pattern.result = block();
+            match(TokenType.DOT);
+            patterns.add(pattern);
+        };
+
+        return new CaseAST(expression, patterns);
     }
 
     private AST expandCall() {

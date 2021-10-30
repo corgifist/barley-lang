@@ -122,10 +122,9 @@ public class Modules {
         put("bts", bts);
     }
 
-    public static void init() {
+    private static void initBarley() {
         HashMap<String, Function> shell = new HashMap<>();
-        initIo();
-        initBts();
+
         shell.put("reparse", (args -> {
             Arguments.check(1, args.length);
             try {
@@ -172,7 +171,30 @@ public class Modules {
             BarleyPID pid = (BarleyPID) val;
             return ProcessTable.get(pid);
         });
+
+        shell.put("generator_skip", args -> {
+            throw new GeneratorSkip();
+        });
+        shell.put("is_integer", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyNumber)));
+        });
+        shell.put("length", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue arg = args[0];
+            if (arg instanceof BarleyString) {
+                return new BarleyNumber((arg).toString().length());
+            } else if (arg instanceof BarleyList) {
+                return new BarleyNumber(((BarleyList) arg).getList().size());
+            } else throw new BarleyException("BadArg", "expected object that support length function");
+        });
         put("barley", shell);
+    }
+
+    public static void init() {
+        initBarley();
+        initIo();
+        initBts();
     }
 
     public static int getRandomNumber(int min, int max) {

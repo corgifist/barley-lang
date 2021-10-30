@@ -23,6 +23,9 @@ public enum TokenType {
     GTEQ,
     LT,
     LTEQ,
+    BAR,
+    BARBAR,
+    CC,
 
     LPAREN, // (
     RPAREN, // )
@@ -36,6 +39,7 @@ public enum TokenType {
     MODULE,
     WHEN,
     RECIEVE,
+    CASE, OF, END,
 
     VAR , ATOM, EOF
 }

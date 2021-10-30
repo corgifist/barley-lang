@@ -8,6 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         Modules.init();
+        Handler.loadCore();
         Handler.file("program.barley");
         Handler.handle("test:main().", true);
     }

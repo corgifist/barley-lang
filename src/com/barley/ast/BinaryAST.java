@@ -25,7 +25,7 @@ public class BinaryAST implements AST{
             BarleyList list1 = (BarleyList) expr1.execute();
             switch (op) {
                 case '+':
-                    BarleyList list2 = (BarleyList) expr1.execute();
+                    BarleyList list2 = (BarleyList) expr2.execute();
                     LinkedList<BarleyValue> result = new LinkedList<>();
                     result.addAll(list1.getList());
                     result.addAll(list2.getList());
