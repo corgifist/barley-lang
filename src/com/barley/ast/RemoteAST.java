@@ -18,6 +18,7 @@ public class RemoteAST implements AST {
     public BarleyValue execute() {
         if (!(Modules.isExists(module.toString()))) throw new BarleyException("BadArg", "module '" + module.toString() + "' is not compiled or doesn't exists");
         Function a = Modules.get(module.execute().toString()).get(target.execute().toString());
+        if (a == null) throw new BarleyException("Undef", "module '" + module + "' exists but function '" + target + "' doesn't");
         return new BarleyFunction(a);
     }
 

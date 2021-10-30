@@ -62,12 +62,10 @@ public class Modules {
             System.out.println(String.format(format, values));
             return new BarleyAtom(AtomTable.put("ok"));
         });
-
         io.put("readline", args -> {
             Arguments.check(0, args.length);
             return new BarleyString(new Scanner(System.in).nextLine());
         });
-
 
         modules.put("io", io);
     }
@@ -78,7 +76,6 @@ public class Modules {
         shell.put("reparse", (args -> {
             Arguments.check(1, args.length);
             try {
-                Modules.init();
                 Handler.handle(SourceLoader.readSource(args[0].toString()), false);
             } catch (IOException e) {
                 e.printStackTrace();

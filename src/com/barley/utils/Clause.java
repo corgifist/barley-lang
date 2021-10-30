@@ -40,10 +40,6 @@ public class Clause {
 
     @Override
     public String toString() {
-        return "Clause{" +
-                "args=" + args +
-                ", guard=" + guard +
-                ", result=" + result +
-                '}';
+        return guard == null ? String.format("%s -> %s", args, result) : String.format("%s when %s -> %", args, guard, result);
     }
 }

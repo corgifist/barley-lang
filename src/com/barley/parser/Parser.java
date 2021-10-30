@@ -190,6 +190,7 @@ public final class Parser {
     }
 
     private AST call() {
+        if (lookMatch(0, TokenType.ATOM) && lookMatch(1, TokenType.LPAREN)) return expandCall();
         AST result = remote();
 
         while (true) {
@@ -253,6 +254,11 @@ public final class Parser {
 
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+    }
+
+    private AST expandCall() {
+        AST target = remote();
+        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(addAtom(module))), target), arguments());
     }
 
     private Clause clause() {

@@ -8,10 +8,7 @@ import com.barley.patterns.ConstantPattern;
 import com.barley.patterns.ListPattern;
 import com.barley.patterns.Pattern;
 import com.barley.patterns.VariablePattern;
-import com.barley.utils.AST;
-import com.barley.utils.BarleyException;
-import com.barley.utils.Clause;
-import com.barley.utils.Function;
+import com.barley.utils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,48 +25,63 @@ public class UserFunction implements Function {
 
     @Override
     public BarleyValue execute(BarleyValue... args) {
-        boolean br = false;
-        AST toExecute = null;
-        ArrayList<String> toDelete = new ArrayList<>();
-        for (int i = 0; i < clauses.size(); i++) {
-            Clause clause = clauses.get(i);
-            ArrayList<Pattern> patterns = patterns(clause.getArgs());
-            if (patterns.size() != args.length) continue;
-            for (int k = 0; k < patterns.size(); k++) {
-                Pattern pattern = patterns.get(k);
-                BarleyValue arg = args[k];
-                if (pattern instanceof VariablePattern) {
-                    VariablePattern p = (VariablePattern) pattern;
-                    Table.set(p.getVariable(), arg);
-                    toDelete.add(p.getVariable());
-                } else if (pattern instanceof ConstantPattern) {
-                    ConstantPattern p = (ConstantPattern) pattern;
-                    boolean isEquals = p.getConstant().equals(arg);
-                    if (isEquals);
-                    else br = true;
-                } else if (pattern instanceof ListPattern) {
-                    ListPattern p = (ListPattern) pattern;
-                    br = !(processList(p, arg, toDelete));
+        Table.push();
+        try {
+            boolean br = false;
+            AST toExecute = null;
+            ArrayList<String> toDelete = new ArrayList<>();
+            for (int i = 0; i < clauses.size(); i++) {
+                Clause clause = clauses.get(i);
+                ArrayList<Pattern> patterns = patterns(clause.getArgs());
+                if (patterns.size() != args.length) continue;
+                for (int k = 0; k < patterns.size(); k++) {
+                    Pattern pattern = patterns.get(k);
+                    BarleyValue arg = args[k];
+                    if (pattern instanceof VariablePattern) {
+                        VariablePattern p = (VariablePattern) pattern;
+                        Table.set(p.getVariable(), arg);
+                        toDelete.add(p.getVariable());
+                    } else if (pattern instanceof ConstantPattern) {
+                        ConstantPattern p = (ConstantPattern) pattern;
+                        boolean isEquals = p.getConstant().equals(arg);
+                        if (isEquals);
+                        else br = true;
+                    } else if (pattern instanceof ListPattern) {
+                        ListPattern p = (ListPattern) pattern;
+                        br = !(processList(p, arg, toDelete));
+                    }
                 }
-            }
-            if (clause.getGuard() != null) {
-                if ((clause.getGuard().execute()).toString() == "true");
-                else continue;
-            }
+                if (clause.getGuard() != null) {
+                    if ((clause.getGuard().execute()).toString() == "true");
+                    else continue;
+                }
 
-            if (br) {
-                br = false;
-                continue;
+                if (br) {
+                    br = false;
+                    continue;
+                }
+                toExecute = clause.getResult();
+                break;
             }
-            toExecute = clause.getResult();
-            break;
+            BarleyValue result = toExecute.execute();
+            if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
+            //for (String var : toDelete) {
+            //    Table.remove(var);
+            //}
+            Table.pop();
+            return result;
+        } catch (BarleyException ex) {
+            System.out.printf("** exception error: %s\n", ex.getText());
+            int count = CallStack.getCalls().size();
+            if (count == 0) System.exit(1);
+            System.out.println(String.format("\nCall stack was:"));
+            for (CallStack.CallInfo info : CallStack.getCalls()) {
+                System.out.println("    " + count + ". " + info);
+                count--;
+            }
+            System.exit(1);
+            throw ex;
         }
-        BarleyValue result = toExecute.execute();
-        if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
-        //for (String var : toDelete) {
-        //    Table.remove(var);
-        //}
-        return result;
     }
     private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
         if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");
@@ -134,8 +146,6 @@ public class UserFunction implements Function {
 
     @Override
     public String toString() {
-        return "UserFunction{" +
-                "clauses=" + clauses +
-                '}';
+        return "#Function" + clauses;
     }
 }
