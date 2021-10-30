@@ -35,6 +35,7 @@ public enum TokenType {
 
     MODULE,
     WHEN,
+    RECIEVE,
 
     VAR , ATOM, EOF
 }

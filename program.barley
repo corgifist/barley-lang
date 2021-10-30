@@ -1,4 +1,14 @@
--module(m).
+-module(test).
 
-sum_list([1, 1, 1]) -> 1.
-sum_list([A, B, C]) -> A + B + C.
+start() ->
+    receive barley:spawn(0) -> Rest + Message.
+
+call(Pid, Value) ->
+    Pid ! Value.
+
+main() ->
+    Pid = test:start(),
+    io:writeln(Pid),
+    test:call(Pid, 6),
+    test:call(Pid, 4),
+    io:fwriteln(barley:extract_pid(Pid)).

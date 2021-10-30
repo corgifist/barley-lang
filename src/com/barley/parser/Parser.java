@@ -4,7 +4,6 @@ import com.barley.ast.*;
 import com.barley.runtime.*;
 import com.barley.utils.*;
 
-import javax.print.attribute.standard.NumberUp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -73,7 +72,16 @@ public final class Parser {
                 consume(TokenType.RPAREN, "expected ')' after module name");
             }
             return new ConstantAST(new BarleyNumber(0));
+        } else if (match(TokenType.RECIEVE)) {
+            return receive();
         } else throw new BarleyException("BadCompiler", "bad declaration '" + current + "'");
+    }
+
+    private AST receive() {
+        AST pid = expression();
+        consume(TokenType.STABBER, "error after term '" + pid + "' in recieve at line " + line());
+        AST body = block();
+        return new RecieveAST(pid, body);
     }
 
     private AST method(String name) {
@@ -163,6 +171,10 @@ public final class Parser {
                 result = new BinaryAST(result, unary(), '/');
                 continue;
             }
+
+            if (match(TokenType.BANG)) {
+                result = new ProcessCallAST(result, unary());
+            }
             break;
         }
 
@@ -238,6 +250,8 @@ public final class Parser {
         if (match(TokenType.LBRACKET)) {
             return list();
         }
+
+        if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
     }
 

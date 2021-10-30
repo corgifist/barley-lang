@@ -2,10 +2,7 @@ package com.barley.utils;
 
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyValue;
-import com.barley.runtime.Modules;
-import com.barley.runtime.UserFunction;
+import com.barley.runtime.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +20,7 @@ public class Handler {
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             for (AST node : nodes) {
-                System.out.println(node.execute());
+                node.execute();
             }
         } catch (BarleyException ex) {
             System.out.printf("** exception error: %s\n", ex.getText());
@@ -38,7 +35,7 @@ public class Handler {
     }
 
     public static void console() {
-        System.out.printf("Barley/Java%s [barley-runtime%s] [%s] [threads-%s]\n", getVersion(), RUNTIME_VERSION, System.getProperty("os.arch"), Thread.activeCount());
+        System.out.printf("Barley/Java%s [barley-runtime%s] [%s] [threads-%s]\n", getVersion(), RUNTIME_VERSION, System.getProperty("os.arch"), Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             System.out.print(">>>");

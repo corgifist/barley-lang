@@ -66,9 +66,9 @@ public class UserFunction implements Function {
         }
         BarleyValue result = toExecute.execute();
         if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
-        for (String var : toDelete) {
-            Table.remove(var);
-        }
+        //for (String var : toDelete) {
+        //    Table.remove(var);
+        //}
         return result;
     }
     private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
