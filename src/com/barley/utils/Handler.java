@@ -2,6 +2,9 @@ package com.barley.utils;
 
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
+import com.barley.runtime.BarleyNumber;
+import com.barley.runtime.BarleyValue;
+import com.barley.runtime.UserFunction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,10 +19,14 @@ public class Handler {
         try {
             Lexer lexer = new Lexer(input);
             List<Token> tokens = lexer.tokenize();
-            List<AST> nodes = new Parser(tokens).parse();
+            Parser parser = new Parser(tokens);
+            List<AST> nodes = parser.parse();
             for (AST node : nodes) {
                 System.out.println(node.execute());
             }
+            UserFunction sum = parser.methods.get("sum");
+            sum.execute(new BarleyValue[] {new BarleyNumber(3), new BarleyNumber(5)});
+            sum.execute(new BarleyValue[] {new BarleyNumber(6)});
         } catch (BarleyException ex) {
             System.out.printf("** exception error: %s\n", ex.getText());
         }
@@ -35,6 +42,14 @@ public class Handler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void file(String path) {
+        try {
+            Handler.handle(SourceLoader.readSource(path));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

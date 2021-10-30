@@ -1,5 +1,7 @@
 package com.barley.runtime;
 
+import com.barley.utils.BarleyException;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -68,7 +70,7 @@ public final class Table {
                 return scopeData.scope.variables.get(key);
             }
         }
-        return new BarleyNumber(0);
+        throw new BarleyException("UnboundVar", "unbound var '" + key + "'");
     }
 
     public static void set(String key, BarleyValue value) {

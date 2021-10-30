@@ -1,16 +1,15 @@
 package com.barley.parser;
 
 import com.barley.ast.*;
-import com.barley.runtime.AtomTable;
-import com.barley.runtime.BarleyAtom;
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyString;
+import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
+import com.barley.utils.Clause;
 import com.barley.utils.Token;
 
 import javax.print.attribute.standard.NumberUp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,24 +17,59 @@ public final class Parser {
 
     private static final Token EOF = new Token(TokenType.EOF, "", -1);
 
+    public HashMap<String, UserFunction> methods;
+
     private final List<Token> tokens;
     private final int size;
 
     private int pos;
 
+    private String module;
+
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         size = tokens.size();
+        methods = new HashMap<>();
+        module = null;
     }
 
     public List<AST> parse() {
         final List<AST> result = new ArrayList<>();
         while (!match(TokenType.EOF)) {
-            AST expr = expression();
+            AST expr = declaration();
             result.add(expr);
-            consume(TokenType.DOT, "Unterminated term.\n    where term: \n        " + expr);
+            consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
         }
+        if (module.equals(null)) throw new BarleyException("BadCompiler", "module name isn't exists or invalid");
+        System.out.println(methods);
         return result;
+    }
+
+    private AST declaration() {
+        Token current = get(0);
+        if (match(TokenType.ATOM)) {
+            return method(current.getText());
+        } else if (match(TokenType.MINUS)) {
+            if (match(TokenType.MODULE)) {
+                consume(TokenType.LPAREN, "expected '(' before module name");
+                module = expression().toString();
+                consume(TokenType.RPAREN, "expected ')' after module name");
+            }
+            return new ConstantAST(new BarleyNumber(0));
+        } else throw new BarleyException("BadCompiler", "error at '" + current + "' at line " + current.getLine());
+    }
+
+    private AST method(String name) {
+        Clause clause = clause();
+        consume(TokenType.STABBER, "error at '" + name + "' declaration");
+        clause.setResult(expression());
+        ArrayList<Clause> clauses = new ArrayList<>();
+        if (methods.containsKey(name)) {
+            clauses.addAll(methods.get(name).getClauses());
+        }
+        clauses.add(clause);
+        methods.put(name, new UserFunction(clauses));
+        return new ConstantAST(new BarleyNumber(0));
     }
 
     private AST expression() {
@@ -135,6 +169,25 @@ public final class Parser {
             return list();
         }
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+    }
+
+    private Clause clause() {
+        ArrayList<AST> args = arguments();
+        return new Clause(args, null, null);
+    }
+
+    private int line() {
+        return get(0).getLine();
+    }
+
+    private ArrayList<AST> arguments() {
+        consume(TokenType.LPAREN, "error at ')' at line " + line());
+        ArrayList<AST> args = new ArrayList<>();
+        while (!(match(TokenType.RPAREN))) {
+            args.add(expression());
+            match(TokenType.COMMA);
+        }
+        return args;
     }
 
     private int addAtom(String atom) {

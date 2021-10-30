@@ -33,5 +33,7 @@ public enum TokenType {
 
     DOT,
 
+    MODULE,
+
     VAR , ATOM, EOF
 }

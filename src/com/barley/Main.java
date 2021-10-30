@@ -6,6 +6,6 @@ import com.barley.utils.Handler;
 public class Main {
 
     public static void main(String[] args) {
-        Handler.console();
+        Handler.file("program.barley");
     }
 }

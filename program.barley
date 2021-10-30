@@ -1,0 +1,4 @@
+-module(m).
+
+sum(A, B) -> A + B.
+sum(A) -> A + A.

@@ -44,6 +44,7 @@ public final class Lexer {
     private static final Map<String, TokenType> KEYWORDS;
     static {
         KEYWORDS = new HashMap<>();
+        KEYWORDS.put("module", TokenType.MODULE);
     }
 
     private final String input;
