@@ -27,14 +27,22 @@ public class UserFunction implements Function {
             for (int i = 0; i < clauses.size(); i++) {
                 Clause clause = clauses.get(i);
                 ArrayList<Pattern> patterns = patterns(clause.getArgs());
+                if (patterns.isEmpty() && args.length == 0) {
+                    toExecute = clause.getResult();
+                    break;
+                }
                 if (patterns.size() != args.length) continue;
                 for (int k = 0; k < patterns.size(); k++) {
                     Pattern pattern = patterns.get(k);
                     BarleyValue arg = args[k];
                     if (pattern instanceof VariablePattern) {
-                        VariablePattern p = (VariablePattern) pattern;
-                        Table.set(p.getVariable(), arg);
-                        toDelete.add(p.getVariable());
+                        VariablePattern c = (VariablePattern) pattern;
+                        if (!(Table.isExists(c.getVariable()))) Table.set(c.getVariable(), arg);
+                        else if (!(Table.get(c.getVariable()).equals(arg))) {
+                            br = true;
+                            break;
+                        }
+                        toDelete.add(c.getVariable());
                     } else if (pattern instanceof ConstantPattern) {
                         ConstantPattern p = (ConstantPattern) pattern;
                         boolean isEquals = p.getConstant().equals(arg);
@@ -67,9 +75,9 @@ public class UserFunction implements Function {
             }
             BarleyValue result = toExecute.execute();
             if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
-            //for (String var : toDelete) {
-            //    Table.remove(var);
-            //}
+            for (String var : toDelete) {
+                Table.remove(var);
+            }
             Table.pop();
             return result;
         } catch (BarleyException ex) {
@@ -95,7 +103,8 @@ public class UserFunction implements Function {
             BarleyValue obj = list.getList().get(i);
             if (p instanceof VariablePattern) {
                 VariablePattern c = (VariablePattern) p;
-                Table.set(c.getVariable(), obj);
+                if (!(Table.isExists(c.getVariable()))) Table.set(c.getVariable(), obj);
+                else if (!(Table.get(c.getVariable()).equals(obj))) return false;
                 toDelete.add(c.getVariable());
             } else if (p instanceof ConstantPattern) {
                 ConstantPattern c = (ConstantPattern) p;

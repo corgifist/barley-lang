@@ -1,6 +1,9 @@
 -module(test).
 
+same(X, X) -> true.
+same(Other, AnotherOther) -> false.
+
 main() ->
-    .
+    5.
 
 
