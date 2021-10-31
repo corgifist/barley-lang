@@ -2,12 +2,14 @@ package com.barley.runtime;
 
 import com.barley.utils.BarleyException;
 import com.barley.utils.Function;
+import com.barley.utils.FunctionState;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-public class BarleyFunction implements BarleyValue, Function {
+public class BarleyFunction implements BarleyValue, Function, FunctionState, Serializable {
 
     private Function function;
 
@@ -32,6 +34,11 @@ public class BarleyFunction implements BarleyValue, Function {
     @Override
     public BarleyValue execute(BarleyValue... args) {
         return function.execute(args);
+    }
+
+    @Override
+    public boolean isLambda() {
+        return false;
     }
 
     @Override

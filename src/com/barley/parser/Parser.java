@@ -80,7 +80,13 @@ public final class Parser {
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
             return receive();
+        } else if (match(TokenType.GLOBAL)) {
+            return global();
         } else throw new BarleyException("BadCompiler", "bad declaration '" + current + "'");
+    }
+
+    private AST global() {
+        return expression();
     }
 
     private AST receive() {
@@ -104,7 +110,35 @@ public final class Parser {
     }
 
     private AST expression() {
-        return generator();
+        return or();
+    }
+
+    private AST or() {
+        AST result = and();
+
+        while (true) {
+            if (match(TokenType.OR)) {
+                result = new BinaryAST(result, and(), 'o');
+                continue;
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    private AST and() {
+        AST result = generator();
+
+        while (true) {
+            if (match(TokenType.AND)) {
+                result = new BinaryAST(result, generator(), 'a');
+                continue;
+            }
+            break;
+        }
+
+        return result;
     }
 
     private AST generator() {
@@ -311,6 +345,7 @@ public final class Parser {
                 final  CaseAST.ListPattern listPattern = new CaseAST.ListPattern();
                 while (!match(TokenType.RBRACKET)) {
                     listPattern.add(consume(TokenType.VAR, "expected var name in list pattern at line " + line()).getText());
+                    match(TokenType.COMMA);
                     match(TokenType.CC);
                 }
                 pattern = listPattern;

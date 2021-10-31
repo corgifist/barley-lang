@@ -41,7 +41,7 @@ public enum TokenType {
     WHEN,
     RECIEVE,
     CASE, OF, END,
-    AND, OR,
+    AND, OR, GLOBAL,
 
     VAR , ATOM, EOF
 }

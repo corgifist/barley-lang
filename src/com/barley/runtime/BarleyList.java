@@ -2,12 +2,13 @@ package com.barley.runtime;
 
 import com.barley.utils.BarleyException;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class BarleyList implements BarleyValue {
+public class BarleyList implements BarleyValue, Serializable {
 
     private LinkedList<BarleyValue> list;
 

@@ -3,11 +3,12 @@ package com.barley.runtime;
 import com.barley.utils.BarleyException;
 import com.barley.utils.PidValues;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-public class BarleyPID implements BarleyValue {
+public class BarleyPID implements BarleyValue, Serializable {
 
     private PidValues id;
 

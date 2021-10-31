@@ -38,7 +38,7 @@ public class Handler {
         System.out.printf("Barley/Java%s [barley-runtime%s] [%s] [threads-%s]\n", getVersion(), RUNTIME_VERSION, System.getProperty("os.arch"), Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
-            System.out.printf("threads - %s >>>", Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
+            System.out.printf(">>> ", Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
             try {
                 Handler.handle(br.readLine(), true);
             } catch (IOException e) {

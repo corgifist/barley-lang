@@ -20,11 +20,7 @@ concat(Args) -> concat(Args, "").
 concat([], Acc) -> Acc.
 concat(H|T, Acc) -> concat(T, Acc + H).
 
-duplicate(Elem, Times) -> duplicate(Elem, Times, 0, []).
-duplicate(Elem, Times, Iteration, Acc)
-    when Iteration == Times ->
-        Acc.
-duplicate(Elem, Times, Iteration, Acc) -> duplicate(Elem, Times, Iteration + 1, Acc + [Elem]).
+duplicate(Elem, Times) -> barley:range(Times, Elem).
 
 foreach(F, List) ->
     F(X) || X -> List,
@@ -35,11 +31,10 @@ last(Arr) -> case ITERATION == barley:length(Arr) - 1 ->
  of false: generator_skip.
 end || X -> Arr.
 
-nth(Arr, N) -> case ITERATION == N ->
-    of true: X.
-    of false: generator_skip.
-end || X -> Arr.
+nth(Arr, N) -> barley:nth(Arr, N).
 
 reverse(Arr) -> reverse(Arr, []).
 reverse([], Acc) -> Acc.
 reverse(H|T, Acc) -> reverse(T, [H] + Acc).
+
+seq(Elem, Times) -> duplicate(Elem, Times).

@@ -1,7 +1,5 @@
 package com.barley.runtime;
 
-import com.barley.ast.ExtractBindAST;
-import com.barley.ast.JavaFunctionAST;
 import com.barley.utils.*;
 
 import java.io.*;
@@ -200,6 +198,24 @@ public class Modules {
             }
             return new BarleyList(result);
         });
+        shell.put("from_binary", args -> {
+            Arguments.check(1, args.length);
+            LinkedList<BarleyValue> arr = ((BarleyList) args[0]).getList();
+            ArrayList<Byte> b = new ArrayList<>();
+            for (BarleyValue bt : arr) {
+                b.add((byte) bt.asInteger().intValue());
+            }
+            Byte[] bs = b.toArray(new Byte[] {});
+            byte[] binary = toPrimitives(bs);
+            try {
+                return SerializeUtils.deserialize(binary);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom(AtomTable.put("error"));
+        });
         shell.put("docs", args -> {
             Arguments.check(1, args.length);
             String module = args[0].toString();
@@ -216,6 +232,26 @@ public class Modules {
             }
             return new BarleyList(result);
         });
+
+        shell.put("nth", args -> {
+            Arguments.check(2, args.length);
+            BarleyList list = (BarleyList) args[0];
+            int nth = args[1].asInteger().intValue();
+            return list.getList().get(nth);
+        });
+        shell.put("sublist", args -> {
+            BarleyList list = (BarleyList) args[0];
+            int from = args[1].asInteger().intValue();
+            int to = args[2].asInteger().intValue();
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            List<BarleyValue> subd = list.getList().subList(from, to);
+            for (BarleyValue value : subd) {
+                result.add(value);
+            }
+            return new BarleyList(result);
+        });
+
+        shell.put("threads_count", args -> new BarleyNumber(Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size()));
         put("barley", shell);
     }
 
@@ -294,11 +330,123 @@ public class Modules {
         modules.put("math", math);
     }
 
+    private static void initString() {
+        HashMap<String, Function> string = new HashMap<>();
+
+        string.put("length", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(args[0].toString().length());
+        });
+        string.put("lower", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyString(args[0].toString().toLowerCase(Locale.ROOT));
+        });
+        string.put("upper", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyString(args[0].toString().toUpperCase(Locale.ROOT));
+        });
+        string.put("split", args -> {
+            Arguments.checkOrOr(1, 2, args.length);
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            String str = args[0].toString();
+            switch (args.length) {
+                case 1:
+                    String[] parts = str.split(" ");
+                    for (String part : parts) {
+                        result.add(new BarleyString(part));
+                    }
+                    return new BarleyList(result);
+                case 2:
+                    String[] parts_ = str.split(args[1].toString());
+                    for (String part : parts_) {
+                        result.add(new BarleyString(part));
+                    }
+                    return new BarleyList(result);
+                default: throw new BarleyException("BadArg", "unexpected error was occurred");
+            }
+        });
+
+        string.put("as_number", args -> {
+            Arguments.check(1, args.length);
+            try {
+                return new BarleyNumber(Double.parseDouble(args[0].toString()));
+            } catch (NumberFormatException ex) {
+                return new BarleyAtom(AtomTable.put("error"));
+            }
+        });
+
+        put("string", string);
+    }
+
+    private static void initStack() {
+        HashMap<String, Function> stack = new HashMap<>();
+
+        stack.put("new", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyReference(new Stack<BarleyValue>());
+        });
+
+        stack.put("push", args -> {
+            Arguments.check(2, args.length);
+            ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
+            ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
+            return ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
+        });
+
+        stack.put("is_empty", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
+            return new BarleyAtom(AtomTable.put(String.valueOf(st.isEmpty())));
+        });
+
+        stack.put("pop", args -> {
+            Arguments.check(1, args.length);
+            Stack<BarleyValue> s = ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef());
+            //System.out.println("Stack: " + s);;
+            return s.pop();
+        });
+
+        stack.put("peek", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
+            return st.peek();
+        });
+
+        stack.put("stack_to_list", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (BarleyValue value : st) {
+                result.add(value);
+            }
+            return new BarleyList(result);
+        });
+
+        put("stack", stack);
+    }
+
     public static void init() {
         initBarley();
         initIo();
         initBts();
         initMath();
+        initString();
+        initStack();
+    }
+
+    static byte[] toPrimitives(Byte[] oBytes)
+    {
+        byte[] bytes = new byte[oBytes.length];
+        for(int i = 0; i < oBytes.length; i++){
+            bytes[i] = oBytes[i];
+        }
+        return bytes;
     }
 
     public static int getRandomNumber(int min, int max) {

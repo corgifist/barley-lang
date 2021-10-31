@@ -20,6 +20,7 @@ public class UserFunction implements Function {
 
     @Override
     public BarleyValue execute(BarleyValue... args) {
+        // System.out.println(List.of(args));
         Table.push();
         try {
             boolean br = false;
@@ -28,6 +29,14 @@ public class UserFunction implements Function {
             for (int i = 0; i < clauses.size(); i++) {
                 Clause clause = clauses.get(i);
                 ArrayList<Pattern> patterns = patterns(clause.getArgs());
+                if (patterns.isEmpty() && args.length == 0) {
+                    if (clause.getGuard() != null) {
+                        if ((clause.getGuard().execute()).toString().equals("true"));
+                        else continue;
+                    }
+                    toExecute = clause.getResult();
+                    break;
+                }
                 if (patterns.size() != args.length) continue;
                 for (int k = 0; k < patterns.size(); k++) {
                     Pattern pattern = patterns.get(k);
@@ -40,7 +49,10 @@ public class UserFunction implements Function {
                         ConstantPattern p = (ConstantPattern) pattern;
                         boolean isEquals = p.getConstant().equals(arg);
                         if (isEquals);
-                        else br = true;
+                        else {
+                            br = true;
+                            break;
+                        }
                     } else if (pattern instanceof ListPattern) {
                         ListPattern p = (ListPattern) pattern;
                         br = !(processList(p, arg, toDelete));
@@ -66,14 +78,15 @@ public class UserFunction implements Function {
                 toExecute = clause.getResult();
                 break;
             }
+            if (toExecute.equals(null)) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
             BarleyValue result = toExecute.execute();
-            if (result == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
-            for (String var : toDelete) {
-                Table.remove(var);
-            }
+            //for (String var : toDelete) {
+            //    Table.remove(var);
+            //}
             Table.pop();
             return result;
         } catch (BarleyException ex) {
+            System.out.println("Error clauses: " + clauses);
             System.out.printf("** exception error: %s\n", ex.getText());
             int count = CallStack.getCalls().size();
             if (count == 0) System.exit(1);
@@ -86,6 +99,8 @@ public class UserFunction implements Function {
             throw ex;
         }
     }
+
+
     private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
         if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");
         BarleyList list = (BarleyList) val;

@@ -2,10 +2,11 @@ package com.barley.runtime;
 
 import com.barley.utils.BarleyException;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class BarleyReference implements BarleyValue {
+public class BarleyReference implements BarleyValue, Serializable {
 
     private Object ref;
 

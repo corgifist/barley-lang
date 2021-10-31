@@ -1,10 +1,11 @@
 package com.barley.runtime;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-public class BarleyNumber implements BarleyValue {
+public class BarleyNumber implements BarleyValue, Serializable {
 
     BigDecimal number;
 

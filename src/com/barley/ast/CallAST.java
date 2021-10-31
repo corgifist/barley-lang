@@ -2,9 +2,7 @@ package com.barley.ast;
 
 import com.barley.runtime.BarleyFunction;
 import com.barley.runtime.BarleyValue;
-import com.barley.utils.AST;
-import com.barley.utils.BarleyException;
-import com.barley.utils.CallStack;
+import com.barley.utils.*;
 
 import java.util.ArrayList;
 
@@ -28,10 +26,11 @@ public class CallAST implements AST {
         BarleyValue temporal = obj.execute();
         if (!(temporal instanceof BarleyFunction)) throw new BarleyException("BadArg", "expected callable object, but got not callable");
         BarleyFunction function = (BarleyFunction) temporal;
+        Function fun = function.getFunction();
         BarleyValue result = null;
         try {
-            CallStack.enter(obj.toString(), function);
-            result = function.execute(arguments);
+            CallStack.enter(obj.toString(), fun);
+            result = fun.execute(arguments);
             CallStack.exit();
         } finally {
             return result;
