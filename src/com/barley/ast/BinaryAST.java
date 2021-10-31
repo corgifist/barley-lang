@@ -4,6 +4,7 @@ import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 
 public class BinaryAST implements AST{
@@ -46,14 +47,16 @@ public class BinaryAST implements AST{
             }
         }
 
+        BigDecimal decimal1 = val1.asFloat();
+        BigDecimal decimal2 = val2.asFloat();
         double number1 = val1.asFloat().doubleValue();
         double number2 = val2.asFloat().doubleValue();
 
         switch (op) {
-            case '-': return new BarleyNumber(number1 - number2);
-            case '*': return new BarleyNumber(number1 * number2);
-            case '/': return new BarleyNumber(number1 / number2);
-            case '+': return new BarleyNumber(number1 + number2);
+            case '-': return new BarleyNumber(decimal1.subtract(decimal2));
+            case '*': return new BarleyNumber(decimal1.multiply(decimal2));
+            case '/': return new BarleyNumber(decimal1.divide(decimal2));
+            case '+': return new BarleyNumber(decimal1.add(decimal2));
             case '>': return new BarleyAtom(addAtom(String.valueOf(number1 > number2)));
             case '<': return new BarleyAtom(addAtom(String.valueOf(number1 < number2)));
             case 't': return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
