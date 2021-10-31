@@ -40,6 +40,6 @@ public class Clause {
 
     @Override
     public String toString() {
-        return guard == null ? String.format("%s -> %s", args, result) : String.format("%s when %s -> %", args, guard, result);
+        return guard == null ? String.format("%s -> %s", args, result) : String.format("%s when %s -> %s", args, guard, result);
     }
 }

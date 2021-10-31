@@ -206,6 +206,16 @@ public class Modules {
             System.out.println(docs.get(module));
             return new BarleyAtom(AtomTable.put("ok"));
         });
+        shell.put("range", args -> {
+            Arguments.check(2, args.length);
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            BarleyValue obj = args[1];
+            int iteration = args[0].asFloat().intValue();
+            for (int i = 0; i < iteration; i++) {
+                result.add(obj);
+            }
+            return new BarleyList(result);
+        });
         put("barley", shell);
     }
 

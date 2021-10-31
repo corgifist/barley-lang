@@ -62,10 +62,16 @@ public class BinaryAST implements AST{
             case 't': return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
             case 'g': return new BarleyAtom(addAtom(String.valueOf(number1 >= number2)));
             case '=': return new BarleyAtom(addAtom(String.valueOf(number1 == number2)));
+            case 'a': return new BarleyNumber(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
+            case 'o': return new BarleyNumber(addAtom(String.valueOf(istrue(val1) || istrue(val2))));
             default:
                badArith();
         }
         return null;
+    }
+
+    private boolean istrue(BarleyValue value) {
+        return value.toString().equals("true");
     }
 
     public void badArith() {

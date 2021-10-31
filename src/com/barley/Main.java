@@ -12,6 +12,6 @@ public class Main {
         Handler.loadCore();
         Handler.file("program.barley");
         //AtomTable.dump();
-        Handler.console();
+        Handler.handle("test:main().", true);
     }
 }

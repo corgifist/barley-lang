@@ -54,6 +54,8 @@ public final class Lexer {
         KEYWORDS.put("case", TokenType.CASE);
         KEYWORDS.put("of", TokenType.OF);
         KEYWORDS.put("end", TokenType.END);
+        KEYWORDS.put("and", TokenType.AND);
+        KEYWORDS.put("or", TokenType.OR);
     }
 
     private final String input;
