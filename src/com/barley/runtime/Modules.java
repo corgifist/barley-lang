@@ -4,9 +4,7 @@ import com.barley.ast.ExtractBindAST;
 import com.barley.ast.JavaFunctionAST;
 import com.barley.utils.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 public class Modules {
@@ -187,6 +185,19 @@ public class Modules {
             } else if (arg instanceof BarleyList) {
                 return new BarleyNumber(((BarleyList) arg).getList().size());
             } else throw new BarleyException("BadArg", "expected object that support length function");
+        });
+        shell.put("binary", args -> {
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            byte[] bytes = new byte[0];
+            try {
+                bytes = SerializeUtils.serialize((Serializable) args[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            for (int i = 0; i < bytes.length; i++) {
+                result.add(new BarleyNumber(bytes[i]));
+            }
+            return new BarleyList(result);
         });
         put("barley", shell);
     }
