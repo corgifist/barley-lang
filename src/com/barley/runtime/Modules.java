@@ -209,10 +209,86 @@ public class Modules {
         put("barley", shell);
     }
 
+    private static void initMath() {
+        HashMap<String, Function> math = new HashMap<>();
+
+        math.put("pi", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyNumber(Math.PI);
+        });
+        math.put("e", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyNumber(Math.E);
+        });
+        math.put("floor", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.floor(args[0].asFloat().doubleValue()));
+        });
+        math.put("cos", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.cos(args[0].asFloat().doubleValue()));
+        });
+        math.put("tan", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.tan(args[0].asFloat().doubleValue()));
+        });
+        math.put("atan", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.atan(args[0].asFloat().doubleValue()));
+        });
+        math.put("random", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyNumber(Math.random());
+        });
+        math.put("abs", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.abs(args[0].asFloat().doubleValue()));
+        });
+        math.put("acos", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.acos(args[0].asFloat().doubleValue()));
+        });
+        math.put("cbrt", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.cbrt(args[0].asFloat().doubleValue()));
+        });
+        math.put("ceil", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.ceil(args[0].asFloat().doubleValue()));
+        });
+        math.put("cosh", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.cosh(args[0].asFloat().doubleValue()));
+        });
+        math.put("exp", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.exp(args[0].asFloat().doubleValue()));
+        });
+        math.put("log", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyNumber(Math.log(args[0].asFloat().doubleValue()));
+        });
+        math.put("max", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(Math.max(args[0].asFloat().doubleValue(), args[1].asFloat().doubleValue()));
+        });
+        math.put("min", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(Math.min(args[0].asFloat().doubleValue(), args[1].asFloat().doubleValue()));
+        });
+        math.put("pow", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(Math.pow(args[0].asFloat().doubleValue(), args[1].asFloat().doubleValue()));
+        });
+
+        modules.put("math", math);
+    }
+
     public static void init() {
         initBarley();
         initIo();
         initBts();
+        initMath();
     }
 
     public static int getRandomNumber(int min, int max) {
