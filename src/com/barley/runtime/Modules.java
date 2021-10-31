@@ -11,6 +11,8 @@ public class Modules {
 
     private static HashMap<String, HashMap<String, Function>> modules = new HashMap<>();
 
+    public static HashMap<String, String> docs = new HashMap<>();
+
     static {
 
     }
@@ -161,7 +163,6 @@ public class Modules {
             }
             return new BarleyAtom(AtomTable.put("error"));
         });
-
         shell.put("extract_pid", args -> {
             Arguments.check(1, args.length);
             BarleyValue val = args[0];
@@ -198,6 +199,12 @@ public class Modules {
                 result.add(new BarleyNumber(bytes[i]));
             }
             return new BarleyList(result);
+        });
+        shell.put("docs", args -> {
+            Arguments.check(1, args.length);
+            String module = args[0].toString();
+            System.out.println(docs.get(module));
+            return new BarleyAtom(AtomTable.put("ok"));
         });
         put("barley", shell);
     }

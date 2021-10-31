@@ -20,7 +20,7 @@ public final class Parser {
 
     private int pos;
 
-    private String module;
+    private String module, doc;
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -37,6 +37,7 @@ public final class Parser {
             consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
         }
         Modules.put(module, methods);
+        if (doc != null) Modules.docs.put(module, doc);
         return result;
     }
 
@@ -70,6 +71,11 @@ public final class Parser {
                 consume(TokenType.LPAREN, "expected '(' before module name");
                 module = expression().toString();
                 consume(TokenType.RPAREN, "expected ')' after module name");
+            }
+            if (match(TokenType.MODULEDOC)) {
+                consume(TokenType.LPAREN, "expected '(' before module doc");
+                doc = expression().toString();
+                consume(TokenType.RPAREN, "expected ')' after module doc");
             }
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {

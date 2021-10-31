@@ -37,6 +37,7 @@ public enum TokenType {
     DOT,
 
     MODULE,
+    MODULEDOC,
     WHEN,
     RECIEVE,
     CASE, OF, END,

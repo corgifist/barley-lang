@@ -19,4 +19,8 @@ public class AtomTable {
         return atoms.get(pos);
     }
 
+    public static void dump() {
+        System.out.println(atoms);
+    }
+
 }
