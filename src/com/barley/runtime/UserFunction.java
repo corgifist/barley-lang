@@ -55,6 +55,10 @@ public class UserFunction implements Function, Serializable {
                             break;
                         }
                     } else if (pattern instanceof ListPattern) {
+                        if (!(arg instanceof BarleyList)) {
+                            br = true;
+                            break;
+                        }
                         ListPattern p = (ListPattern) pattern;
                         br = !(processList(p, arg, toDelete));
                     } else if (pattern instanceof ConsPattern) {
@@ -120,7 +124,8 @@ public class UserFunction implements Function, Serializable {
                 if (!(c.getConstant().equals(obj))) return false;
             } else if (p instanceof ListPattern) {
                 ListPattern c = (ListPattern) p;
-                processList(c, obj, toDelete);
+                if (processList(c, obj, toDelete)) continue;
+                else return false;
             } else if (p instanceof ConsPattern) {
                 ConsPattern c = (ConsPattern) p;
                 if (!(obj instanceof BarleyList)) return false;

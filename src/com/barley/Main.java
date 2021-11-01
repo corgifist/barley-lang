@@ -9,7 +9,8 @@ public class Main {
 
     public static void main(String[] args) {
         Modules.init();
-        Handler.file("program.barley");
-        Handler.console();
+        Handler.loadCore();
+        Handler.file("program.barley", true);
+        Handler.handle("test:main().", true, false);
     }
 }

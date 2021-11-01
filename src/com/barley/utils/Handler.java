@@ -15,7 +15,7 @@ public class Handler {
 
     private static String RUNTIME_VERSION = "0.1";
 
-    public static void handle(String input, boolean isExpr) {
+    public static void handle(String input, boolean isExpr, boolean time) {
         try {
             final TimeMeasurement measurement = new TimeMeasurement();
             measurement.start("Lexer time");
@@ -31,8 +31,10 @@ public class Handler {
                 node.execute();
             }
             measurement.stop("Execute time");
-            System.out.println("======================");
-            System.out.println(measurement.summary(TimeUnit.MILLISECONDS, true));
+            if (time) {
+                System.out.println("======================");
+                System.out.println(measurement.summary(TimeUnit.MILLISECONDS, true));
+            }
         } catch (BarleyException ex) {
             System.out.printf("** exception error: %s\n", ex.getText());
             int count = CallStack.getCalls().size();
@@ -43,6 +45,10 @@ public class Handler {
                 count--;
             }
         }
+    }
+
+    public static void handle(String input, boolean isExpr) {
+        Handler.handle(input, isExpr, false);
     }
 
     public static List<AST> parseAST(String input) {
@@ -65,12 +71,16 @@ public class Handler {
         }
     }
 
-    public static void file(String path) {
+    public static void file(String path, boolean time) {
         try {
-            Handler.handle(SourceLoader.readSource(path), false);
+            Handler.handle(SourceLoader.readSource(path), false, time);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void file(String path) {
+        file(path, false);
     }
 
     private static int getVersion() {
