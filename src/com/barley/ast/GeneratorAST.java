@@ -8,9 +8,10 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 import com.barley.utils.GeneratorSkip;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class GeneratorAST implements AST {
+public class GeneratorAST implements AST, Serializable {
 
     private AST gen;
     private String var;

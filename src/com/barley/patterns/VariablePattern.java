@@ -1,6 +1,8 @@
 package com.barley.patterns;
 
-public class VariablePattern extends Pattern {
+import java.io.Serializable;
+
+public class VariablePattern extends Pattern implements Serializable {
 
     private String variable;
 

@@ -7,7 +7,9 @@ import com.barley.runtime.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Handler {
 
@@ -15,13 +17,22 @@ public class Handler {
 
     public static void handle(String input, boolean isExpr) {
         try {
+            final TimeMeasurement measurement = new TimeMeasurement();
+            measurement.start("Lexer time");
             Lexer lexer = new Lexer(input);
             List<Token> tokens = lexer.tokenize();
+            measurement.stop("Lexer time");
+            measurement.start("Parse time");
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
+            measurement.stop("Parse time");
+            measurement.start("Execute time");
             for (AST node : nodes) {
                 node.execute();
             }
+            measurement.stop("Execute time");
+            System.out.println("======================");
+            System.out.println(measurement.summary(TimeUnit.MILLISECONDS, true));
         } catch (BarleyException ex) {
             System.out.printf("** exception error: %s\n", ex.getText());
             int count = CallStack.getCalls().size();
@@ -32,6 +43,13 @@ public class Handler {
                 count--;
             }
         }
+    }
+
+    public static List<AST> parseAST(String input) {
+        Lexer lexer = new Lexer(input);
+        List<Token> tokens = lexer.tokenize();
+        Parser parser = new Parser(tokens);
+        return parser.parse();
     }
 
     public static void console() {

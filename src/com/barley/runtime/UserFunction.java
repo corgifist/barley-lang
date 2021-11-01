@@ -5,12 +5,13 @@ import com.barley.patterns.*;
 import com.barley.utils.*;
 
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UserFunction implements Function {
+public class UserFunction implements Function, Serializable {
 
     private ArrayList<Clause> clauses;
 

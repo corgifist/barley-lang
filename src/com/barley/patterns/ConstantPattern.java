@@ -2,7 +2,9 @@ package com.barley.patterns;
 
 import com.barley.runtime.BarleyValue;
 
-public class ConstantPattern extends Pattern{
+import java.io.Serializable;
+
+public class ConstantPattern extends Pattern implements Serializable {
 
     private BarleyValue constant;
 

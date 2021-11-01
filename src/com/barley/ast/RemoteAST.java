@@ -5,7 +5,9 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Function;
 
-public class RemoteAST implements AST {
+import java.io.Serializable;
+
+public class RemoteAST implements AST, Serializable {
 
     private AST module, target;
 

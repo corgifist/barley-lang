@@ -1,8 +1,9 @@
 package com.barley.utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Clause {
+public class Clause implements Serializable {
 
     private ArrayList<AST> args;
     private AST guard;

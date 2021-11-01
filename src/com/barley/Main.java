@@ -9,9 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         Modules.init();
-        Handler.loadCore();
         Handler.file("program.barley");
-        //AtomTable.dump();
-        Handler.handle("test:main().", true);
+        Handler.console();
     }
 }

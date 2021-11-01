@@ -3,7 +3,9 @@ package com.barley.ast;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
 
-public class RecieveAST implements AST {
+import java.io.Serializable;
+
+public class RecieveAST implements AST, Serializable {
 
     private AST pid, body;
     private BarleyPID p;

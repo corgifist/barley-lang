@@ -3,7 +3,9 @@ package com.barley.ast;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
 
-public class ProcessCallAST implements AST {
+import java.io.Serializable;
+
+public class ProcessCallAST implements AST, Serializable {
 
     private AST pid, expr;
 

@@ -8,10 +8,11 @@ import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BindAST implements AST {
+public class BindAST implements AST, Serializable {
 
     private AST left, right;
 

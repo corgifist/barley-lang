@@ -1,47 +1,6 @@
--module(test).
+-module(program).
 
 -doc("Calculator").
 
-global ST = stack:new().
-
-eval(S) ->
-    String = string:split(S),
-    lists:map(test:rpn, String),
-    stack_trace(),
-    pop().
-
-rpn("+") ->
-    A = pop(),
-    B = pop(),
-    push(B + A).
-
-rpn("-") ->
-    A = pop(),
-    B = pop(),
-    push(B - A).
-
-rpn("/") ->
-    A = pop(),
-    B = pop(),
-    push(B / A).
-
-rpn("*") ->
-    A = pop(),
-    B = pop(),
-    push(B * A).
-
-rpn(X) ->
-    push(read(X)).
-
-read(N) ->
-    case string:as_number(N) ->
-        of error: CaughtError.
-        of Number: Number.
-    end.
-
-push(Value) -> stack:push(ST, Value).
-pop() -> stack:pop(ST).
-stack_trace() -> io:writeln(stack:stack_to_list(ST)).
-
 main() ->
-    io:fwriteln(eval("2 2 + 2 * 2 /")).
+    io:fwriteln("other").

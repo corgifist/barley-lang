@@ -1,4 +1,6 @@
 package com.barley.patterns;
 
-public abstract class Pattern {
+import java.io.Serializable;
+
+public abstract class Pattern implements Serializable {
 }

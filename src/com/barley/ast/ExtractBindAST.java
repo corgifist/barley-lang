@@ -4,7 +4,9 @@ import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Table;
 import com.barley.utils.AST;
 
-public class ExtractBindAST implements AST {
+import java.io.Serializable;
+
+public class ExtractBindAST implements AST, Serializable {
 
     private String constant;
 

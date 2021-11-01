@@ -1,6 +1,8 @@
 package com.barley.patterns;
 
-public class ConsPattern extends Pattern {
+import java.io.Serializable;
+
+public class ConsPattern extends Pattern implements Serializable {
 
     private String left, right;
 

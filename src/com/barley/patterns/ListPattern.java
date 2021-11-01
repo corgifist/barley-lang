@@ -2,9 +2,10 @@ package com.barley.patterns;
 
 import com.barley.utils.AST;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class ListPattern extends Pattern {
+public class ListPattern extends Pattern implements Serializable {
 
     private LinkedList<AST> arr;
 

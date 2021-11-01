@@ -4,12 +4,13 @@ import com.barley.ast.*;
 import com.barley.runtime.*;
 import com.barley.utils.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class Parser {
+public final class Parser implements Serializable {
 
     private static final Token EOF = new Token(TokenType.EOF, "", -1);
 
@@ -36,7 +37,7 @@ public final class Parser {
             result.add(expr);
             consume(TokenType.DOT, "unterminated term.\n    where term: \n        " + expr);
         }
-        Modules.put(module, methods);
+        result.add(new CompileAST(module, methods));
         if (doc != null) Modules.docs.put(module, doc);
         return result;
     }
@@ -106,7 +107,7 @@ public final class Parser {
         }
         clauses.add(clause);
         methods.put(name, new UserFunction(clauses));
-        return new ConstantAST(new BarleyNumber(0));
+        return new MethodAST(this, new UserFunction(clauses), name);
     }
 
     private AST expression() {

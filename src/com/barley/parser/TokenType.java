@@ -1,6 +1,8 @@
 package com.barley.parser;
 
-public enum TokenType {
+import java.io.Serializable;
+
+public enum TokenType implements Serializable {
 
     NUMBER,
     STRING,

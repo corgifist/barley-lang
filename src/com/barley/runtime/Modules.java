@@ -250,8 +250,62 @@ public class Modules {
             }
             return new BarleyList(result);
         });
-
         shell.put("threads_count", args -> new BarleyNumber(Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size()));
+        shell.put("ast_to_binary", args -> {
+            Arguments.check(1, args.length);
+            try {
+                List<AST> parsed = Handler.parseAST(SourceLoader.readSource(args[0].toString()));
+                byte[] binary = SerializeUtils.serialize((Serializable) parsed);
+                LinkedList<BarleyValue> result = new LinkedList<>();
+                for (byte b : binary) {
+                    result.add(new BarleyNumber(b));
+                }
+                return new BarleyList(result);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom(AtomTable.put("error"));
+        });
+        shell.put("compile", args -> {
+            Arguments.check(1, args.length);
+            try {
+                List<AST> parsed = Handler.parseAST(SourceLoader.readSource(args[0].toString()));
+                byte[] binary = SerializeUtils.serialize((Serializable) parsed);
+                try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".ast", false)) {
+                    for (byte b : binary) {
+                        writer.append(String.valueOf(b) + " ");
+                    }
+                }
+                return new BarleyAtom(AtomTable.put("ok"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom(AtomTable.put("error"));
+        });
+        shell.put("ast_from_binary", args -> {
+            Arguments.check(1, args.length);
+            try {
+                String bytes = SourceLoader.readSource(args[0].toString());
+                String[] bs = bytes.split(" ");
+
+                ArrayList<Byte> bts = new ArrayList<>();
+                for (String b : bs) {
+                    bts.add(Byte.parseByte(b));
+                }
+                byte[] binary = toPrimitives(bts.toArray(new Byte[] {}));
+                List<AST> ast = (List<AST>) SerializeUtils.deserialize(binary);
+                System.out.println("after parsing");
+                for (AST node : ast) {
+                    node.execute();
+                }
+                return new BarleyAtom(AtomTable.put("ok"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom(AtomTable.put("error"));
+        });
         put("barley", shell);
     }
 

@@ -2,7 +2,9 @@ package com.barley.utils;
 
 import com.barley.parser.TokenType;
 
-public final class Token {
+import java.io.Serializable;
+
+public final class Token implements Serializable {
 
     private TokenType type;
     private String text;

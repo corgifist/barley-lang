@@ -3,9 +3,10 @@ package com.barley.ast;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BlockAST implements AST {
+public class BlockAST implements AST, Serializable {
 
     private ArrayList<AST> block;
 

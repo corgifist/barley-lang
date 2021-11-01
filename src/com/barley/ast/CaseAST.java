@@ -4,11 +4,12 @@ import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public final class CaseAST implements AST {
+public final class CaseAST implements AST, Serializable {
 
     public final AST  expression;
     public final List<Pattern> patterns;
@@ -182,7 +183,7 @@ public final class CaseAST implements AST {
         return sb.toString();
     }
 
-    public abstract static class Pattern {
+    public abstract static class Pattern implements Serializable {
         public AST result;
         public AST optCondition;
 

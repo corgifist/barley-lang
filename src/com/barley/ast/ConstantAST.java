@@ -3,7 +3,9 @@ package com.barley.ast;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
-public class ConstantAST implements AST {
+import java.io.Serializable;
+
+public class ConstantAST implements AST, Serializable {
 
     private BarleyValue constant;
 

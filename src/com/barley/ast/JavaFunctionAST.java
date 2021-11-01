@@ -4,9 +4,10 @@ import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 import com.barley.utils.Function;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class JavaFunctionAST implements AST {
+public class JavaFunctionAST implements AST, Serializable {
 
     private Function function;
     private BarleyValue[] args;

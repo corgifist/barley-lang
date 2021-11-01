@@ -6,7 +6,9 @@ import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
-public class UnaryAST implements AST {
+import java.io.Serializable;
+
+public class UnaryAST implements AST, Serializable {
 
     private final AST expr1;
     private char op;

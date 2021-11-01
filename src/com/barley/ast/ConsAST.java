@@ -4,9 +4,10 @@ import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class ConsAST implements AST {
+public class ConsAST implements AST, Serializable {
 
     private AST left, right;
 
