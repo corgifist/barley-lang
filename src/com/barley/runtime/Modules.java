@@ -485,6 +485,47 @@ public class Modules {
         put("stack", stack);
     }
 
+    private static void initTypes() {
+        HashMap<String, Function> types = new HashMap<>();
+
+        types.put("is_number", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyNumber)));
+        });
+
+        types.put("is_string", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyString)));
+        });
+
+        types.put("is_atom", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyAtom)));
+        });
+
+        types.put("is_function", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof Function)));
+        });
+
+        types.put("is_list", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyList)));
+        });
+
+        types.put("is_pid", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyPID)));
+        });
+
+        types.put("is_string", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyString)));
+        });
+
+        put("types", types);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -492,6 +533,7 @@ public class Modules {
         initMath();
         initString();
         initStack();
+        initTypes();
     }
 
     static byte[] toPrimitives(Byte[] oBytes)
