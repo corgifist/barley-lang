@@ -306,6 +306,13 @@ public class Modules {
             }
             return new BarleyAtom(AtomTable.put("error"));
         });
+
+        shell.put("atoms", args -> {
+            Arguments.check(0, args.length);
+            AtomTable.dump();
+            return new BarleyAtom("ok");
+        });
+
         put("barley", shell);
     }
 

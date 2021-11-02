@@ -318,8 +318,25 @@ public final class Parser implements Serializable {
             return match();
         }
 
+        if (match(TokenType.DEF)) {
+            return lambda();
+        }
+
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+    }
+
+    private AST lambda() {
+        ArrayList<Clause> clauses = new ArrayList<>();
+        while (!(match(TokenType.END))) {
+            match(TokenType.DEF);
+            Clause clause = clause();
+            consume(TokenType.STABBER, "error at lambda declaration at line " + line());
+            clause.setResult(block());
+            match(TokenType.DOT);
+            clauses.add(clause);
+        }
+        return new ConstantAST(new BarleyFunction(new UserFunction(clauses)));
     }
 
     private CaseAST match() {
@@ -403,7 +420,7 @@ public final class Parser implements Serializable {
     }
 
     private ArrayList<AST> arguments() {
-        consume(TokenType.LPAREN, "error at ')' at line " + line());
+        consume(TokenType.LPAREN, "error at '(' at line " + line());
         ArrayList<AST> args = new ArrayList<>();
         while (!(match(TokenType.RPAREN))) {
             args.add(expression());

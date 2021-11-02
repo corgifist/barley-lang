@@ -11,6 +11,10 @@ public class BarleyAtom implements BarleyValue, Serializable {
 
     private int pos;
 
+    public BarleyAtom(String atom) {
+        this(AtomTable.put(atom));
+    }
+
     public BarleyAtom(int pos) {
         this.pos = pos;
     }
