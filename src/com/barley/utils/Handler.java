@@ -106,4 +106,31 @@ public class Handler {
             }
         }
     }
+
+    public static void tests() {
+
+        final TimeMeasurement measurement = new TimeMeasurement();
+
+        String[] scripts = new String[] {
+                "examples/bts.barley",
+                "examples/lists.barley",
+                "examples/prrocesses.barley",
+                "examples/stack.barley",
+                "examples/types.barley",
+        };
+
+        measurement.start("Tests time");
+        for(String script : scripts) {
+            try {
+                Handler.handle(SourceLoader.readSource(script), false, false);
+                Handler.handle("test:main().", true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        measurement.stop("Tests time");
+        System.out.println("======================");
+        System.out.println(measurement.summary(TimeUnit.MILLISECONDS, true));
+    }
 }

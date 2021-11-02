@@ -6,8 +6,7 @@ global ST = stack:new().
 
 eval(S) ->
     String = string:split(S),
-    lists:map(test:rpn, String),
-    stack_trace(),
+    rpn(X) || X -> String,
     pop().
 
 rpn("+") ->
@@ -31,6 +30,8 @@ rpn("*") ->
     push(B * A).
 
 rpn(X) ->
+    io:write("stack trace: "),
+    stack_trace(),
     push(read(X)).
 
 read(N) ->
@@ -44,4 +45,4 @@ pop() -> stack:pop(ST).
 stack_trace() -> io:writeln(stack:stack_to_list(ST)).
 
 main() ->
-    io:fwriteln(eval("2 2 + 2 * 2 /")).
+    io:fwriteln("result: " + eval("2 +")).

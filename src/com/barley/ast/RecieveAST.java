@@ -14,15 +14,16 @@ public class RecieveAST implements AST, Serializable {
         this.pid = pid;
         this.body = body;
         this.p = (BarleyPID) pid.execute();
+        ProcessTable.receives.put(p, new JavaFunctionAST(args -> {
+            Table.set("Rest", ProcessTable.get(p));
+            ProcessTable.put(p, body.execute());
+            Table.remove("Rest");
+            return ProcessTable.get(p);
+        }, new BarleyValue[]{}));
     }
 
     @Override
     public BarleyValue execute() {
-        ProcessTable.receives.put(p, new JavaFunctionAST(args -> {
-            Table.set("Rest", ProcessTable.get(p));
-            ProcessTable.put(p, body.execute());
-            return ProcessTable.get(p);
-        }, new BarleyValue[]{}));
         return p;
     }
 

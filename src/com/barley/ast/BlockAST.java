@@ -19,8 +19,7 @@ public class BlockAST implements AST, Serializable {
         int size = block.size();
         BarleyValue last = null;
         for (int i = 0; i < size; i++) {
-            if (i + 1 == size) last = block.get(i).execute();
-            else block.get(i).execute();
+            last = block.get(i).execute();
         }
         return last;
     }

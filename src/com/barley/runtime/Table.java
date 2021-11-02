@@ -75,12 +75,20 @@ public final class Table {
 
     public static void set(String key, BarleyValue value) {
         synchronized (lock) {
-            findScope(key).scope.variables.put(key, value);
+            if (scope.parent != null) {
+                scope.parent.variables.put(key, value);
+                return;
+            }
+            scope.variables.put(key, value);
         }
     }
 
     public static void define(String key, BarleyValue value) {
         synchronized (lock) {
+            if (scope.parent != null) {
+                scope.parent.variables.put(key, value);
+                return;
+            }
             scope.variables.put(key, value);
         }
     }

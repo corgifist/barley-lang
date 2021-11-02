@@ -25,17 +25,12 @@ public class CallAST implements AST, Serializable {
             arguments[i] = node.execute();
         }
         BarleyValue temporal = obj.execute();
-        if (!(temporal instanceof BarleyFunction)) throw new BarleyException("BadArg", "expected callable object, but got not callable");
         BarleyFunction function = (BarleyFunction) temporal;
-        Function fun = function.getFunction();
         BarleyValue result = null;
-        try {
-            CallStack.enter(obj.toString(), fun);
-            result = fun.execute(arguments);
-            CallStack.exit();
-        } finally {
-            return result;
-        }
+        CallStack.enter(obj.toString(), function);
+        result = function.execute(arguments);
+        CallStack.exit();
+        return result;
     }
 
     @Override

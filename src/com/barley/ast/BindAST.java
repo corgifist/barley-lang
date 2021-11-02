@@ -24,11 +24,10 @@ public class BindAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         Pattern pattern = pattern(left);
-        processPattern(pattern, right);
-        return right.execute();
+        return processPattern(pattern, right);
     }
 
-    private void processPattern(Pattern pattern, AST r) {
+    private BarleyValue processPattern(Pattern pattern, AST r) {
         BarleyValue ast = r.execute();
         if (pattern instanceof ListPattern) {
             if (!(ast instanceof BarleyList)) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
@@ -38,7 +37,6 @@ public class BindAST implements AST, Serializable {
             for (int i = 0; i < list.size(); i++) {
                 Pattern pattern1 = patterns.get(i);
                 BarleyValue right = list.get(i);
-
                 if (pattern1 instanceof VariablePattern) {
                     VariablePattern c = (VariablePattern) pattern1;
                     if (Table.isExists(c.getVariable())) processPattern(new ConstantPattern(Table.get(c.getVariable())), new ConstantAST(right));
@@ -57,12 +55,12 @@ public class BindAST implements AST, Serializable {
                     Table.set(p1.getRight(), tail((BarleyList) right));
                 }
             }
-            return;
+            return ast;
         }
         if (pattern instanceof VariablePattern) {
             VariablePattern c = (VariablePattern) pattern;
             if (Table.isExists(c.getVariable())) processPattern(new ConstantPattern(Table.get(c.getVariable())), r);
-            else Table.set(c.getVariable(), r.execute());
+            else Table.set(c.getVariable(), ast);
         } else if (pattern instanceof ConstantPattern) {
             BarleyValue l = ((ConstantPattern) pattern).getConstant();
             if (ast.equals(l));
@@ -73,6 +71,7 @@ public class BindAST implements AST, Serializable {
             Table.set(p.getLeft(), head((BarleyList) ast));
             Table.set(p.getRight(), tail((BarleyList) ast));
         }
+        return ast;
     }
 
     private Pattern pattern(AST ast) {

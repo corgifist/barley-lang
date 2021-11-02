@@ -106,6 +106,7 @@ public class Modules {
             if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            if (!(map.containsKey(args[1]))) throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[0] + "'");
             return map.get(args[1]);
         });
         bts.put("remove", args -> {
@@ -449,8 +450,6 @@ public class Modules {
 
         stack.put("push", args -> {
             Arguments.check(2, args.length);
-            ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
-            ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
             return ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef()).push(args[1]);
         });
 
@@ -465,7 +464,6 @@ public class Modules {
         stack.put("pop", args -> {
             Arguments.check(1, args.length);
             Stack<BarleyValue> s = ((Stack<BarleyValue>) ((BarleyReference) args[0]).getRef());
-            //System.out.println("Stack: " + s);;
             return s.pop();
         });
 

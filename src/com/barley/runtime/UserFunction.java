@@ -44,7 +44,7 @@ public class UserFunction implements Function, Serializable {
                     BarleyValue arg = args[k];
                     if (pattern instanceof VariablePattern) {
                         VariablePattern p = (VariablePattern) pattern;
-                        Table.set(p.getVariable(), arg);
+                        Table.define(p.getVariable(), arg);
                         toDelete.add(p.getVariable());
                     } else if (pattern instanceof ConstantPattern) {
                         ConstantPattern p = (ConstantPattern) pattern;
@@ -85,9 +85,6 @@ public class UserFunction implements Function, Serializable {
             }
             if (toExecute.equals(null)) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
             BarleyValue result = toExecute.execute();
-            //for (String var : toDelete) {
-            //    Table.remove(var);
-            //}
             Table.pop();
             return result;
         } catch (BarleyException ex) {
@@ -100,7 +97,6 @@ public class UserFunction implements Function, Serializable {
                 System.out.println("    " + count + ". " + info);
                 count--;
             }
-            System.exit(1);
             throw ex;
         }
     }
@@ -116,7 +112,7 @@ public class UserFunction implements Function, Serializable {
             BarleyValue obj = list.getList().get(i);
             if (p instanceof VariablePattern) {
                 VariablePattern c = (VariablePattern) p;
-                if (!(Table.isExists(c.getVariable()))) Table.set(c.getVariable(), obj);
+                if (!(Table.isExists(c.getVariable()))) Table.define(c.getVariable(), obj);
                 else if (!(Table.get(c.getVariable()).equals(obj))) return false;
                 toDelete.add(c.getVariable());
             } else if (p instanceof ConstantPattern) {
