@@ -2,9 +2,6 @@
 
 -doc("Calculator").
 
-type(A) when types:is_number(A) -> number.
-type(A) when types:is_list(A) -> list.
-type(A) when types:is_atom(A) -> atom.
 
 main() ->
-    io:fwriteln("Atom %s\nList %s\nNumber %s", type(atom), type([1]), type(1)).
+   5.

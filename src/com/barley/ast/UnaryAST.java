@@ -1,12 +1,11 @@
 package com.barley.ast;
 
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyString;
-import com.barley.runtime.BarleyValue;
+import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedType;
 
 public class UnaryAST implements AST, Serializable {
 
@@ -26,9 +25,21 @@ public class UnaryAST implements AST, Serializable {
 
         switch (op) {
             case '-': return new BarleyNumber(-number1);
+            case 'n': return not(val1);
             default:
                badArith();
         }
+        return null;
+    }
+
+    private BarleyValue not(BarleyValue value) {
+        if (value instanceof BarleyNumber) {
+            return new BarleyAtom(AtomTable.put(String.valueOf(value.asInteger().intValue() != 0)));
+        } else if (value instanceof BarleyString) {
+            return new BarleyAtom(AtomTable.put(String.valueOf(value.toString().isEmpty())));
+        } else if (value instanceof BarleyList) {
+            return new BarleyAtom(AtomTable.put(String.valueOf(value.toString().equals("[]"))));
+        } else badArith();
         return null;
     }
 

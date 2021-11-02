@@ -244,6 +244,10 @@ public final class Parser implements Serializable {
             return new UnaryAST(call(), '-');
         }
 
+        if (match(TokenType.NOT)) {
+            return new UnaryAST(call(), 'n');
+        }
+
         return call();
     }
 

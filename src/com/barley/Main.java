@@ -12,5 +12,6 @@ public class Main {
         Handler.loadCore();
         Handler.file("program.barley", true);
         Handler.handle("test:main().", true, false);
+        Handler.console();
     }
 }

@@ -57,6 +57,7 @@ public final class Lexer {
         KEYWORDS.put("and", TokenType.AND);
         KEYWORDS.put("or", TokenType.OR);
         KEYWORDS.put("global", TokenType.GLOBAL);
+        KEYWORDS.put("not", TokenType.NOT);
     }
 
     private final String input;
