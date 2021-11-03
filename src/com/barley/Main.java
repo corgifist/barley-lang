@@ -11,7 +11,7 @@ public class Main {
         Modules.init();
         Handler.loadCore();
         Handler.tests();
-        Handler.file("examples/stack.barley", true);
+        Handler.file("program.barley", true);
         Handler.handle("test:main().", true, false);
     }
 }
