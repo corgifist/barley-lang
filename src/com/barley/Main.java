@@ -13,5 +13,6 @@ public class Main {
         Handler.tests();
         Handler.file("program.barley", true);
         Handler.handle("test:main().", true, false);
+        Handler.console();
     }
 }

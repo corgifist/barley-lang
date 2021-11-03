@@ -1,0 +1,25 @@
+-module(test).
+
+-doc("Calculator").
+
+start() -> barley:spawn(bts:new()).
+
+adopt_dog(Server, Name) ->
+    Dog = bts:lookup(barley:extract_pid(Server), Name),
+    bts:remove(table(Server), Name),
+    Dog.
+
+new_dog(Server, Name, Color) ->
+    bts:insert(table(Server), Name, Color).
+
+dogs(Server) -> bts:tabtolist(barley:extract_pid(Server)).
+table(Server) -> barley:extract_pid(Server).
+
+main() ->
+   PetShopServer = start(),
+   new_dog(PetShopServer, "kate", "brown"),
+   new_dog(PetShopServer, "john", "white"),
+   io:fwriteln(dogs(PetShopServer)),
+   John = adopt_dog(PetShopServer, "john"),
+   io:fwriteln(dogs(PetShopServer)),
+   io:fwriteln(John).
