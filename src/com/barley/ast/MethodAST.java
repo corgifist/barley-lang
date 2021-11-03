@@ -24,7 +24,7 @@ public class MethodAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         parser.methods.put(name, method);
-        return new BarleyAtom(AtomTable.put("ok"));
+        return new BarleyAtom("ok");
     }
 
     @Override

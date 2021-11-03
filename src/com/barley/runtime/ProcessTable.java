@@ -2,12 +2,14 @@ package com.barley.runtime;
 
 import com.barley.utils.AST;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ProcessTable {
 
     public static HashMap<BarleyPID, BarleyValue> storage = new HashMap<>();
     public static HashMap<BarleyPID, AST> receives = new HashMap<>();
+    public static ArrayList<BarleyPID> links;
 
     public static void put(BarleyPID pid, BarleyValue val) {
         storage.put(pid, val);

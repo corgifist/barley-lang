@@ -2,6 +2,17 @@
 
 -doc("Calculator").
 
+start() -> receive barley:spawn([]) -> Rest + Message.
+
+put(Pid, Obj) -> Pid ! Obj.
+
+get(Pid, Index) -> lists:nth(list(Pid), Index).
+
+list(Pid) -> barley:extract_pid(Pid).
 
 main() ->
-   2 + 2.
+   List = start(),
+   put(List, [1]),
+   io:fwriteln(list(List)),
+   put(List, 1),
+   io:fwriteln(list(List)).

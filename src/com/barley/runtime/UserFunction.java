@@ -87,15 +87,6 @@ public class UserFunction implements Function, Serializable {
             Table.pop();
             return result;
         } catch (BarleyException ex) {
-            //System.out.println("Error clauses: " + clauses);
-            //System.out.printf("** exception error: %s\n", ex.getText());
-            //int count = CallStack.getCalls().size();
-            //if (count == 0) System.exit(1);
-            //System.out.println(String.format("\nCall stack was:"));
-            //for (CallStack.CallInfo info : CallStack.getCalls()) {
-            //System.out.println("    " + count + ". " + info);
-            //    count--;
-            //}
             CallStack.exit();
             throw ex;
         }
