@@ -26,10 +26,14 @@ foreach(F, List) ->
     F(X) || X -> List,
     ok || Nothing -> List.
 
-last(Arr) -> case ITERATION == barley:length(Arr) - 1 ->
+make_last(Arr) -> case ITERATION == barley:length(Arr) - 1 ->
  of true: X.
  of false: generator_skip.
 end || X -> Arr.
+
+last(Arr) ->
+    [Res] = make_last(Arr),
+    Res.
 
 nth(Arr, N) -> barley:nth(Arr, N).
 
