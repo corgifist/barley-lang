@@ -10,7 +10,7 @@ import java.util.LinkedList;
 
 public class BinaryAST implements AST, Serializable  {
 
-    private final AST expr1, expr2;
+    public final AST expr1, expr2;
     private char op;
 
     public BinaryAST(AST expr1, AST expr2, char op) {

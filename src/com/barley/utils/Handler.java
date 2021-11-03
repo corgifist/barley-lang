@@ -100,7 +100,7 @@ public class Handler {
 
         for (String str : scripts) {
             try {
-                Handler.handle(SourceLoader.readSource(str), false);
+                Handler.handle(SourceLoader.readSource(str), false, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -117,6 +117,7 @@ public class Handler {
                 "examples/prrocesses.barley",
                 "examples/stack.barley",
                 "examples/types.barley",
+                "examples/dogs.barley"
         };
 
         measurement.start("Tests time");

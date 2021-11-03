@@ -314,6 +314,21 @@ public class Modules {
             return new BarleyAtom("ok");
         });
 
+        shell.put("processes", args -> {
+            Arguments.check(0, args.length);
+            System.out.println(ProcessTable.receives);
+            System.out.println(ProcessTable.storage);
+            return new BarleyAtom("ok");
+        });
+
+        shell.put("free_process", args -> {
+            Arguments.check(1, args.length);
+            BarleyPID pid = (BarleyPID) args[0];
+            ProcessTable.storage.remove(pid);
+            ProcessTable.receives.remove(pid);
+            return new BarleyAtom("ok");
+        });
+
         put("barley", shell);
     }
 

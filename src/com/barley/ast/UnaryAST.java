@@ -9,7 +9,7 @@ import java.lang.reflect.AnnotatedType;
 
 public class UnaryAST implements AST, Serializable {
 
-    private final AST expr1;
+    public final AST expr1;
     private char op;
 
     public UnaryAST(AST expr1, char op) {
