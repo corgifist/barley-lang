@@ -9,7 +9,7 @@ public final class Table {
 
     private static final Object lock = new Object();
 
-    private static class Scope {
+    public static class Scope {
         final Scope parent;
         final Map<String, BarleyValue> variables;
 
@@ -28,7 +28,7 @@ public final class Table {
         Scope scope;
     }
 
-    private static volatile Scope scope;
+    public static volatile Scope scope;
     static {
         Table.clear();
     }

@@ -22,7 +22,7 @@ public class UserFunction implements Function, Serializable {
     @Override
     public BarleyValue execute(BarleyValue... args) {
         // System.out.println(List.of(args));
-        Table.push();
+        Table.Scope old = Table.scope;
         try {
             boolean br = false;
             AST toExecute = null;
@@ -85,7 +85,7 @@ public class UserFunction implements Function, Serializable {
             }
             if (toExecute.equals(null)) throw new BarleyException("FunctionClause", "can't find function clause for args " + Arrays.asList(args));
             BarleyValue result = toExecute.execute();
-            Table.pop();
+            Table.scope = old;
             return result;
         } catch (BarleyException ex) {
             System.out.println("Error clauses: " + clauses);

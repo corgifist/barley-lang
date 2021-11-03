@@ -6,32 +6,34 @@ global ST = stack:new().
 
 eval(S) ->
     String = string:split(S),
-    rpn(X) || X -> String,
+    io:fwriteln(String),
+    process(Part) || Part -> String,
     pop().
 
+process(P) -> rpn(P).
+
 rpn("+") ->
-    A = pop(),
     B = pop(),
-    push(B + A).
+    A = pop(),
+    push(A + B).
 
 rpn("-") ->
-    A = pop(),
     B = pop(),
-    push(B - A).
-
-rpn("/") ->
     A = pop(),
-    B = pop(),
-    push(B / A).
+    push(A - B).
 
 rpn("*") ->
-    A = pop(),
     B = pop(),
-    push(B * A).
+    A = pop(),
+    push(A * B).
+
+rpn("/") ->
+    B = pop(),
+    A = pop(),
+    push(A / B).
 
 rpn(X) ->
-    io:write("stack trace: "),
-    stack_trace(),
+    io:fwriteln(X),
     push(read(X)).
 
 read(N) ->
@@ -45,4 +47,4 @@ pop() -> stack:pop(ST).
 stack_trace() -> io:writeln(stack:stack_to_list(ST)).
 
 main() ->
-    io:fwriteln("result: " + eval("2 +")).
+    io:fwriteln("result: " + eval("2 2 + 3 - 10 *")).

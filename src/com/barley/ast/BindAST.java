@@ -39,8 +39,7 @@ public class BindAST implements AST, Serializable {
                 BarleyValue right = list.get(i);
                 if (pattern1 instanceof VariablePattern) {
                     VariablePattern c = (VariablePattern) pattern1;
-                    if (Table.isExists(c.getVariable())) processPattern(new ConstantPattern(Table.get(c.getVariable())), new ConstantAST(right));
-                    else Table.set(c.getVariable(), right);
+                    Table.set(c.getVariable(), right);
                 } else if (pattern1 instanceof ConstantPattern) {
                     BarleyValue l = ((ConstantPattern) pattern1).getConstant();
                     if (right.equals(l));
@@ -59,8 +58,7 @@ public class BindAST implements AST, Serializable {
         }
         if (pattern instanceof VariablePattern) {
             VariablePattern c = (VariablePattern) pattern;
-            if (Table.isExists(c.getVariable())) processPattern(new ConstantPattern(Table.get(c.getVariable())), r);
-            else Table.set(c.getVariable(), ast);
+            Table.set(c.getVariable(), ast);
         } else if (pattern instanceof ConstantPattern) {
             BarleyValue l = ((ConstantPattern) pattern).getConstant();
             if (ast.equals(l));
