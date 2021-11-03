@@ -138,7 +138,15 @@ The recommended function to spawn a process is a:
  
  Rest - the current value of process.
  
- Message - sent message,
+ Message - sent message
+ 
+ ### Isolation of processes
+ 
+ Let's say you've done a process with your receive clause. You send messages to him, extract data from him, 
+ 
+ when suddenly you have not designed some aspects of communication with the process! And you are shown an error. 
+ 
+ Fear not, this error did not affect other processes. Isolation of processes is another Barley feature.
  
  ### Simple process-based program
  
