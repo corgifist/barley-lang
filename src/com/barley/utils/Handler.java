@@ -117,7 +117,10 @@ public class Handler {
                 "examples/prrocesses.barley",
                 "examples/stack.barley",
                 "examples/types.barley",
-                "examples/dogs.barley"
+                "examples/dogs.barley",
+                "examples/isolation.barley",
+                "examples/queue.barley",
+                "examples/measurement.barley"
         };
 
         measurement.start("Tests time");

@@ -1,0 +1,11 @@
+-module(test).
+
+main() ->
+   Q = queue:new(),
+   queue:in(Q, 15),
+   queue:in(Q, 2),
+   queue:in(Q, 3),
+   io:fwriteln(queue:q_to_list(Q)),
+   A = queue:out(Q),
+   io:fwriteln(A),
+   io:fwriteln(queue:q_to_list(Q)).

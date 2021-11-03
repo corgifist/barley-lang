@@ -3,7 +3,10 @@ package com.barley.runtime;
 import com.barley.utils.*;
 
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Modules {
 
@@ -562,6 +565,111 @@ public class Modules {
         put("types", types);
     }
 
+    private static void initQueue() {
+        HashMap<String, Function> queue = new HashMap<>();
+
+        queue.put("new", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyReference(new ConcurrentLinkedQueue<BarleyValue>());
+        });
+
+        queue.put("in", args -> {
+            Arguments.check(2, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
+            st.add(args[1]);
+            return args[1];
+        });
+
+        queue.put("out", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
+            return st.remove();
+        });
+
+        queue.put("peek", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
+            return st.peek();
+        });
+
+        queue.put("q_to_list", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
+            BarleyValue[] calls = st.toArray(new BarleyValue[] {});
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (BarleyValue call : calls) {
+                result.add(call);
+            }
+            return new BarleyList(result);
+        });
+
+        queue.put("is_empty", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
+            return new BarleyAtom(String.valueOf(st.isEmpty()));
+        });
+
+        put("queue", queue);
+    }
+
+    private static void initMeasurement() {
+        HashMap<String, Function> m = new HashMap<>();
+
+        m.put("new", args -> {
+            Arguments.check(0, args.length);
+            return new BarleyReference(new TimeMeasurement());
+        });
+
+        m.put("start", args -> {
+            Arguments.check(2, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
+            st.start(args[1].toString());
+            return new BarleyAtom("ok");
+        });
+
+        m.put("stop", args -> {
+            Arguments.check(2, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
+            st.stop(args[1].toString());
+            return new BarleyAtom("ok");
+        });
+
+        m.put("pause", args -> {
+            Arguments.check(2, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
+            st.pause(args[1].toString());
+            return new BarleyAtom("ok");
+        });
+
+        m.put("summary", args -> {
+            Arguments.check(1, args.length);
+            BarleyValue s = args[0];
+            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
+            System.out.println("======================");
+            System.out.println(st.summary(TimeUnit.MILLISECONDS, true));
+            return new BarleyAtom("ok");
+        });
+
+        put("measurement", m);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -570,6 +678,8 @@ public class Modules {
         initString();
         initStack();
         initTypes();
+        initQueue();
+        initMeasurement();
     }
 
     static byte[] toPrimitives(Byte[] oBytes)
