@@ -71,15 +71,13 @@ It wouldn't be called erlang if it didn't have pattern matching! Barley supports
 
 (barley:b() shows current binding)
 
-As in Erlang, variables cannot be reassigned.
+Unlike Erlang, variables in Barely can be reassigned!
 
 `Barley/Java15 [barley-runtime0.1] [amd64] [threads-2]`
 
 `>>> A = 15.`
 
 `>>> A = 14.`
-
-`** exception error: no match of right-hand value: 14`
 
 Pattern matching is also supported for functions.
 
