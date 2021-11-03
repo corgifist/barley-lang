@@ -2,7 +2,7 @@
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
 
-It have a stack of useful modules like: BTS (Barley-Term-Storage), string, lists, math and also barley (the main module)
+It have a stack of useful modules like: BTS (Barley-Term-Storage), string, lists, math, types and also barley (the main module)
 
 ## Examples
 
