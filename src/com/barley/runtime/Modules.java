@@ -329,6 +329,22 @@ public class Modules {
             return new BarleyAtom("ok");
         });
 
+        shell.put("throw", args -> {
+            Arguments.check(1, args.length);
+            throw new BarleyException(args[0].toString(), args[0].toString());
+        });
+
+        shell.put("catch", args -> {
+            Arguments.check(2, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            BarleyFunction c = (BarleyFunction) args[1];
+            try {
+                return fun.execute(new BarleyValue[]{});
+            } catch (BarleyException ex) {
+                return c.execute(new BarleyValue[]{new BarleyAtom(ex.getType().toLowerCase(Locale.ROOT))});
+            }
+        });
+
         put("barley", shell);
     }
 
