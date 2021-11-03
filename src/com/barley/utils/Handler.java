@@ -2,12 +2,11 @@ package com.barley.utils;
 
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
-import com.barley.runtime.*;
+import com.barley.runtime.ProcessTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -85,22 +84,25 @@ public class Handler {
 
     private static int getVersion() {
         String version = System.getProperty("java.version");
-        if(version.startsWith("1.")) {
+        if (version.startsWith("1.")) {
             version = version.substring(2, 3);
         } else {
             int dot = version.indexOf(".");
-            if(dot != -1) { version = version.substring(0, dot); }
-        } return Integer.parseInt(version);
+            if (dot != -1) {
+                version = version.substring(0, dot);
+            }
+        }
+        return Integer.parseInt(version);
     }
 
     public static void loadCore() {
-        String[] scripts = new String[] {
+        String[] scripts = new String[]{
                 "lib/lists.barley"
         };
 
         for (String str : scripts) {
             try {
-                Handler.handle(SourceLoader.readSource(str), false, true);
+                Handler.handle(SourceLoader.readSource(str), false, false);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -111,7 +113,7 @@ public class Handler {
 
         final TimeMeasurement measurement = new TimeMeasurement();
 
-        String[] scripts = new String[] {
+        String[] scripts = new String[]{
                 "examples/bts.barley",
                 "examples/lists.barley",
                 "examples/prrocesses.barley",
@@ -125,7 +127,7 @@ public class Handler {
         };
 
         measurement.start("Tests time");
-        for(String script : scripts) {
+        for (String script : scripts) {
             try {
                 Handler.handle(SourceLoader.readSource(script), false, false);
                 Handler.handle("test:main().", true);

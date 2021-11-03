@@ -2,21 +2,19 @@ package com.barley.runtime;
 
 import com.barley.utils.*;
 
-import java.io.*;
-import java.sql.Time;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 public class Modules {
 
-    private static HashMap<String, HashMap<String, Function>> modules = new HashMap<>();
-
     public static HashMap<String, String> docs = new HashMap<>();
+    private static final HashMap<String, HashMap<String, Function>> modules = new HashMap<>();
 
-    static {
-
-    }
     private static void initIo() {
         HashMap<String, Function> io = new HashMap<>();
         io.put("write", args -> {
@@ -58,7 +56,7 @@ public class Modules {
             for (int i = 1; i < args.length; i++) {
                 values[i - 1] = args[i].toString();
             }
-            System.out.println(String.format(format, values));
+            System.out.printf((format) + "%n", values);
             return new BarleyAtom(AtomTable.put("ok"));
         });
         io.put("readline", args -> {
@@ -77,14 +75,16 @@ public class Modules {
         });
         bts.put("insert", args -> {
             Arguments.check(3, args.length);
-            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             ((HashMap<BarleyValue, BarleyValue>) ref.getRef()).put(args[1], args[2]);
             return ref;
         });
         bts.put("tabtolist", args -> {
             Arguments.check(1, args.length);
-            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             LinkedList<BarleyValue> result = new LinkedList<>();
@@ -99,22 +99,26 @@ public class Modules {
 
         bts.put("member", args -> {
             Arguments.check(2, args.length);
-            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             return new BarleyAtom(AtomTable.put(String.valueOf(map.containsKey(args[1]))));
         });
         bts.put("lookup", args -> {
             Arguments.check(2, args.length);
-            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
-            if (!(map.containsKey(args[1]))) throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[0] + "'");
+            if (!(map.containsKey(args[1])))
+                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[0] + "'");
             return map.get(args[1]);
         });
         bts.put("remove", args -> {
             Arguments.check(2, args.length);
-            if (!(args[0] instanceof BarleyReference)) throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             map.remove(args[1]);
@@ -156,12 +160,14 @@ public class Modules {
             PidValues pid = new PidValues(getRandomNumber(0, 300), getRandomNumber(0, 300), getRandomNumber(0, 300));
             BarleyPID p = new BarleyPID(pid);
             switch (args.length) {
-                case 0:
+                case 0 -> {
                     ProcessTable.put(p);
                     return p;
-                case 1:
+                }
+                case 1 -> {
                     ProcessTable.put(p, args[0]);
                     return p;
+                }
             }
             return new BarleyAtom(AtomTable.put("error"));
         });
@@ -193,12 +199,12 @@ public class Modules {
             LinkedList<BarleyValue> result = new LinkedList<>();
             byte[] bytes = new byte[0];
             try {
-                bytes = SerializeUtils.serialize((Serializable) args[0]);
+                bytes = SerializeUtils.serialize(args[0]);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            for (int i = 0; i < bytes.length; i++) {
-                result.add(new BarleyNumber(bytes[i]));
+            for (byte aByte : bytes) {
+                result.add(new BarleyNumber(aByte));
             }
             return new BarleyList(result);
         });
@@ -209,13 +215,11 @@ public class Modules {
             for (BarleyValue bt : arr) {
                 b.add((byte) bt.asInteger().intValue());
             }
-            Byte[] bs = b.toArray(new Byte[] {});
+            Byte[] bs = b.toArray(new Byte[]{});
             byte[] binary = toPrimitives(bs);
             try {
                 return SerializeUtils.deserialize(binary);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
             return new BarleyAtom(AtomTable.put("error"));
@@ -247,11 +251,8 @@ public class Modules {
             BarleyList list = (BarleyList) args[0];
             int from = args[1].asInteger().intValue();
             int to = args[2].asInteger().intValue();
-            LinkedList<BarleyValue> result = new LinkedList<>();
             List<BarleyValue> subd = list.getList().subList(from, to);
-            for (BarleyValue value : subd) {
-                result.add(value);
-            }
+            LinkedList<BarleyValue> result = new LinkedList<>(subd);
             return new BarleyList(result);
         });
         shell.put("threads_count", args -> new BarleyNumber(Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size()));
@@ -277,7 +278,7 @@ public class Modules {
                 byte[] binary = SerializeUtils.serialize((Serializable) parsed);
                 try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".ast", false)) {
                     for (byte b : binary) {
-                        writer.append(String.valueOf(b) + " ");
+                        writer.append(String.valueOf(b)).append(" ");
                     }
                 }
                 return new BarleyAtom(AtomTable.put("ok"));
@@ -296,16 +297,14 @@ public class Modules {
                 for (String b : bs) {
                     bts.add(Byte.parseByte(b));
                 }
-                byte[] binary = toPrimitives(bts.toArray(new Byte[] {}));
-                List<AST> ast = (List<AST>) SerializeUtils.deserialize(binary);
+                byte[] binary = toPrimitives(bts.toArray(new Byte[]{}));
+                List<AST> ast = SerializeUtils.deserialize(binary);
                 System.out.println("after parsing");
                 for (AST node : ast) {
                     node.execute();
                 }
                 return new BarleyAtom(AtomTable.put("ok"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
             return new BarleyAtom(AtomTable.put("error"));
@@ -342,10 +341,21 @@ public class Modules {
             BarleyFunction fun = (BarleyFunction) args[0];
             BarleyFunction c = (BarleyFunction) args[1];
             try {
-                return fun.execute(new BarleyValue[]{});
+                return fun.execute();
             } catch (BarleyException ex) {
-                return c.execute(new BarleyValue[]{new BarleyAtom(ex.getType().toLowerCase(Locale.ROOT))});
+                return c.execute(new BarleyAtom(ex.getType().toLowerCase(Locale.ROOT)));
             }
+        });
+
+        shell.put("sleep", args -> {
+            Arguments.check(1, args.length);
+            long time = args[0].asInteger().longValue();
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
         });
 
         put("barley", shell);
@@ -446,19 +456,21 @@ public class Modules {
             LinkedList<BarleyValue> result = new LinkedList<>();
             String str = args[0].toString();
             switch (args.length) {
-                case 1:
+                case 1 -> {
                     String[] parts = str.split(" ");
                     for (String part : parts) {
                         result.add(new BarleyString(part));
                     }
                     return new BarleyList(result);
-                case 2:
+                }
+                case 2 -> {
                     String[] parts_ = str.split(args[1].toString());
                     for (String part : parts_) {
                         result.add(new BarleyString(part));
                     }
                     return new BarleyList(result);
-                default: throw new BarleyException("BadArg", "unexpected error was occurred");
+                }
+                default -> throw new BarleyException("BadArg", "unexpected error was occurred");
             }
         });
 
@@ -469,6 +481,17 @@ public class Modules {
             } catch (NumberFormatException ex) {
                 return new BarleyAtom(AtomTable.put("error"));
             }
+        });
+
+        string.put("join", args -> {
+            Arguments.check(2, args.length);
+            LinkedList<BarleyValue> strings = ((BarleyList) args[0]).getList();
+            ArrayList<String> strs = new ArrayList<>();
+            for (BarleyValue str : strings) {
+                strs.add(str.toString());
+            }
+            String delimiter = args[1].toString();
+            return new BarleyString(String.join(delimiter, strs));
         });
 
         put("string", string);
@@ -490,7 +513,8 @@ public class Modules {
         stack.put("is_empty", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as stack object");
             Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
             return new BarleyAtom(AtomTable.put(String.valueOf(st.isEmpty())));
         });
@@ -504,7 +528,8 @@ public class Modules {
         stack.put("peek", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as stack object");
             Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
             return st.peek();
         });
@@ -512,7 +537,8 @@ public class Modules {
         stack.put("stack_to_list", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as stack object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as stack object");
             Stack<BarleyValue> st = (Stack<BarleyValue>) ((BarleyReference) s).getRef();
             LinkedList<BarleyValue> result = new LinkedList<>();
             for (BarleyValue value : st) {
@@ -532,10 +558,6 @@ public class Modules {
             return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyNumber)));
         });
 
-        types.put("is_string", args -> {
-            Arguments.check(1, args.length);
-            return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyString)));
-        });
 
         types.put("is_atom", args -> {
             Arguments.check(1, args.length);
@@ -576,7 +598,8 @@ public class Modules {
         queue.put("in", args -> {
             Arguments.check(2, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as queue object");
             ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
             st.add(args[1]);
             return args[1];
@@ -585,7 +608,8 @@ public class Modules {
         queue.put("out", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as queue object");
             ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
             return st.remove();
         });
@@ -593,7 +617,8 @@ public class Modules {
         queue.put("peek", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as queue object");
             ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
             return st.peek();
         });
@@ -601,9 +626,10 @@ public class Modules {
         queue.put("q_to_list", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as queue object");
             ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
-            BarleyValue[] calls = st.toArray(new BarleyValue[] {});
+            BarleyValue[] calls = st.toArray(new BarleyValue[]{});
             LinkedList<BarleyValue> result = new LinkedList<>();
             for (BarleyValue call : calls) {
                 result.add(call);
@@ -614,7 +640,8 @@ public class Modules {
         queue.put("is_empty", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as queue object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as queue object");
             ConcurrentLinkedQueue<BarleyValue> st = (ConcurrentLinkedQueue<BarleyValue>) ((BarleyReference) s).getRef();
             return new BarleyAtom(String.valueOf(st.isEmpty()));
         });
@@ -633,7 +660,8 @@ public class Modules {
         m.put("start", args -> {
             Arguments.check(2, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as measurement object");
             TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
             st.start(args[1].toString());
             return new BarleyAtom("ok");
@@ -642,7 +670,8 @@ public class Modules {
         m.put("stop", args -> {
             Arguments.check(2, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as measurement object");
             TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
             st.stop(args[1].toString());
             return new BarleyAtom("ok");
@@ -651,7 +680,8 @@ public class Modules {
         m.put("pause", args -> {
             Arguments.check(2, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as measurement object");
             TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
             st.pause(args[1].toString());
             return new BarleyAtom("ok");
@@ -660,7 +690,8 @@ public class Modules {
         m.put("summary", args -> {
             Arguments.check(1, args.length);
             BarleyValue s = args[0];
-            if (!(s instanceof BarleyReference)) throw new BarleyException("BadArg", "expected reference as measurement object");
+            if (!(s instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected reference as measurement object");
             TimeMeasurement st = (TimeMeasurement) ((BarleyReference) s).getRef();
             System.out.println("======================");
             System.out.println(st.summary(TimeUnit.MILLISECONDS, true));
@@ -668,6 +699,69 @@ public class Modules {
         });
 
         put("measurement", m);
+    }
+
+    private static void initSignal() {
+        HashMap<String, Function> s = new HashMap<>();
+        s.put("create", args -> {
+            Arguments.check(0, args.length);
+            new File("tmp/").mkdir();
+            try (FileWriter writer = new FileWriter("tmp/signals.txt", false)) {
+                writer.append("");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        s.put("throw", args -> {
+            Arguments.check(2, args.length);
+            String type = args[0].toString();
+            String text = args[1].toString();
+            try (FileWriter writer = new FileWriter("tmp/signals.txt", false)) {
+                writer.append(type + " " + text);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        s.put("on_signal", args -> {
+            Arguments.check(1, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            try {
+                String[] messageParts = SourceLoader.readSource("tmp/signals.txt").split(" ");
+                if (List.of().isEmpty()) return new BarleyAtom("empty");
+                String type = messageParts[0];
+                String message = String.join(" ", List.of(messageParts).subList(1, messageParts.length));
+                fun.execute(new BarleyString(type), new BarleyString(message));
+                new FileWriter("tmp/signals.txt", false).append("").close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        s.put("on_named_signal", args -> {
+            Arguments.check(2, args.length);
+            String m = args[0].toString();
+            BarleyFunction fun = (BarleyFunction) args[1];
+            try {
+                String[] messageParts = SourceLoader.readSource("tmp/signals.txt").split(" ");
+                if (List.of(messageParts).isEmpty()) return new BarleyAtom("empty");
+                String type = messageParts[0];
+                if (m.equals(type));
+                else return new BarleyAtom("unmatch");
+                String message = String.join(" ", List.of(messageParts).subList(1, messageParts.length));
+                fun.execute(new BarleyString(type), new BarleyString(message));
+                new FileWriter("tmp/signals.txt", false).append("").close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        put("signal", s);
     }
 
     public static void init() {
@@ -680,12 +774,12 @@ public class Modules {
         initTypes();
         initQueue();
         initMeasurement();
+        initSignal();
     }
 
-    static byte[] toPrimitives(Byte[] oBytes)
-    {
+    static byte[] toPrimitives(Byte[] oBytes) {
         byte[] bytes = new byte[oBytes.length];
-        for(int i = 0; i < oBytes.length; i++){
+        for (int i = 0; i < oBytes.length; i++) {
             bytes[i] = oBytes[i];
         }
         return bytes;

@@ -1,7 +1,6 @@
 package com.barley.ast;
 
 import com.barley.parser.Parser;
-import com.barley.runtime.AtomTable;
 import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.UserFunction;

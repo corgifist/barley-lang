@@ -2,7 +2,6 @@ package com.barley.ast;
 
 import com.barley.patterns.*;
 import com.barley.runtime.BarleyList;
-import com.barley.runtime.BarleyReference;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Table;
 import com.barley.utils.AST;
@@ -30,7 +29,8 @@ public class BindAST implements AST, Serializable {
     private BarleyValue processPattern(Pattern pattern, AST r) {
         BarleyValue ast = r.execute();
         if (pattern instanceof ListPattern) {
-            if (!(ast instanceof BarleyList)) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+            if (!(ast instanceof BarleyList))
+                throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
             ListPattern p = (ListPattern) pattern;
             LinkedList<BarleyValue> list = ((BarleyList) ast).getList();
             LinkedList<Pattern> patterns = pattern(p);
@@ -42,14 +42,16 @@ public class BindAST implements AST, Serializable {
                     Table.set(c.getVariable(), right);
                 } else if (pattern1 instanceof ConstantPattern) {
                     BarleyValue l = ((ConstantPattern) pattern1).getConstant();
-                    if (right.equals(l));
+                    if (right.equals(l)) ;
                     else throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
                 } else if (pattern1 instanceof ListPattern) {
-                    if (!((right instanceof BarleyList))) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                    if (!((right instanceof BarleyList)))
+                        throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
                     processPattern(pattern1, new ConstantAST(right));
                 } else if (pattern1 instanceof ConsPattern) {
                     ConsPattern p1 = (ConsPattern) pattern1;
-                    if (!(right instanceof BarleyList)) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                    if (!(right instanceof BarleyList))
+                        throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
                     Table.set(p1.getLeft(), head((BarleyList) right));
                     Table.set(p1.getRight(), tail((BarleyList) right));
                 }
@@ -61,11 +63,12 @@ public class BindAST implements AST, Serializable {
             Table.set(c.getVariable(), ast);
         } else if (pattern instanceof ConstantPattern) {
             BarleyValue l = ((ConstantPattern) pattern).getConstant();
-            if (ast.equals(l));
+            if (ast.equals(l)) ;
             else throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
         } else if (pattern instanceof ConsPattern) {
             ConsPattern p = (ConsPattern) pattern;
-            if (!(ast instanceof BarleyList)) throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+            if (!(ast instanceof BarleyList))
+                throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
             Table.set(p.getLeft(), head((BarleyList) ast));
             Table.set(p.getRight(), tail((BarleyList) ast));
         }

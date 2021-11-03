@@ -5,7 +5,6 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
-import java.lang.reflect.AnnotatedType;
 
 public class UnaryAST implements AST, Serializable {
 
@@ -24,10 +23,12 @@ public class UnaryAST implements AST, Serializable {
         double number1 = val1.asFloat().doubleValue();
 
         switch (op) {
-            case '-': return new BarleyNumber(-number1);
-            case 'n': return not(val1);
+            case '-':
+                return new BarleyNumber(-number1);
+            case 'n':
+                return not(val1);
             default:
-               badArith();
+                badArith();
         }
         return null;
     }
@@ -44,7 +45,7 @@ public class UnaryAST implements AST, Serializable {
     }
 
     public void badArith() {
-        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    "  + this);
+        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    " + this);
     }
 
     @Override

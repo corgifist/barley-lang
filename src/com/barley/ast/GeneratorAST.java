@@ -6,7 +6,6 @@ import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
-import com.barley.utils.GeneratorSkip;
 
 import java.io.Serializable;
 import java.util.LinkedList;

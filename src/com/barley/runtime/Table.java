@@ -8,32 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Table {
 
     private static final Object lock = new Object();
-
-    public static class Scope {
-        final Scope parent;
-        final Map<String, BarleyValue> variables;
-
-        Scope() {
-            this(null);
-        }
-
-        Scope(Scope parent) {
-            this.parent = parent;
-            variables = new ConcurrentHashMap<>();
-        }
-    }
-
-    private static class ScopeFindData {
-        boolean isFound;
-        Scope scope;
-    }
-
     public static volatile Scope scope;
+
     static {
         Table.clear();
     }
 
-    private Table() { }
+    private Table() {
+    }
 
     public static Map<String, BarleyValue> variables() {
         return scope.variables;
@@ -117,5 +99,24 @@ public final class Table {
         result.isFound = false;
         result.scope = scope;
         return result;
+    }
+
+    public static class Scope {
+        final Scope parent;
+        final Map<String, BarleyValue> variables;
+
+        Scope() {
+            this(null);
+        }
+
+        Scope(Scope parent) {
+            this.parent = parent;
+            variables = new ConcurrentHashMap<>();
+        }
+    }
+
+    private static class ScopeFindData {
+        boolean isFound;
+        Scope scope;
     }
 }

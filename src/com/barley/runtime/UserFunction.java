@@ -4,10 +4,8 @@ import com.barley.ast.*;
 import com.barley.patterns.*;
 import com.barley.utils.*;
 
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +30,7 @@ public class UserFunction implements Function, Serializable {
                 ArrayList<Pattern> patterns = patterns(clause.getArgs());
                 if (patterns.isEmpty() && args.length == 0) {
                     if (clause.getGuard() != null) {
-                        if ((clause.getGuard().execute()).toString().equals("true"));
+                        if ((clause.getGuard().execute()).toString().equals("true")) ;
                         else continue;
                     }
                     toExecute = clause.getResult();
@@ -49,7 +47,7 @@ public class UserFunction implements Function, Serializable {
                     } else if (pattern instanceof ConstantPattern) {
                         ConstantPattern p = (ConstantPattern) pattern;
                         boolean isEquals = p.getConstant().equals(arg);
-                        if (isEquals);
+                        if (isEquals) ;
                         else {
                             br = true;
                             break;
@@ -72,7 +70,7 @@ public class UserFunction implements Function, Serializable {
                     }
                 }
                 if (clause.getGuard() != null) {
-                    if ((clause.getGuard().execute()).toString().equals("true"));
+                    if ((clause.getGuard().execute()).toString().equals("true")) ;
                     else br = true;
                 }
 

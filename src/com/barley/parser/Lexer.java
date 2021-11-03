@@ -13,6 +13,8 @@ public final class Lexer {
 
     private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.|";
     private static final Map<String, TokenType> OPERATORS;
+    private static final Map<String, TokenType> KEYWORDS;
+
     static {
         OPERATORS = new HashMap<>();
         OPERATORS.put("+", TokenType.PLUS);
@@ -44,7 +46,6 @@ public final class Lexer {
         OPERATORS.put("::", TokenType.CC);
     }
 
-    private static final Map<String, TokenType> KEYWORDS;
     static {
         KEYWORDS = new HashMap<>();
         KEYWORDS.put("module", TokenType.MODULE);
@@ -63,10 +64,8 @@ public final class Lexer {
 
     private final String input;
     private final int length;
-    private int line = 1;
-
     private final List<Token> tokens;
-
+    private int line = 1;
     private int pos;
 
     public Lexer(String input) {
@@ -74,6 +73,20 @@ public final class Lexer {
         length = input.length();
 
         tokens = new ArrayList<>();
+    }
+
+    private static boolean isHexNumber(char current) {
+        return "abcdef".indexOf(Character.toLowerCase(current)) != -1;
+    }
+
+    private static boolean isStringLowerCase(String str) {
+        char[] charArray = str.toCharArray();
+
+        for (int i = 0; i < charArray.length; i++) {
+            if (!Character.isLowerCase(charArray[i]) && !(charArray[i] == '_'))
+                return false;
+        }
+        return true;
     }
 
     public List<Token> tokenize() {
@@ -112,13 +125,34 @@ public final class Lexer {
             if (current == '\\') {
                 current = next();
                 switch (current) {
-                    case '"': current = next(); buffer.append('"'); continue;
-                    case '0': current = next(); buffer.append('\0'); continue;
-                    case 'b': current = next(); buffer.append('\b'); continue;
-                    case 'f': current = next(); buffer.append('\f'); continue;
-                    case 'n': current = next(); buffer.append('\n'); continue;
-                    case 'r': current = next(); buffer.append('\r'); continue;
-                    case 't': current = next(); buffer.append('\t'); continue;
+                    case '"':
+                        current = next();
+                        buffer.append('"');
+                        continue;
+                    case '0':
+                        current = next();
+                        buffer.append('\0');
+                        continue;
+                    case 'b':
+                        current = next();
+                        buffer.append('\b');
+                        continue;
+                    case 'f':
+                        current = next();
+                        buffer.append('\f');
+                        continue;
+                    case 'n':
+                        current = next();
+                        buffer.append('\n');
+                        continue;
+                    case 'r':
+                        current = next();
+                        buffer.append('\r');
+                        continue;
+                    case 't':
+                        current = next();
+                        buffer.append('\t');
+                        continue;
                     case 'u': // http://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.3
                         int rollbackPosition = pos;
                         while (current == 'u') current = next();
@@ -144,7 +178,8 @@ public final class Lexer {
                 continue;
             }
             if (current == '"') break;
-            if (current == '\0') throw new BarleyException("BadCompiler", "Reached end of file while parsing text string");
+            if (current == '\0')
+                throw new BarleyException("BadCompiler", "Reached end of file while parsing text string");
             buffer.append(current);
             current = next();
         }
@@ -189,11 +224,6 @@ public final class Lexer {
         addToken(TokenType.NUMBER, buffer.toString());
     }
 
-
-    private static boolean isHexNumber(char current) {
-        return "abcdef".indexOf(Character.toLowerCase(current)) != -1;
-    }
-
     private void tokenizeOperator() {
         char current = peek(0);
         final StringBuilder buffer = new StringBuilder();
@@ -229,15 +259,5 @@ public final class Lexer {
 
     private void addToken(TokenType type, String text) {
         tokens.add(new Token(type, text, line));
-    }
-
-    private static boolean isStringLowerCase(String str){
-        char[] charArray = str.toCharArray();
-
-        for(int i=0; i < charArray.length; i++){
-            if( !Character.isLowerCase(charArray[i]) && !(charArray[i] == '_'))
-                return false;
-        }
-        return true;
     }
 }

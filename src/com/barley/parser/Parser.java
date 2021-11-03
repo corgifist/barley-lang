@@ -13,12 +13,9 @@ import java.util.List;
 public final class Parser implements Serializable {
 
     private static final Token EOF = new Token(TokenType.EOF, "", -1);
-
-    public HashMap<String, Function> methods;
-
     private final List<Token> tokens;
     private final int size;
-
+    public HashMap<String, Function> methods;
     private int pos;
 
     private String module, doc;
@@ -256,7 +253,7 @@ public final class Parser implements Serializable {
         AST result = remote();
 
         while (true) {
-            if (lookMatch(0,TokenType.LPAREN)) {
+            if (lookMatch(0, TokenType.LPAREN)) {
                 ArrayList<AST> args = arguments();
                 result = new CallAST(result, args);
             }
@@ -364,7 +361,7 @@ public final class Parser implements Serializable {
                 pattern = new CaseAST.ConstantPattern(new BarleyAtom(addAtom(current.getText())));
             } else if (match(TokenType.LBRACKET)) {
                 // case [x :: xs]:
-                final  CaseAST.ListPattern listPattern = new CaseAST.ListPattern();
+                final CaseAST.ListPattern listPattern = new CaseAST.ListPattern();
                 while (!match(TokenType.RBRACKET)) {
                     listPattern.add(consume(TokenType.VAR, "expected var name in list pattern at line " + line()).getText());
                     match(TokenType.COMMA);
@@ -398,7 +395,8 @@ public final class Parser implements Serializable {
             pattern.result = block();
             match(TokenType.DOT);
             patterns.add(pattern);
-        };
+        }
+        ;
 
         return new CaseAST(expression, patterns);
     }

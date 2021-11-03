@@ -1,0 +1,31 @@
+-module(test).
+
+global ID = 0.
+
+receiver() ->
+    signal:on_named_signal("message", def (Type, Msg) -> write_msg(Msg). end),
+    barley:sleep(1000),
+    receiver().
+
+sender() ->
+    Prompt = input(),
+    signal:throw("message", Prompt + " " + ID),
+    sender().
+
+write_msg(Message) ->
+    Parts = string:split(Message),
+    SenderID = lists:last(Parts),
+    Text = string:join(barley:sublist(Parts, 0, barley:length(Parts) - 1), " "),
+    io:fwriteln("%s >>> %s", SenderID, Text).
+
+input() ->
+    io:write(">>> "),
+    io:readline().
+
+control(X) when X == 0 -> receiver().
+control(X) -> sender().
+
+main() ->
+   io:fwriteln("Enter ID: "),
+   ID = string:as_number(input()),
+   control(ID).

@@ -1,6 +1,9 @@
 package com.barley.ast;
 
-import com.barley.runtime.*;
+import com.barley.runtime.BarleyList;
+import com.barley.runtime.BarleyNumber;
+import com.barley.runtime.BarleyValue;
+import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
@@ -11,7 +14,7 @@ import java.util.List;
 
 public final class CaseAST implements AST, Serializable {
 
-    public final AST  expression;
+    public final AST expression;
     public final List<Pattern> patterns;
 
     public CaseAST(AST expression, List<Pattern> patterns) {
@@ -78,7 +81,7 @@ public final class CaseAST implements AST, Serializable {
         final int size = array.getList().size();
         for (int i = 0; i < size; i++) {
             final AST expr = p.values.get(i);
-            if ( (expr != TuplePattern.ANY) && (expr.execute().equals(expr)) ) {
+            if ((expr != TuplePattern.ANY) && (expr.execute().equals(expr))) {
                 return false;
             }
         }
@@ -256,6 +259,18 @@ public final class CaseAST implements AST, Serializable {
     }
 
     public static class TuplePattern extends Pattern {
+        private static final AST ANY = new AST() {
+            @Override
+            public BarleyValue execute() {
+                return new BarleyNumber(1);
+            }
+
+
+            @Override
+            public String toString() {
+                return "_".concat(super.toString());
+            }
+        };
         public List<AST> values;
 
         public TuplePattern() {
@@ -288,18 +303,5 @@ public final class CaseAST implements AST, Serializable {
             }
             return "()".concat(super.toString());
         }
-
-        private static final AST ANY = new AST() {
-            @Override
-            public BarleyValue execute() {
-                return new BarleyNumber(1);
-            }
-
-
-            @Override
-            public String toString() {
-                return "_".concat(super.toString());
-            }
-        };
     }
 }

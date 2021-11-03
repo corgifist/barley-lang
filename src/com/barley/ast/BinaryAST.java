@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 
-public class BinaryAST implements AST, Serializable  {
+public class BinaryAST implements AST, Serializable {
 
     public final AST expr1, expr2;
     private char op;
@@ -36,7 +36,8 @@ public class BinaryAST implements AST, Serializable  {
                     return new BarleyList(result);
                 case '=':
                     return new BarleyAtom(addAtom(String.valueOf(list1.equals(val1))));
-                default: badArith(val1, val2);
+                default:
+                    badArith(val1, val2);
             }
         }
 
@@ -44,9 +45,12 @@ public class BinaryAST implements AST, Serializable  {
             String str1 = val1.toString();
             String str2 = val2.toString();
             switch (op) {
-                case '+': return new BarleyString(str1 + str2);
-                case '=': return new BarleyAtom(addAtom(String.valueOf(str1.equals(str2))));
-                default: badArith(val1, val2);
+                case '+':
+                    return new BarleyString(str1 + str2);
+                case '=':
+                    return new BarleyAtom(addAtom(String.valueOf(str1.equals(str2))));
+                default:
+                    badArith(val1, val2);
             }
         }
 
@@ -56,19 +60,30 @@ public class BinaryAST implements AST, Serializable  {
         double number2 = val2.asFloat().doubleValue();
 
         switch (op) {
-            case '-': return new BarleyNumber(decimal1.subtract(decimal2));
-            case '*': return new BarleyNumber(decimal1.multiply(decimal2));
-            case '/': return new BarleyNumber(decimal1.divide(decimal2));
-            case '+': return new BarleyNumber(decimal1.add(decimal2));
-            case '>': return new BarleyAtom(addAtom(String.valueOf(number1 > number2)));
-            case '<': return new BarleyAtom(addAtom(String.valueOf(number1 < number2)));
-            case 't': return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
-            case 'g': return new BarleyAtom(addAtom(String.valueOf(number1 >= number2)));
-            case '=': return new BarleyAtom(addAtom(String.valueOf(number1 == number2)));
-            case 'a': return new BarleyNumber(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
-            case 'o': return new BarleyNumber(addAtom(String.valueOf(istrue(val1) || istrue(val2))));
+            case '-':
+                return new BarleyNumber(decimal1.subtract(decimal2));
+            case '*':
+                return new BarleyNumber(decimal1.multiply(decimal2));
+            case '/':
+                return new BarleyNumber(decimal1.divide(decimal2));
+            case '+':
+                return new BarleyNumber(decimal1.add(decimal2));
+            case '>':
+                return new BarleyAtom(addAtom(String.valueOf(number1 > number2)));
+            case '<':
+                return new BarleyAtom(addAtom(String.valueOf(number1 < number2)));
+            case 't':
+                return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
+            case 'g':
+                return new BarleyAtom(addAtom(String.valueOf(number1 >= number2)));
+            case '=':
+                return new BarleyAtom(addAtom(String.valueOf(number1 == number2)));
+            case 'a':
+                return new BarleyNumber(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
+            case 'o':
+                return new BarleyNumber(addAtom(String.valueOf(istrue(val1) || istrue(val2))));
             default:
-               badArith(val1, val2);
+                badArith(val1, val2);
         }
         return null;
     }
@@ -78,7 +93,7 @@ public class BinaryAST implements AST, Serializable  {
     }
 
     public void badArith(BarleyValue val1, BarleyValue val2) {
-        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    "  + String.format("%s %s %s", val1, op, val2));
+        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    " + String.format("%s %s %s", val1, op, val2));
     }
 
     @Override
