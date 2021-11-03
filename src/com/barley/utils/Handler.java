@@ -120,7 +120,8 @@ public class Handler {
                 "examples/dogs.barley",
                 "examples/isolation.barley",
                 "examples/queue.barley",
-                "examples/measurement.barley"
+                "examples/measurement.barley",
+                "examples/fibonacci.barley"
         };
 
         measurement.start("Tests time");
