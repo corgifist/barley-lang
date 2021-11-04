@@ -209,3 +209,19 @@ Conversion usually takes 0-10 milliseconds for a file of 33 kilobytes. And execu
 Use `barley:compile(Path)` to compile code to ast. The AST file will be created at the path you specified.
 
 Use `barley:ast_from_bianry(Path)` to transform byte-ast to normal ast and run it!
+
+### Signals
+
+Two or more Barley instances can talk to each other by messages.
+
+This messages is named singnals!
+
+Before you will throw && catch messages you need to `signal:create()`
+
+To throw message you need to use `signal:throw(Type, Message)`
+
+To catch message you need to use `signal:on_signal(def (Type, Msg) -> Body. end)`
+
+To catch specific message you need to use `signal:on_named_signal(Type, def(Type, Msg) -> Body. end)`
+
+See `examples/chat.barley` for more information
