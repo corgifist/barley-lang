@@ -140,4 +140,12 @@ public class Handler {
         System.out.println("======================");
         System.out.println(measurement.summary(TimeUnit.MILLISECONDS, true));
     }
+
+    public static void calculator() {
+        Handler.file("calculator/lexer.barley", true);
+        Handler.file("calculator/parser.barley", true);
+        Handler.file("calculator/interpreter.barley", true);
+        Handler.file("calculator/program.barley", true);
+        Handler.handle("test:main().", true, false);
+    }
 }

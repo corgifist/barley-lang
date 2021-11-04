@@ -1,0 +1,61 @@
+-module(lexer).
+
+global Pos = 0.
+global Line = 1.
+global EOFToken = [eof, -1, ""].
+global Operators = bts:new().
+
+peek(Parts, RelativePos) ->
+    FinalPosition = RelativePos + Pos,
+    lists:nth(Parts, FinalPosition).
+
+next(Parts) ->
+    barley:define("Pos", Pos + 1),
+    peek(Parts, 0).
+
+operators() ->
+    bts:insert(Operators, "+", plus),
+    bts:insert(Operators, "-", minus),
+    bts:insert(Operators, "*", star),
+    bts:insert(Operators, "/", slash),
+    bts:insert(Operators, "(", lparen),
+    bts:insert(Operators, ")", rparen).
+
+illegal_character(S, L) -> barley:throw("illegal char '" + S + "'").
+
+lex(String) -> lex(String, 1).
+
+lex(String, Line) ->
+    Pos = 0,
+    operators(),
+    process_parts(string:split(String, "")).
+
+process_parts(Parts) ->
+    Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_symbol(Parts, First)]. end, Parts, []),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),
+    WithoutEOF = WithoutEOF + [EOFToken].
+
+process_symbol(Parts, Symbol) when Symbol == "\n" -> Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, ""].
+
+process_symbol(Parts, Symbol) when Symbol == end_of_list -> EOFToken.
+
+process_symbol(Parts, Symbol) when bts:member(Operators, Symbol) ->
+    next(Parts),
+    operator(Symbol).
+
+process_symbol(Parts, Symbol) when Symbol == " " -> next(Parts), [skip, Line, ""].
+
+process_symbol(Parts, Symbol) when not (string:as_number(Symbol) == error) ->
+    [number, Line, catch_while_numbers(Parts)].
+
+process_symbol(Parts, Symbol) -> illegal_character(Symbol, Line).
+
+operator(Symbol) -> [bts:lookup(Operators, Symbol), Line, Symbol].
+
+catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
+catch_while_number(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_numbers(Parts, OldPos, NewPos) when not (string:as_number(lists:nth(Parts, NewPos)) == error) ->
+    catch_while_numbers(Parts, OldPos, NewPos + 1).
+catch_while_numbers(Parts, OldPos, NewPos) -> Pos = NewPos, string:join(barley:sublist(Parts, OldPos, NewPos), "").

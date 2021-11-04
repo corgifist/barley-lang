@@ -75,9 +75,9 @@ public class BinaryAST implements AST, Serializable {
             case '=':
                 return new BarleyAtom(addAtom(String.valueOf(val1.equals(val2))));
             case 'a':
-                return new BarleyNumber(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
+                return new BarleyAtom(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
             case 'o':
-                return new BarleyNumber(addAtom(String.valueOf(istrue(val1) || istrue(val2))));
+                return new BarleyAtom(addAtom(String.valueOf(istrue(val1) || istrue(val2))));
             default:
                 badArith(val1, val2);
         }

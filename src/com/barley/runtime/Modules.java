@@ -248,7 +248,7 @@ public class Modules {
             try {
                 return list.getList().get(nth);
             } catch (IndexOutOfBoundsException ex) {
-                return list.getList().get(list.getList().size() - 1);
+                return new BarleyAtom("end_of_list");
             }
         });
         shell.put("sublist", args -> {

@@ -1,0 +1,9 @@
+-module(interpreter).
+
+eval([value, String]) -> string:as_number(String).
+eval([binary_op, "+", Left, Right]) -> eval(Left) + eval(Right).
+eval([binary_op, "-", Left, Right]) -> eval(Left) - eval(Right).
+eval([binary_op, "*", Left, Right]) -> eval(Left) * eval(Right).
+eval([binary_op, "/", Left, Right]) -> eval(Left) / eval(Right).
+eval([unary_op, Op, Left]) -> Value = eval(Left), -Value.
+eval(Expr) -> Expr.
