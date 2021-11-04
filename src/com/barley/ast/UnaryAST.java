@@ -20,11 +20,9 @@ public class UnaryAST implements AST, Serializable {
     public BarleyValue execute() {
         BarleyValue val1 = expr1.execute();
 
-        double number1 = val1.asFloat().doubleValue();
-
         switch (op) {
             case '-':
-                return new BarleyNumber(-number1);
+                return new BarleyNumber(-val1.asFloat().doubleValue());
             case 'n':
                 return not(val1);
             default:
@@ -37,9 +35,11 @@ public class UnaryAST implements AST, Serializable {
         if (value instanceof BarleyNumber) {
             return new BarleyAtom(AtomTable.put(String.valueOf(value.asInteger().intValue() != 0)));
         } else if (value instanceof BarleyString) {
-            return new BarleyAtom(AtomTable.put(String.valueOf(value.toString().isEmpty())));
+            return new BarleyAtom(AtomTable.put(String.valueOf(!(value.toString().isEmpty()))));
         } else if (value instanceof BarleyList) {
             return new BarleyAtom(AtomTable.put(String.valueOf(value.toString().equals("[]"))));
+        } else if (value instanceof BarleyAtom) {
+            return new BarleyAtom(String.valueOf(value.toString().equals("false")));
         } else badArith();
         return null;
     }

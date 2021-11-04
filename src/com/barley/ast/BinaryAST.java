@@ -23,6 +23,7 @@ public class BinaryAST implements AST, Serializable {
     public BarleyValue execute() {
         BarleyValue val1 = expr1.execute();
         BarleyValue val2 = expr2.execute();
+
         if (val1 instanceof BarleyList) {
             BarleyList list1 = (BarleyList) val1;
             switch (op) {
@@ -54,30 +55,25 @@ public class BinaryAST implements AST, Serializable {
             }
         }
 
-        BigDecimal decimal1 = val1.asFloat();
-        BigDecimal decimal2 = val2.asFloat();
-        double number1 = val1.asFloat().doubleValue();
-        double number2 = val2.asFloat().doubleValue();
-
         switch (op) {
             case '-':
-                return new BarleyNumber(decimal1.subtract(decimal2));
+                return new BarleyNumber(val1.asFloat().subtract(val2.asFloat()));
             case '*':
-                return new BarleyNumber(decimal1.multiply(decimal2));
+                return new BarleyNumber(val1.asFloat().multiply(val2.asFloat()));
             case '/':
-                return new BarleyNumber(decimal1.divide(decimal2));
+                return new BarleyNumber(val1.asFloat().divide(val2.asFloat()));
             case '+':
-                return new BarleyNumber(decimal1.add(decimal2));
+                return new BarleyNumber(val1.asFloat().add(val2.asFloat()));
             case '>':
-                return new BarleyAtom(addAtom(String.valueOf(number1 > number2)));
+                return new BarleyAtom(addAtom(String.valueOf(val1.asFloat().doubleValue() > val2.asFloat().doubleValue())));
             case '<':
-                return new BarleyAtom(addAtom(String.valueOf(number1 < number2)));
+                return new BarleyAtom(addAtom(String.valueOf(val1.asFloat().doubleValue() < val2.asFloat().doubleValue())));
             case 't':
-                return new BarleyAtom(addAtom(String.valueOf(number1 <= number2)));
+                return new BarleyAtom(addAtom(String.valueOf(val1.asFloat().doubleValue() <= val2.asFloat().doubleValue())));
             case 'g':
-                return new BarleyAtom(addAtom(String.valueOf(number1 >= number2)));
+                return new BarleyAtom(addAtom(String.valueOf(val1.asFloat().doubleValue() >= val2.asFloat().doubleValue())));
             case '=':
-                return new BarleyAtom(addAtom(String.valueOf(number1 == number2)));
+                return new BarleyAtom(addAtom(String.valueOf(val1.equals(val2))));
             case 'a':
                 return new BarleyNumber(addAtom(String.valueOf(istrue(val1) && istrue(val2))));
             case 'o':

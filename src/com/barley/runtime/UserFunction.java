@@ -42,7 +42,7 @@ public class UserFunction implements Function, Serializable {
                     BarleyValue arg = args[k];
                     if (pattern instanceof VariablePattern) {
                         VariablePattern p = (VariablePattern) pattern;
-                        Table.set(p.getVariable(), arg);
+                        Table.define(p.getVariable(), arg);
                         toDelete.add(p.getVariable());
                     } else if (pattern instanceof ConstantPattern) {
                         ConstantPattern p = (ConstantPattern) pattern;
@@ -81,6 +81,7 @@ public class UserFunction implements Function, Serializable {
                 toExecute = clause.getResult();
                 break;
             }
+            if (toExecute == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + List.of(args));
             BarleyValue result = toExecute.execute();
             Table.pop();
             return result;

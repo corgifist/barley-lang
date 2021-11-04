@@ -245,7 +245,11 @@ public class Modules {
             Arguments.check(2, args.length);
             BarleyList list = (BarleyList) args[0];
             int nth = args[1].asInteger().intValue();
-            return list.getList().get(nth);
+            try {
+                return list.getList().get(nth);
+            } catch (IndexOutOfBoundsException ex) {
+                return list.getList().get(list.getList().size() - 1);
+            }
         });
         shell.put("sublist", args -> {
             BarleyList list = (BarleyList) args[0];
@@ -356,6 +360,16 @@ public class Modules {
                 e.printStackTrace();
             }
             return new BarleyAtom("ok");
+        });
+
+        shell.put("define", args -> {
+            Arguments.check(2, args.length);
+            String var = args[0].toString();
+            BarleyValue value = args[1];
+            Table.set(var, value);
+            Table.define(var, value);
+            Table.variables().put(var, value);
+            return value;
         });
 
         put("barley", shell);
