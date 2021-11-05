@@ -918,11 +918,47 @@ public class Modules {
                 failureDescription = "";
             } catch (BUnitAssertionException oae) {
                 isSuccessfull = false;
-                failureDescription = oae.getMessage();
+                failureDescription = oae.getText();
             }
             final long elapsedTime = System.nanoTime() - startTime;
             return new TestInfo(name, isSuccessfull, failureDescription, elapsedTime / 1000);
         }
+    }
+
+    private static void initFile() {
+        HashMap<String, Function> file = new HashMap<>();
+
+        file.put("read", args -> {
+            Arguments.check(1, args.length);
+            try {
+                return new BarleyString(SourceLoader.readSource(args[0].toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        file.put("write", args -> {
+            Arguments.check(2, args.length);
+            try (FileWriter writer = new FileWriter(args[0].toString(), false)) {
+                writer.append(args[1].toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        file.put("append", args -> {
+            Arguments.check(2, args.length);
+            try (FileWriter writer = new FileWriter(args[0].toString(), true)) {
+                writer.append(args[1].toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        put("file", file);
     }
 
     public static void init() {
@@ -938,6 +974,7 @@ public class Modules {
         initSignal();
         initCode();
         initBarleyUnit();
+        initFile();
     }
 
     private static String microsToSeconds(long micros) {

@@ -1,6 +1,6 @@
 -module(test).
 
 main() ->
-    IoAtom = io,
-    FwritelnAtom = fwriteln,
-    IoAtom:FwritelnAtom("Yraa").
+    Content = file:read("tmp/signals.txt"),
+    io:fwriteln(Content),
+    file:write("tmp/signals.txt", "message 15 1").
