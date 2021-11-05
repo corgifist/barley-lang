@@ -1,0 +1,10 @@
+-module(test).
+
+main() ->
+    Methods = bts:new(),
+    bts:insert(Methods, "sum", def (A, B) -> A + B. end),
+    Binary = code:load_bts(Methods),
+    io:fwriteln(Binary),
+    code:load_binary("loaded", Binary),
+    io:fwriteln(loaded:sum(5, 1)),
+    io:fwriteln(code:modules()).
