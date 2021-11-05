@@ -9,7 +9,7 @@ public class Main {
         Modules.init();
         Handler.loadCore();
         //Handler.tests();
-        Handler.calculator();
-        Handler.console();
+        Handler.entry("program.barley");
+        //Handler.console();
     }
 }

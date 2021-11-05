@@ -50,6 +50,11 @@ public class Handler {
         Handler.handle(input, isExpr, false);
     }
 
+    public static void entry(String input) {
+        Handler.file(input, false);
+        handle("test:main().", true);
+    }
+
     public static List<AST> parseAST(String input) {
         Lexer lexer = new Lexer(input);
         List<Token> tokens = lexer.tokenize();

@@ -778,6 +778,71 @@ public class Modules {
         put("signal", s);
     }
 
+    private static void initCode() {
+        HashMap<String, Function> code = new HashMap<>();
+
+        code.put("load_bts", args -> {
+            Arguments.check(1, args.length);
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            try {
+                BarleyReference ref = (BarleyReference) args[0];
+                HashMap<BarleyValue, BarleyValue> methods = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+                HashMap<String, BarleyFunction> ms = new HashMap<>();
+                for (Map.Entry<BarleyValue, BarleyValue> entry : methods.entrySet()) {
+                    ms.put(entry.getKey().toString(), (BarleyFunction) entry.getValue());
+                }
+                byte[] bytes = SerializeUtils.serialize(ms);
+                LinkedList<BarleyValue> bs = new LinkedList<>();
+                for (byte b : bytes) {
+                    bs.add(new BarleyNumber(b));
+                }
+                return new BarleyList(bs);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        code.put("loaded", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(String.valueOf(modules.containsKey(args[0].toString())));
+        });
+
+        code.put("modules", args -> {
+            Arguments.check(0, args.length);
+            LinkedList<BarleyValue> strings = new LinkedList<>();
+            Set<String> names = modules.keySet();
+            for (String key : names) {
+                strings.add(new BarleyString(key));
+            }
+            return new BarleyList(strings);
+        });
+
+        code.put("load_binary", args -> {
+            Arguments.check(2, args.length);
+            try {
+                String module = args[0].toString();
+                LinkedList<BarleyValue> b = ((BarleyList) args[1]).getList();
+                byte[] bytes = new byte[b.size()];
+                for (int i = 0; i < b.size(); i++) {
+                    bytes[i] = b.get(i).asInteger().byteValue();
+                }
+                HashMap<String, BarleyFunction> methods = SerializeUtils.deserialize(bytes);
+                HashMap<String, Function> funs = new HashMap<>();
+                for (Map.Entry<String, BarleyFunction> entry : methods.entrySet()) {
+                    funs.put(entry.getKey(), entry.getValue());
+                }
+                put(module, funs);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        put("code", code);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -789,6 +854,7 @@ public class Modules {
         initQueue();
         initMeasurement();
         initSignal();
+        initCode();
     }
 
     static byte[] toPrimitives(Byte[] oBytes) {
