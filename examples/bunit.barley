@@ -1,0 +1,11 @@
+-module(test).
+
+test_equals() ->
+    b_unit:assert_equals(5, 5).
+
+test_error() ->
+    b_unit:assert_equals(5, 4),
+    b_unit:assert_equals(5, 1).
+
+main() ->
+    io:fwriteln(b_unit:run("test")).

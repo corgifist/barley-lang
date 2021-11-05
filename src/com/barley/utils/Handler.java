@@ -128,7 +128,9 @@ public class Handler {
                 "examples/isolation.barley",
                 "examples/queue.barley",
                 "examples/measurement.barley",
-                "examples/fibonacci.barley"
+                "examples/fibonacci.barley",
+                "examples/bunit.barley",
+                "examples/code.barley"
         };
 
         measurement.start("Tests time");

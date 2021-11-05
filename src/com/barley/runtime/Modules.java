@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Modules {
 
@@ -508,6 +510,11 @@ public class Modules {
             return new BarleyString(String.join(delimiter, strs));
         });
 
+        string.put("charAt", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyString(String.valueOf(args[0].toString().charAt(args[1].asInteger().intValue())));
+        });
+
         put("string", string);
     }
 
@@ -843,6 +850,81 @@ public class Modules {
         put("code", code);
     }
 
+    private static void initBarleyUnit() {
+        HashMap<String, Function> unit = new HashMap<>();
+
+        unit.put("assert_equals", args -> {
+            Arguments.check(2, args.length);
+            if (args[0].equals(args[1])) return new BarleyAtom("ok");
+            throw new BUnitAssertionException("values are not equals: "
+                    + "1: " + args[0] + ", 2: " + args[1]);
+        });
+        unit.put("assert_not_equals", args -> {
+            Arguments.check(2, args.length);
+            if ((!args[0].equals(args[1]))) return new BarleyAtom("ok");
+            throw new BUnitAssertionException("values are not equals: "
+                    + "1: " + args[0] + ", 2: " + args[1]);
+        });
+        unit.put("assert_true", args -> {
+            Arguments.check(2, args.length);
+            if (args[0].toString().equals("true")) return new BarleyAtom("ok");
+            throw new BUnitAssertionException("values are not equals: "
+                    + "1: " + args[0] + ", 2: " + args[1]);
+        });
+        unit.put("assert_false", args -> {
+            Arguments.check(2, args.length);
+            if (args[0].toString().equals("false")) return new BarleyAtom("ok");
+            throw new BUnitAssertionException("values are not equals: "
+                    + "1: " + args[0] + ", 2: " + args[1]);
+        });
+        unit.put("run", new runTests());
+
+        put("b_unit", unit);
+    }
+
+    private static class runTests implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            HashMap<String, Function> methods = modules.get(args[0].toString());
+            List<TestInfo> tests = methods.entrySet().stream()
+                    .filter(e -> e.getKey().toLowerCase().startsWith("test"))
+                    .map(e -> runTest(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+
+            int failures = 0;
+            long summaryTime = 0;
+            final StringBuilder result = new StringBuilder();
+            for (TestInfo test : tests) {
+                if (!test.isPassed) failures++;
+                summaryTime += test.elapsedTimeInMicros;
+                result.append("\n");
+                result.append(test.info());
+            }
+            result.append("\n");
+            result.append(String.format("Tests run: %d, Failures: %d, Time elapsed: %s",
+                    tests.size(), failures,
+                    microsToSeconds(summaryTime)));
+            return new BarleyString(result.toString());
+        }
+
+        private TestInfo runTest(String name, Function f) {
+            final long startTime = System.nanoTime();
+            boolean isSuccessfull;
+            String failureDescription;
+            try {
+                f.execute();
+                isSuccessfull = true;
+                failureDescription = "";
+            } catch (BUnitAssertionException oae) {
+                isSuccessfull = false;
+                failureDescription = oae.getMessage();
+            }
+            final long elapsedTime = System.nanoTime() - startTime;
+            return new TestInfo(name, isSuccessfull, failureDescription, elapsedTime / 1000);
+        }
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -855,6 +937,11 @@ public class Modules {
         initMeasurement();
         initSignal();
         initCode();
+        initBarleyUnit();
+    }
+
+    private static String microsToSeconds(long micros) {
+        return new DecimalFormat("#0.0000").format(micros / 1000d / 1000d) + " sec";
     }
 
     static byte[] toPrimitives(Byte[] oBytes) {
@@ -881,4 +968,33 @@ public class Modules {
         return modules.containsKey(name);
     }
 
+    private static class BUnitAssertionException extends BarleyException {
+
+        public BUnitAssertionException(String message) {
+            super("BadTest", message);
+        }
+    }
+
+    private static class TestInfo {
+        String name;
+        boolean isPassed;
+        String failureDescription;
+        long elapsedTimeInMicros;
+
+        public TestInfo(String name, boolean isPassed, String failureDescription, long elapsedTimeInMicros) {
+            this.name = name;
+            this.isPassed = isPassed;
+            this.failureDescription = failureDescription;
+            this.elapsedTimeInMicros = elapsedTimeInMicros;
+        }
+
+        public String info() {
+            return String.format("%s [%s]\n%sElapsed: %s\n",
+                    name,
+                    isPassed ? "passed" : "FAILED",
+                    isPassed ? "" : (failureDescription + "\n"),
+                    microsToSeconds(elapsedTimeInMicros)
+            );
+        }
+    }
 }
