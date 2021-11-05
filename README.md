@@ -10,52 +10,53 @@ Barley have simplified syntax and other cool things that normal erlang don't hav
 
 Simplified syntax and global variables:
 
-`-module(program).`
-
-`-doc("Calculator").`
-
 `global ST = stack:new().`
 
 `eval(S) ->`
-`    String = string:split(S),`
-`    lists:map(program:rpn, String),`
-`    pop().`
+    `String = string:split(S),`
+    `io:fwriteln(String),`
+    `process(Part) || Part -> String,`
+   `pop().`
+
+`process(P) -> rpn(P).`
 
 `rpn("+") ->`
- `   A = pop(),`
     `B = pop(),`
-    `push(B + A).`
+   ` A = pop(),`
+    `push(A + B).`
 
 `rpn("-") ->`
+    `B = pop(),`
     `A = pop(),`
-    `B = pop(),`
-    `push(B - A).`
-
-`rpn("/") ->`
-   `A = pop(),`
-    `B = pop(),`
-    `push(B / A).`
+    `push(A - B).`
 
 `rpn("*") ->`
+   ` B = pop(),`
     `A = pop(),`
+    `push(A * B).`
+
+`rpn("/") ->`
     `B = pop(),`
-    `push(B * A).`
+    `A = pop(),`
+    `push(A / B).`
 
 `rpn(X) ->`
- `   push(read(X)).`
+    `io:fwriteln(X),`
+    `push(read(X)).`
 
 `read(N) ->`
- `   case string:as_number(N) ->`
- `       of error: CaughtError.`
- `       of Number: Number.`
- `   end.`
+    `case string:as_number(N) ->`
+        `of error: CaughtError.`
+        `of Number: Number.`
+    `end.`
 
 `push(Value) -> stack:push(ST, Value).`
 `pop() -> stack:pop(ST).`
 `stack_trace() -> io:writeln(stack:stack_to_list(ST)).`
 
 `main() ->`
-    `io:fwriteln(eval("2 2 +")).`
+    `io:fwriteln("result: " + eval("2 2 + 3 - 10 *")).`
+
     
 ### Pattern matching
 
