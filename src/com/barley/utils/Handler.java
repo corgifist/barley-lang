@@ -130,7 +130,8 @@ public class Handler {
                 "examples/measurement.barley",
                 "examples/fibonacci.barley",
                 "examples/bunit.barley",
-                "examples/code.barley"
+                "examples/code.barley",
+                "examples/expanded_remote.barley"
         };
 
         measurement.start("Tests time");

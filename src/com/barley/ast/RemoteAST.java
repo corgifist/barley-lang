@@ -20,11 +20,13 @@ public class RemoteAST implements AST, Serializable {
 
     @Override
     public BarleyValue execute() {
-        if (!(Modules.isExists(module.toString())))
-            throw new BarleyException("BadArg", "module '" + module.toString() + "' is not compiled or doesn't exists");
-        Function a = Modules.get(module.execute().toString()).get(target.execute().toString());
+        String m = module.execute().toString();
+        String t = target.execute().toString();
+        if (!(Modules.isExists(m)))
+            throw new BarleyException("BadArg", "module '" + m + "' is not compiled or doesn't exists");
+        Function a = Modules.get(module.execute().toString()).get(t);
         if (a == null)
-            throw new BarleyException("Undef", "module '" + module + "' exists but function '" + target + "' doesn't");
+            throw new BarleyException("Undef", "module '" + m + "' exists but function '" + t + "' doesn't");
         return new BarleyFunction(a);
     }
 
