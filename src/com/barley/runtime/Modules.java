@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -968,6 +970,47 @@ public class Modules {
         put("file", file);
     }
 
+    private static void initSocket() {
+        HashMap<String, Function> socket = new HashMap<>();
+
+        socket.put("server", args -> {
+            Arguments.check(1, args.length);
+            try {
+                return new BarleyReference(new ServerSocket(args[0].asInteger().intValue()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        socket.put("socket", args -> {
+            Arguments.check(2, args.length);
+            String host_name = args[0].toString();
+            int port = args[1].asInteger().intValue();
+            try {
+                return new BarleyReference(new Socket(host_name, port));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        socket.put("accept_server", args -> {
+            Arguments.check(1, args.length);
+            ServerSocket s = (ServerSocket) ((BarleyReference) args[0]).getRef();
+            try {
+                return new BarleyReference(s.accept());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+
+
+        put("socket", socket);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -982,6 +1025,7 @@ public class Modules {
         initCode();
         initBarleyUnit();
         initFile();
+        initSocket();
     }
 
     private static String microsToSeconds(long micros) {

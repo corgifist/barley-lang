@@ -1,6 +1,3 @@
 -module(test).
 
-main() ->
-    Content = file:read("tmp/signals.txt"),
-    io:fwriteln(Content),
-    file:write("tmp/signals.txt", "message 15 1").
+main() -> io:fwriteln("Sockets").
