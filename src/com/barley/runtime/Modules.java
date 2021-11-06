@@ -374,6 +374,13 @@ public class Modules {
             return value;
         });
 
+        shell.put("thread", args -> {
+            Arguments.check(1, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            new Thread(fun::execute).start();
+            return new BarleyAtom("ok");
+        });
+
         put("barley", shell);
     }
 

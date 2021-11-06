@@ -10,6 +10,6 @@ public class Main {
         Handler.loadCore();
         Handler.tests();
         Handler.entry("program.barley");
-        //Handler.console();
+        Handler.console();
     }
 }
