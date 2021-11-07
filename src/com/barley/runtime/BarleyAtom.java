@@ -9,14 +9,14 @@ import java.util.Objects;
 
 public class BarleyAtom implements BarleyValue, Serializable {
 
-    private int pos;
+    private String atom;
 
     public BarleyAtom(String atom) {
-        this(AtomTable.put(atom));
+        this.atom = atom;
     }
 
     public BarleyAtom(int pos) {
-        this.pos = pos;
+        this(AtomTable.get(pos));
     }
 
     @Override
@@ -31,18 +31,19 @@ public class BarleyAtom implements BarleyValue, Serializable {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BarleyAtom that = (BarleyAtom) o;
-        return pos == that.pos;
+        return Objects.equals(atom, that.atom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pos);
+        return Objects.hash(atom);
     }
 
     @Override
     public String toString() {
-        return AtomTable.get(pos);
+        return atom;
     }
 }

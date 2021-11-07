@@ -1044,10 +1044,11 @@ public class Modules {
                 for (Map.Entry<String, Function> ent : methods.entrySet()) {
                     method.add(new BarleyList(new BarleyString(ent.getKey()), new BarleyFunction(ent.getValue())));
                 }
+                method.add(new BarleyList(new BarleyString("doc"), new BarleyString(docs.get(module))));
                 ms.add(new BarleyList(method));
             }
             result.add(new BarleyList(ms));
-            result.add(new BarleyList(new BarleyAtom("entry_point"), new BarleyReference(entry)));
+            result.add(new BarleyList(new BarleyString("entry_point"), new BarleyReference(entry)));
             return new BarleyList(result);
         });
 
@@ -1069,6 +1070,7 @@ public class Modules {
         dist.put("raw_app", args -> {
             Arguments.check(1, args.length);
             BarleyList root = ((BarleyList) args[0]);
+            System.out.println(root);
             String name = ((BarleyList) root.getList().get(0))
                     .getList().get(1).toString();
             String desc = ((BarleyList) root.getList().get(1))
@@ -1090,6 +1092,10 @@ public class Modules {
                 String m_name = ((BarleyList) module).getList().get(0).toString();
                 List<BarleyValue> m = ((BarleyList) module).getList().subList(1, ((BarleyList) module).getList().size());
                 for (BarleyValue method : m) {
+                    if (((BarleyList) method).getList().get(0).toString().equals("doc")) {
+                        docs.put(m_name, ((BarleyList) method).getList().get(1).toString());
+                        continue;
+                    }
                     String f_name = ((BarleyList) method).getList().get(0).toString();
                     Function f = ((BarleyFunction) ((BarleyList) method).getList().get(1)).getFunction();
                     map.put(f_name, f);
@@ -1123,6 +1129,10 @@ public class Modules {
         });
 
         put("dist", dist);
+    }
+
+    private static String current() {
+        return modules.toString();
     }
 
     public static void init() {

@@ -304,8 +304,7 @@ public final class Parser implements Serializable {
             return new ExtractBindAST(current.getText());
         }
         if (match(TokenType.ATOM)) {
-            int atom = addAtom(current.getText());
-            return new ConstantAST(new BarleyAtom(atom));
+            return new ConstantAST(new BarleyAtom(current.getText()));
         }
 
         if (match(TokenType.LBRACKET)) {
@@ -359,7 +358,7 @@ public final class Parser implements Serializable {
                 // case value:
                 pattern = new CaseAST.VariablePattern(current.getText());
             } else if (match(TokenType.ATOM)) {
-                pattern = new CaseAST.ConstantPattern(new BarleyAtom(addAtom(current.getText())));
+                pattern = new CaseAST.ConstantPattern(new BarleyAtom(current.getText()));
             } else if (match(TokenType.LBRACKET)) {
                 // case [x :: xs]:
                 final CaseAST.ListPattern listPattern = new CaseAST.ListPattern();
@@ -404,7 +403,7 @@ public final class Parser implements Serializable {
 
     private AST expandCall() {
         AST target = remote();
-        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(addAtom(module))), target), arguments());
+        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), target), arguments());
     }
 
     private Clause clause() {
@@ -428,9 +427,6 @@ public final class Parser implements Serializable {
         return args;
     }
 
-    private int addAtom(String atom) {
-        return AtomTable.put(atom);
-    }
 
     private boolean lookMatch(int pos, TokenType type) {
         return get(pos).getType() == type;
