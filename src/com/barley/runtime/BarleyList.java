@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedList;
+import java.util.List;
 
 public class BarleyList implements BarleyValue, Serializable {
 
@@ -13,6 +14,15 @@ public class BarleyList implements BarleyValue, Serializable {
 
     public BarleyList(LinkedList<BarleyValue> list) {
         this.list = list;
+    }
+
+    public BarleyList(BarleyValue... values) {
+        List<BarleyValue> vals = List.of(values);
+        LinkedList<BarleyValue> res = new LinkedList<>();
+        for (BarleyValue val : vals) {
+            res.add(val);
+        }
+        this.list = res;
     }
 
     public BarleyList(int size) {

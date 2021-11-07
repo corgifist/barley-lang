@@ -1,3 +1,8 @@
 -module(test).
 
+global G = 15.
+
+sum(A, B) -> A + B.
+div(A, B) -> A / B.
+
 main() -> io:fwriteln("Sockets").

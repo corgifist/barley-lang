@@ -2,10 +2,7 @@ package com.barley.runtime;
 
 import com.barley.utils.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
@@ -1016,6 +1013,118 @@ public class Modules {
         put("socket", socket);
     }
 
+    private static void initDist() {
+        HashMap<String, Function> dist = new HashMap<>();
+
+
+        dist.put("entry", args -> new BarleyReference(new EntryPoint(args[0].toString(), args[1].toString())));
+
+        dist.put("bake", args -> {
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            String name = args[0].toString();
+            result.add(new BarleyList(new BarleyString("name"), new BarleyString(name)));
+            String desc = args[1].toString();
+            result.add(new BarleyList(new BarleyString("desc"), new BarleyString(desc)));
+            LinkedList<BarleyValue> env = new LinkedList<>();
+            env.add(new BarleyString("globals"));
+            for (Map.Entry<String, BarleyValue> en : Table.variables().entrySet()) {
+                env.add(new BarleyList(new BarleyString(en.getKey()), en.getValue()));
+            }
+            result.add(new BarleyList(env));
+            EntryPoint entry = (EntryPoint) ((BarleyReference) args[2]).getRef();
+            List<BarleyValue> modules = List.of(args).subList(3, args.length);
+            LinkedList<BarleyValue> ms = new LinkedList<>();
+            ms.add(new BarleyString("modules"));
+            for (BarleyValue at : modules) {
+                BarleyAtom atom = (BarleyAtom) at;
+                String module = at.toString();
+                HashMap<String, Function> methods = get(module);
+                LinkedList<BarleyValue> method = new LinkedList<>();
+                method.add(atom);
+                for (Map.Entry<String, Function> ent : methods.entrySet()) {
+                    method.add(new BarleyList(new BarleyString(ent.getKey()), new BarleyFunction(ent.getValue())));
+                }
+                ms.add(new BarleyList(method));
+            }
+            result.add(new BarleyList(ms));
+            result.add(new BarleyList(new BarleyAtom("entry_point"), new BarleyReference(entry)));
+            return new BarleyList(result);
+        });
+
+        dist.put("write", args -> {
+            Arguments.check(2, args.length);
+            try (FileWriter writer = new FileWriter(args[0].toString() + ".app", false)) {
+                byte[] bytes = SerializeUtils.serialize(args[1]);
+                StringBuilder result = new StringBuilder();
+                for (byte b : bytes) {
+                    result.append(b).append(" ");
+                }
+                writer.write(result.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        dist.put("raw_app", args -> {
+            Arguments.check(1, args.length);
+            BarleyList root = ((BarleyList) args[0]);
+            String name = ((BarleyList) root.getList().get(0))
+                    .getList().get(1).toString();
+            String desc = ((BarleyList) root.getList().get(1))
+                    .getList().get(1).toString();
+            Table.define("APP_NAME", new BarleyString(name));
+            Table.define("APP_DESC", new BarleyString(desc));
+            LinkedList<BarleyValue> globals = ((BarleyList) root.getList().get(2)).getList();
+            for (BarleyValue global : globals) {
+                if(global.toString().equals("globals")) continue;
+                BarleyList g = (BarleyList) global;
+                String n = g.getList().get(0).toString();
+                BarleyValue val = g.getList().get(1);
+                Table.define(n, val);
+            }
+            LinkedList<BarleyValue> modules = ((BarleyList) root.getList().get(3)).getList();
+            for (BarleyValue module : modules) {
+                if (module.toString().equals("modules")) continue;
+                HashMap<String, Function> map = new HashMap<>();
+                String m_name = ((BarleyList) module).getList().get(0).toString();
+                List<BarleyValue> m = ((BarleyList) module).getList().subList(1, ((BarleyList) module).getList().size());
+                for (BarleyValue method : m) {
+                    String f_name = ((BarleyList) method).getList().get(0).toString();
+                    Function f = ((BarleyFunction) ((BarleyList) method).getList().get(1)).getFunction();
+                    map.put(f_name, f);
+                }
+                put(m_name, map);
+            }
+            EntryPoint point = (EntryPoint) ((BarleyReference) (((BarleyList) root.getList().get(4)).getList().get(1))).getRef();
+            Function main = get(point.getName()).get(point.getMethod());
+            return main.execute();
+        });
+
+        dist.put("app", args -> {
+            Arguments.check(1, args.length);
+            Function fun = dist.get("raw_app");
+            try  {
+                String[] bts = SourceLoader.readSource(args[0].toString()).split(" ");
+                List<Byte> bs = new ArrayList<>();
+                for (String str : bts) {
+                    bs.add(Byte.parseByte(str));
+                }
+                Byte[] bt = bs.toArray(new Byte[] {});
+                byte[] bytes = toPrimitives(bt);
+                BarleyValue app = SerializeUtils.deserialize(bytes);
+                return fun.execute(app);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        put("dist", dist);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -1031,6 +1140,7 @@ public class Modules {
         initBarleyUnit();
         initFile();
         initSocket();
+        initDist();
     }
 
     private static String microsToSeconds(long micros) {
