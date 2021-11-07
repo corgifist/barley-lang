@@ -1070,7 +1070,6 @@ public class Modules {
         dist.put("raw_app", args -> {
             Arguments.check(1, args.length);
             BarleyList root = ((BarleyList) args[0]);
-            System.out.println(root);
             String name = ((BarleyList) root.getList().get(0))
                     .getList().get(1).toString();
             String desc = ((BarleyList) root.getList().get(1))
