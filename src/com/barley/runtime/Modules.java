@@ -616,6 +616,11 @@ public class Modules {
             return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyString)));
         });
 
+        types.put("ref_to_string",args -> {
+            Arguments.check(1,args.length);
+            return new BarleyString(((BarleyReference) args[0]).getRef().toString());
+        });
+
         put("types", types);
     }
 
