@@ -10,53 +10,54 @@ Barley have simplified syntax and other cool things that normal erlang don't hav
 
 Simplified syntax and global variables:
 
-`global ST = stack:new().`
+```
+global ST = stack:new().
 
-`eval(S) ->`
-    `String = string:split(S),`
-    `io:fwriteln(String),`
-    `process(Part) || Part -> String,`
-   `pop().`
+eval(S) ->
+    String = string:split(S),`
+    io:fwriteln(String),
+    process(Part) || Part -> String,
+    pop().
 
-`process(P) -> rpn(P).`
+process(P) -> rpn(P).
 
-`rpn("+") ->`
-    `B = pop(),`
-   ` A = pop(),`
-    `push(A + B).`
+rpn("+") ->
+    B = pop(),
+    A = pop(),
+    push(A + B).
 
-`rpn("-") ->`
-    `B = pop(),`
-    `A = pop(),`
-    `push(A - B).`
+rpn("-") ->
+    B = pop(),
+    A = pop(),
+    push(A - B).
 
-`rpn("*") ->`
-   ` B = pop(),`
-    `A = pop(),`
-    `push(A * B).`
+rpn("*") ->
+    B = pop(),
+    A = pop(),
+    push(A * B).
 
-`rpn("/") ->`
-    `B = pop(),`
-    `A = pop(),`
-    `push(A / B).`
+rpn("/") ->
+    B = pop(),
+    A = pop(),
+    push(A / B).
 
-`rpn(X) ->`
-    `io:fwriteln(X),`
-    `push(read(X)).`
+rpn(X) ->
+    io:fwriteln(X),
+    push(read(X)).
+    
+read(N) ->
+    case string:as_number(N) ->
+        of error: CaughtError.
+        of Number: Number.
+    end.
 
-`read(N) ->`
-    `case string:as_number(N) ->`
-        `of error: CaughtError.`
-        `of Number: Number.`
-    `end.`
+push(Value) -> stack:push(ST, Value).
+pop() -> stack:pop(ST).
+stack_trace() -> io:writeln(stack:stack_to_list(ST)).
 
-`push(Value) -> stack:push(ST, Value).`
-`pop() -> stack:pop(ST).`
-`stack_trace() -> io:writeln(stack:stack_to_list(ST)).`
-
-`main() ->`
-    `io:fwriteln("result: " + eval("2 2 + 3 - 10 *")).`
-
+main() ->
+    io:fwriteln("result: " + eval("2 2 + 3 - 10 *")).
+```
     
 ### Pattern matching
 
@@ -83,22 +84,22 @@ Unlike Erlang, variables in Barely can be reassigned!
 Pattern matching is also supported for functions.
 
 This could be seen in example 1, but now it will be better revealed.
+```
+-module(test).`
 
-`-module(test).`
+-doc("Calculator").`
 
-`-doc("Calculator").`
+transform([binary_op, "+", Left, Right]) -> transform(Left) + transform(Right).`
 
-`transform([binary_op, "+", Left, Right]) -> transform(Left) + transform(Right).`
+transform([binary_op, "-", Left, Right]) -> transform(Left) - transform(Right).`
 
-`transform([binary_op, "-", Left, Right]) -> transform(Left) - transform(Right).`
+transform([binary_op, "*", Left, Right]) -> transform(Left) * transform(Right).`
 
-`transform([binary_op, "*", Left, Right]) -> transform(Left) * transform(Right).`
+transform([negate, Left]) -> -Left.`
 
-`transform([negate, Left]) -> -Left.`
+transform(Expr) -> Expr.`
 
-`transform(Expr) -> Expr.`
-
-`main() ->`
+main() ->
 
     io:fwriteln(transform([negate, 5])),
     
@@ -107,7 +108,7 @@ This could be seen in example 1, but now it will be better revealed.
     io:fwriteln(transform([binary_op, "-", 5, 3])),
     
     io:fwriteln(transform([binary_op, "*", 5, 3])).
-    
+```    
 
 Resulst are:
 
@@ -151,23 +152,21 @@ The recommended function to spawn a process is a:
  
  ### Simple process-based program
  
- `start() ->`
-    `receive barley:spawn(0) -> Rest + Message.`
+ ```
+ start() ->
+    receive barley:spawn(0) -> Rest + Message.
 
-`call(Pid, Value) ->`
-    `Pid ! Value.`
+call(Pid, Value) ->
+    Pid ! Value.
 
-`main() ->`
-    `Pid = start(),`
-    
-    `io:writeln(Pid),`
-    
-    `call(Pid, 6),`
-    
-    `call(Pid, 4),`
-    
-    `io:writeln(barley:extract_pid(Pid)).`
-    
+main() ->
+    Pid = start(),
+    io:writeln(Pid),
+    call(Pid, 6),
+    call(Pid, 4),
+    io:writeln(barley:extract_pid(Pid)).
+```
+
 The first call will set process value to 6.
 
 And the second call will set process value to 10.
@@ -226,3 +225,144 @@ To catch message you need to use `signal:on_signal(def (Type, Msg) -> Body. end)
 To catch specific message you need to use `signal:on_named_signal(Type, def(Type, Msg) -> Body. end)`
 
 See `examples/chat.barley` for more information
+
+## Thinking about distribution
+
+All releases of programs written in Barley must be distributed in a baked package method.
+
+For this, Barley has a "dist" module. Why not distribute the entire program or its AST? 
+
+This is too expensive in terms of memory and upgradeability. 
+
+Also, this method reliably protects the source code of the program!
+
+## Coding our first distributed program
+
+So, I'll write Magic-8-Ball. 
+
+It is desirable that the entire program be split into a client file and a server file. 
+
+For example I'll name my files "m_ball_client" and "m_ball_server".
+
+m_ball_server:
+
+```
+-module(ball_server).
+-doc("Magic ball server").
+
+answer(ID) when ID == 1 -> io:fwriteln("Certainly.").
+answer(ID) when ID == 2 -> io:fwriteln("I don't like your tone.").
+answer(ID) when ID == 3 -> io:fwriteln("Never.").
+answer(ID) when ID == 4 -> io:fwriteln("*Runs away*").
+answer(ID) when ID == 5 -> io:fwriteln("Yes.").
+answer(ID) when ID == 6 -> io:fwriteln("No.").
+answer(ID) when ID == 7 -> io:fwriteln("Of course not.").
+answer(ID) when ID == 8 -> io:fwriteln("Of course yes.").
+answer(ID) when ID == 9 -> io:fwriteln("Doubtful.").
+answer(ID) when ID == 10 -> io:fwriteln("Try again later.").
+answer(ID) -> io:fwriteln("*Silence*").
+
+ask(Question) ->
+    Answer = math:range(1, 10),
+    answer(Answer).
+```
+
+
+m_ball_client:
+```
+-module(ball_client).
+-doc("Ask vital questions!").
+
+ask_loop() ->
+    Prompt = read(),
+    ball_server:ask(Prompt),
+    ask_loop().
+
+read() ->
+    io:fwrite(">>> "),
+    io:readline().
+
+main() ->
+    barley:docs(ball_client),
+    ask_loop().
+```
+
+Okay, the logic is written. But we still haven't published our program!
+
+It needs to be corrected
+
+Warm up your Barley instance and let's go!
+
+First you need to create a entry point.
+
+Entry point - reference that contains 2 atoms,
+
+First is a module that contains main function,
+
+Second is a name of function.
+
+You better save entry point in variable
+
+Use `dist:entry(Module, Target)` to spawn entry point
+
+So, I made it
+
+```
+Barley/Java16 [barley-runtime0.1] [amd64] [threads-2]
+>>> Entry = dist:entry(ball_client, main).
+>>> 
+```
+
+Next you need to bake all logic of your app in one array!
+
+`dist:bake(NameOfApp, Description, EntryPoint, Modules...)` will help you!
+
+You can put unlimited count of modules at the end of arguments!
+
+### !! WARNING !!
+To bake modules, you need to have this modules compiled.
+
+If you don't, use `barley:reparse(Dir)`. This will parse and save module
+### !! WARNING !!
+
+What are we waiting for?
+
+```
+Barley/Java16 [barley-runtime0.1] [amd64] [threads-2]
+>>> Entry = dist:entry(ball_client, main).
+>>> barley:reparse("examples/magic_ball/m_ball_server.barley").
+>>> barley:reparse("examples/magic_ball/m_ball_client.barley").
+>>> App = dist:bake("Magic Ball", "Ask vital questions", Entry, ball_client, ball_server).
+>>> io:fwriteln(App).
+[[name, Magic Ball], [desc, Ask vital questions], [globals, [Entry, #Reference<445884362>]
+, [G, 15]], [modules, [ball_client, [read, ...]]
+, [ask_loop, ...]], [main, ...]], [doc, Ask vital questions!]], [ball_server, [answer, ...]
+, [ask, ...], [doc, Magic ball server]]], [entry_point, #Reference<1031980531>]]
+>>> 
+```
+
+You're almost ready!
+
+Let's write our info in file
+
+
+```
+Barley/Java16 [barley-runtime0.1] [amd64] [threads-2]
+>>> Entry = dist:entry(ball_client, main).
+>>> barley:reparse("examples/magic_ball/m_ball_server.barley").
+>>> barley:reparse("examples/magic_ball/m_ball_client.barley").
+>>> App = dist:bake("Magic Ball", "Ask vital questions", Entry, ball_client, ball_server).
+>>> dist:write("baked", App).
+```
+You can see that in your dir was appeared a wild `baked.app` file.
+
+Here you are your baked module!
+
+Now you have a cool program that you can distribute without any problems!
+
+You can run it using `dist:app(Dir)`
+
+Dist module also have a function to run a bare baked module by using `dist:raw_app(App)`
+
+
+It's all!
