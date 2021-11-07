@@ -150,10 +150,16 @@ public class Handler {
     }
 
     public static void calculator() {
-        Handler.file("calculator/lexer.barley", true);
-        Handler.file("calculator/parser.barley", true);
-        Handler.file("calculator/interpreter.barley", true);
-        Handler.file("calculator/program.barley", true);
+        Handler.file("examples/calculator/lexer.barley", true);
+        Handler.file("examples/calculator/parser.barley", true);
+        Handler.file("examples/calculator/interpreter.barley", true);
+        Handler.file("examples/calculator/program.barley", true);
         Handler.handle("test:main().", true, false);
+    }
+
+    public static void magicBall() {
+        Handler.file("examples/magic_ball/m_ball_server.barley");
+        Handler.file("Examples/magic_ball/m_ball_client.barley");
+        Handler.handle("ball_client:main().", true);
     }
 }

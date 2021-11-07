@@ -458,6 +458,11 @@ public class Modules {
             return new BarleyNumber(Math.pow(args[0].asFloat().doubleValue(), args[1].asFloat().doubleValue()));
         });
 
+        math.put("range", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(getRandomNumber(args[0].asInteger().intValue(), args[1].asInteger().intValue()));
+        });
+
         modules.put("math", math);
     }
 

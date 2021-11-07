@@ -1,0 +1,15 @@
+-module(ball_client).
+-doc("Ask vital questions!").
+
+ask_loop() ->
+    Prompt = read(),
+    ball_server:ask(Prompt),
+    ask_loop().
+
+read() ->
+    io:fwrite(">>> "),
+    io:readline().
+
+main() ->
+    barley:docs(ball_client),
+    ask_loop().

@@ -25,6 +25,7 @@ public final class Parser implements Serializable {
         size = tokens.size();
         methods = new HashMap<>();
         module = null;
+        doc = null;
     }
 
     public List<AST> parse() {

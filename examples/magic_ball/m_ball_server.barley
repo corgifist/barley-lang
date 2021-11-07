@@ -1,0 +1,18 @@
+-module(ball_server).
+-doc("Magic ball server").
+
+answer(ID) when ID == 1 -> io:fwriteln("Certainly.").
+answer(ID) when ID == 2 -> io:fwriteln("I don't like your tone.").
+answer(ID) when ID == 3 -> io:fwriteln("Never.").
+answer(ID) when ID == 4 -> io:fwriteln("*Runs away*").
+answer(ID) when ID == 5 -> io:fwriteln("Yes.").
+answer(ID) when ID == 6 -> io:fwriteln("No.").
+answer(ID) when ID == 7 -> io:fwriteln("Of course not.").
+answer(ID) when ID == 8 -> io:fwriteln("Of course yes.").
+answer(ID) when ID == 9 -> io:fwriteln("Doubtful.").
+answer(ID) when ID == 10 -> io:fwriteln("Try again later.").
+answer(ID) -> io:fwriteln("*Silence*").
+
+ask(Question) ->
+    Answer = math:range(1, 10),
+    answer(Answer).
