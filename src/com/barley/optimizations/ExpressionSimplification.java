@@ -18,7 +18,7 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public int count() {
-        return 0;
+        return count;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ExpressionSimplification implements Optimization {
             }
         }
 
-        return null;
+        return ast;
     }
 
     public static boolean isIntegerValue(AST node, int valueToCheck) {
@@ -147,27 +147,29 @@ public class ExpressionSimplification implements Optimization {
     @Override
     public AST optimize(ProcessCallAST ast) {
         ast.expr.visit(this);
-        return null;
+        return ast;
     }
 
     @Override
     public AST optimize(RemoteAST ast) {
-        return null;
+        return ast;
     }
 
     @Override
     public AST optimize(TernaryAST ast) {
-        return null;
+        ast.visit(this);
+        return ast;
     }
 
     @Override
     public AST optimize(RecieveAST ast) {
-        return null;
+        return ast;
     }
 
     @Override
     public AST optimize(UnaryAST ast) {
-        return null;
+        ast.visit(this);
+        return ast;
     }
 
 

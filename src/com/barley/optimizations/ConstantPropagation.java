@@ -43,9 +43,10 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(BindAST ast) {
-        ast.emulate(info, mods);
+        info = ast.emulate(info, mods);
         optimize(ast.right);
         ast.visit(this);
+        System.out.println(info);
         count++;
         return ast;
     }
@@ -88,6 +89,7 @@ public class ConstantPropagation implements Optimization {
     public AST optimize(ExtractBindAST ast) {
         count++;
         if (info.containsKey(ast.toString())) {
+            count++;
             return new ConstantAST(info.get(ast.toString()).value);
         }
         Table.clear();
@@ -117,6 +119,7 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(MethodAST ast) {
+        ast.visit(this);
         return ast;
     }
 
@@ -160,7 +163,7 @@ public class ConstantPropagation implements Optimization {
             if (info.value == null) continue;
             candidates.put(e.getKey(), info.value);
         }
-        Table.variables().putAll(candidates);
+
         if (ast instanceof BinaryAST) {
             return optimize((BinaryAST) ast);
         } else if (ast instanceof BindAST) {

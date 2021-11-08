@@ -1,9 +1,6 @@
 package com.barley.utils;
 
-import com.barley.optimizations.ConstantFolding;
-import com.barley.optimizations.ConstantPropagation;
-import com.barley.optimizations.Optimization;
-import com.barley.optimizations.VariableGrabber;
+import com.barley.optimizations.*;
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
 import com.barley.runtime.ProcessTable;
@@ -31,7 +28,7 @@ public class Handler {
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             Optimization[] opts = new Optimization[] {
                     new ConstantFolding(),
-                    new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber())
+                    new ExpressionSimplification()
             };
             measurement.stop("Parse time");
             measurement.start("Optimization time");
@@ -41,7 +38,10 @@ public class Handler {
                     //System.out.println(opt.summary());
                 }
             }
-            //System.out.println(nodes);
+            for (Optimization opt : opts) {
+                System.out.println(opt.summary());
+            }
+            System.out.println(nodes);
             measurement.stop("Optimization time");
             measurement.start("Execute time");
             for (AST node : nodes) {

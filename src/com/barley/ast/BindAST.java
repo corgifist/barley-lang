@@ -126,7 +126,7 @@ public class BindAST implements AST, Serializable {
                     }
                     mods.put(((VariablePattern) root).getVariable(), 0);
                     storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right.execute(), mods.get(((VariablePattern) root).getVariable())));
-                    Table.clear();
+                    //Table.clear();
                 }
             } else if (root instanceof ConstantPattern) {
                 ;
