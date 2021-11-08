@@ -1162,6 +1162,131 @@ public class Modules {
         initFile();
         initSocket();
         initDist();
+        initLists();
+    }
+
+    private static void initLists() {
+        HashMap<String, Function> lists = new HashMap<>();
+
+        lists.put("map", args -> {
+            Arguments.check(2, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            BarleyList list = (BarleyList) args[1];
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (BarleyValue val : list.getList()) {
+                result.add(fun.execute(val));
+            }
+            return new BarleyList(result);
+        });
+
+        lists.put("filter", args -> {
+            Arguments.check(2, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            BarleyList list = (BarleyList) args[1];
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (BarleyValue val : list.getList()) {
+                if (fun.execute(val).toString().equals("true"))
+                    result.add(val);
+            }
+            return new BarleyList(result);
+        });
+
+        lists.put("reduce", args -> {
+            Arguments.check(3, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            BarleyList list = (BarleyList) args[1];
+            BarleyValue acc = args[2];
+            for (BarleyValue val : list.getList()) {
+                acc = fun.execute(val, acc);
+            }
+            return acc;
+        });
+
+        lists.put("append", args -> {
+            Arguments.check(2, args.length);
+            BarleyList list = (BarleyList) args[0];
+            LinkedList<BarleyValue> l = new LinkedList<>(list.getList());
+            l.add(args[1]);
+            return new BarleyList(l);
+
+        });
+
+        lists.put("concat", args -> {
+            Arguments.check(1, args.length);
+            BarleyList list = (BarleyList) args[0];
+            StringBuilder acc = new StringBuilder();
+            for (BarleyValue val : list.getList()) {
+                acc.append(val.toString());
+            }
+            return new BarleyString(acc.toString());
+        });
+
+        lists.put("duplicate", args -> {
+            Arguments.check(2, args.length);
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            BarleyValue obj = args[0];
+            int iteration = args[1].asFloat().intValue();
+            for (int i = 0; i < iteration; i++) {
+                result.add(obj);
+            }
+            return new BarleyList(result);
+        });
+
+        lists.put("seq", args -> {
+            Arguments.check(2, args.length);
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            BarleyValue obj = args[1];
+            int iteration = args[0].asFloat().intValue();
+            for (int i = 0; i < iteration; i++) {
+                result.add(obj);
+            }
+            return new BarleyList(result);
+        });
+
+        lists.put("foreach", args -> {
+            Arguments.check(2, args.length);
+            BarleyFunction fun = (BarleyFunction) args[0];
+            BarleyList list = (BarleyList) args[1];
+            for (BarleyValue val : list.getList()) {
+                fun.execute(val);
+            }
+            return new BarleyAtom("ok");
+        });
+
+        lists.put("last", args -> {
+            Arguments.check(1, args.length);
+            BarleyList list = (BarleyList) args[0];
+            return list.getList().get(list.getList().size() - 1);
+        });
+
+        lists.put("nth", args -> {
+            Arguments.check(2, args.length);
+            BarleyList list = (BarleyList) args[0];
+            int nth = args[1].asInteger().intValue();
+            try {
+                return list.getList().get(nth);
+            } catch (IndexOutOfBoundsException ex) {
+                return new BarleyAtom("end_of_list");
+            }
+        });
+
+        lists.put("reverse", args -> {
+            Arguments.check(1, args.length);
+            LinkedList<BarleyValue> list = ((BarleyList) args[0]).getList();
+            Collections.reverse(list);
+            return new BarleyList(list);
+        });
+
+        lists.put("sublist", args -> {
+            BarleyList list = (BarleyList) args[0];
+            int from = args[1].asInteger().intValue();
+            int to = args[2].asInteger().intValue();
+            List<BarleyValue> subd = list.getList().subList(from, to);
+            LinkedList<BarleyValue> result = new LinkedList<>(subd);
+            return new BarleyList(result);
+        });
+
+        put("lists", lists);
     }
 
     private static String microsToSeconds(long micros) {

@@ -117,20 +117,6 @@ public class Handler {
         return Integer.parseInt(version);
     }
 
-    public static void loadCore() {
-        String[] scripts = new String[]{
-                "lib/lists.barley"
-        };
-
-        for (String str : scripts) {
-            try {
-                Handler.handle(SourceLoader.readSource(str), false, false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public static void tests() {
 
         final TimeMeasurement measurement = new TimeMeasurement();

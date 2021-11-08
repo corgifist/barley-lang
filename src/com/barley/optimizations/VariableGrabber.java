@@ -39,7 +39,6 @@ public class VariableGrabber {
         for (Clause cl : clauses) {
             cast(cl.getResult());
         }
-        System.out.println("in ast");
         return ast;
     }
 
