@@ -35,6 +35,7 @@ public enum TokenType implements Serializable {
     RBRACE, // }
     LBRACKET,
     RBRACKET,
+    QUESTION,
 
     DOT,
 

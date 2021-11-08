@@ -90,7 +90,7 @@ public final class Parser implements Serializable {
 
     private AST receive() {
         AST pid = expression();
-        consume(TokenType.STABBER, "error after term '" + pid + "' in recieve at line " + line());
+        consume(TokenType.STABBER, "error after term '" + pid + "' in receive at line " + line());
         AST body = block();
         return new RecieveAST(pid, body);
     }
@@ -109,7 +109,23 @@ public final class Parser implements Serializable {
     }
 
     private AST expression() {
-        return or();
+        return ternary();
+    }
+
+    private AST ternary() {
+        AST term = or();
+
+        while (true) {
+            if (match(TokenType.QUESTION)) {
+                AST left = or();
+                consume(TokenType.CC, "expected '::' after term in ternary expr at line " + line());
+                AST right = or();
+                term = new TernaryAST(term, left, right);
+            }
+            break;
+        }
+
+        return term;
     }
 
     private AST or() {
