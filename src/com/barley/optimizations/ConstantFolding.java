@@ -3,6 +3,8 @@ package com.barley.optimizations;
 import com.barley.ast.*;
 import com.barley.utils.AST;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Optional;
 
 public class ConstantFolding implements Optimization {
@@ -84,7 +86,11 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ListAST ast) {
-        return ast;
+        LinkedList<AST> result = new LinkedList<>();
+        for (AST node : ast.getArray()) {
+            result.add(optimize(node));
+        }
+        return new ListAST(result);
     }
 
     @Override
