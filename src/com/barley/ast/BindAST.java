@@ -1,6 +1,7 @@
 package com.barley.ast;
 
 import com.barley.optimizations.Optimization;
+import com.barley.optimizations.VariableInfo;
 import com.barley.patterns.*;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
@@ -9,6 +10,7 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +21,7 @@ public class BindAST implements AST, Serializable {
     public BindAST(AST left, AST right) {
         this.left = left;
         this.right = right;
+        //System.out.println(emulate(new HashMap<String, VariableInfo>(), new HashMap<String, Integer>()));
     }
 
     @Override
@@ -104,6 +107,64 @@ public class BindAST implements AST, Serializable {
         }
         return patterns;
     }
+
+    public HashMap<String, VariableInfo> emulate(HashMap<String, VariableInfo> storage, HashMap<String, Integer> mods) {
+        Pattern root = pattern(left);
+        if (root instanceof VariablePattern v) {
+            if (mods.containsKey(((VariablePattern) root).getVariable())) {
+                mods.put(((VariablePattern) root).getVariable(), mods.get(((VariablePattern) root).getVariable()) + 1);
+                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) root).getVariable())));
+            } else {
+                mods.put(((VariablePattern) root).getVariable(), 0);
+                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) root).getVariable())));
+            }
+        } else if (root instanceof ConstantPattern) {
+            ;
+        } else if (root instanceof ListPattern) {
+            emulate_list(storage, mods, root);
+        } else if (root instanceof ConsPattern) {
+
+        }
+        return storage;
+    }
+
+    private void emulate_list(HashMap<String, VariableInfo> storage, HashMap<String, Integer> mods, Pattern root) {
+        BarleyValue r = right.execute();
+        ListPattern p = (ListPattern) root;
+        LinkedList<BarleyValue> list = ((BarleyList) r).getList();
+        LinkedList<Pattern> patterns = pattern(p);
+        for (int i = 0; i < list.size(); i++) {
+            Pattern pattern1 = patterns.get(i);
+            BarleyValue right = list.get(i);
+            if (pattern1 instanceof VariablePattern) {
+                if (mods.containsKey(((VariablePattern) pattern1).getVariable())) {
+                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(new ConstantAST(right), mods.get(((VariablePattern) pattern1).getVariable())));
+                    mods.put(((VariablePattern) pattern1).getVariable(), mods.get(((VariablePattern) pattern1).getVariable()) + 1);
+                } else {
+                    mods.put(((VariablePattern) pattern1).getVariable(), 0);
+                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(new ConstantAST(right), mods.get(((VariablePattern) pattern1).getVariable())));
+                }
+            } else if (pattern1 instanceof ConstantPattern) {
+                continue;
+            } else if (pattern1 instanceof ListPattern p1) {
+                emulate_list(storage, mods, p1);
+                processPattern(pattern1, new ConstantAST(right));
+            } else if (pattern1 instanceof ConsPattern p1) {
+                if (mods.containsKey(p1.getLeft()) && mods.containsKey(p1.getRight())) {
+                    storage.put(p1.getLeft(), new VariableInfo(new ConstantAST(head((BarleyList) right)), mods.get(p1.getLeft()) + 1));
+                    storage.put(p1.getRight(), new VariableInfo(new ConstantAST(tail((BarleyList) right)), mods.get(p1.getRight()) + 1));
+                    mods.put(p1.getLeft(), mods.get(p1.getLeft()) + 1);
+                    mods.put(p1.getRight(), mods.get(p1.getRight()) + 1);
+                } else {
+                    mods.put(p1.getLeft(),0);
+                    mods.put(p1.getRight(), 0);
+                    storage.put(p1.getLeft(), new VariableInfo(new ConstantAST(head((BarleyList) right)), mods.get(p1.getLeft()) + 1));
+                    storage.put(p1.getRight(), new VariableInfo(new ConstantAST(tail((BarleyList) right)), mods.get(p1.getRight()) + 1));
+                }
+            }
+        }
+    }
+
 
     private BarleyValue head(BarleyList list) {
         return list.getList().get(0);

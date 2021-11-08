@@ -2,6 +2,7 @@ package com.barley.utils;
 
 import com.barley.optimizations.ConstantFolding;
 import com.barley.optimizations.Optimization;
+import com.barley.optimizations.VariableGrabber;
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
 import com.barley.runtime.ProcessTable;
@@ -9,6 +10,7 @@ import com.barley.runtime.ProcessTable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,11 +31,14 @@ public class Handler {
             measurement.start("Parse time");
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
+            VariableGrabber grabber = new VariableGrabber();
+            System.out.println(grabber.getInfo(new ArrayList<>(nodes)));
             measurement.stop("Parse time");
             measurement.start("Optimization time");
             for (AST node : nodes) {
                 for (Optimization opt : opts) {
                     node.visit(opt);
+                    //System.out.println(opt.summary());
                 }
             }
             measurement.stop("Optimization time");

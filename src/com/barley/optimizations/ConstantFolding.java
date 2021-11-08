@@ -13,7 +13,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public String summary() {
-        return "Performed " + count + " optimizations";
+        return "Performed " + count + " folding optimizations";
     }
 
     @Override
@@ -23,26 +23,33 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(BinaryAST ast) {
-        AST left = optimize(ast.expr1);
-        AST right = optimize(ast.expr2);
-        if ((left instanceof ConstantAST) && (right instanceof ConstantAST)) {
+        optimize(ast.expr1);
+        optimize(ast.expr2);
+        ast.expr1.visit(this);
+        ast.expr2.visit(this);
+        count++;
+        if ((ast.expr1 instanceof ConstantAST) && (ast.expr2 instanceof ConstantAST)) {
             return new ConstantAST(ast.execute());
         } else return ast;
     }
 
     @Override
     public AST optimize(BindAST ast) {
+        ast.visit(this);
+        count++;
         return ast;
     }
 
     @Override
     public AST optimize(BlockAST ast) {
         ast.visit(this);
+        count++;
         return ast;
     }
 
     @Override
     public AST optimize(CallAST ast) {
+        count++;
         ast.visit(this);
         return ast;
     }
@@ -59,6 +66,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ConsAST ast) {
+        count++;
         if ((ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
             return new ConstantAST(ast.execute());
         } else return ast;
@@ -86,6 +94,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ListAST ast) {
+        count++;
         LinkedList<AST> result = new LinkedList<>();
         for (AST node : ast.getArray()) {
             result.add(optimize(node));
@@ -110,6 +119,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(TernaryAST ast) {
+        count++;
         if ((ast.term instanceof ConstantAST) &&(ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
             return new ConstantAST(ast.execute());
         }
@@ -123,7 +133,9 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(UnaryAST ast) {
-        if (ast.expr1 instanceof ConstantAST) {
+        count++;
+        AST left = optimize(ast.expr1);
+        if (left instanceof ConstantAST) {
             return new ConstantAST(ast.execute());
         }
         return ast;

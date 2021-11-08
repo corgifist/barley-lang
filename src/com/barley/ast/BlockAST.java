@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class BlockAST implements AST, Serializable {
 
-    private ArrayList<AST> block;
+    public ArrayList<AST> block;
 
     public BlockAST(ArrayList<AST> block) {
         this.block = block;
