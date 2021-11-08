@@ -1,5 +1,6 @@
 -module(ball_server).
 -doc("Magic ball server").
+-opt().
 
 answer(ID) when ID == 1 -> io:fwriteln("Certainly.").
 answer(ID) when ID == 2 -> io:fwriteln("I don't like your tone.").

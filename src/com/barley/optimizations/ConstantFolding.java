@@ -23,12 +23,10 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(BinaryAST ast) {
-        optimize(ast.expr1);
-        optimize(ast.expr2);
-        ast.expr1.visit(this);
-        ast.expr2.visit(this);
+        AST left = optimize(ast.expr1);
+        AST right = optimize(ast.expr2);
         count++;
-        if ((ast.expr1 instanceof ConstantAST) && (ast.expr2 instanceof ConstantAST)) {
+        if ((left instanceof ConstantAST) && (right instanceof ConstantAST)) {
             return new ConstantAST(ast.execute());
         } else return ast;
     }

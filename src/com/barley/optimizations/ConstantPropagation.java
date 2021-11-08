@@ -46,7 +46,6 @@ public class ConstantPropagation implements Optimization {
         info = ast.emulate(info, mods);
         optimize(ast.right);
         ast.visit(this);
-        System.out.println(info);
         count++;
         return ast;
     }

@@ -17,12 +17,14 @@ public final class Parser implements Serializable {
     private final int size;
     public HashMap<String, Function> methods;
     private int pos;
+    public boolean opt;
 
     private String module, doc;
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         size = tokens.size();
+        opt = false;
         methods = new HashMap<>();
         module = null;
         doc = null;
@@ -75,6 +77,11 @@ public final class Parser implements Serializable {
                 consume(TokenType.LPAREN, "expected '(' before module doc");
                 doc = expression().toString();
                 consume(TokenType.RPAREN, "expected ')' after module doc");
+            }
+            if (match(TokenType.OPT)) {
+                consume(TokenType.LPAREN, "expected '(' before opt");
+                consume(TokenType.RPAREN, "expected ')' after opt");
+                opt = true;
             }
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {

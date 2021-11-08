@@ -27,21 +27,21 @@ public class Handler {
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             Optimization[] opts = new Optimization[] {
+                    new ExpressionSimplification(),
                     new ConstantFolding(),
-                    new ExpressionSimplification()
+                    new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber())
             };
             measurement.stop("Parse time");
             measurement.start("Optimization time");
-            for (AST node : nodes) {
-                for (Optimization opt : opts) {
-                    node.visit(opt);
-                    //System.out.println(opt.summary());
+            if (parser.opt) {
+                for (AST node : nodes) {
+                    for (Optimization opt : opts) {
+                        node.visit(opt);
+                        //System.out.println(opt.summary());
+                    }
                 }
             }
-            for (Optimization opt : opts) {
-                System.out.println(opt.summary());
-            }
-            System.out.println(nodes);
+            //System.out.println(nodes);
             measurement.stop("Optimization time");
             measurement.start("Execute time");
             for (AST node : nodes) {

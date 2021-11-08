@@ -1,4 +1,5 @@
 -module(ball_client).
+-opt().
 -doc("Ask vital questions!").
 
 ask_loop() ->

@@ -2,5 +2,6 @@
 
 main() ->
     X = 2 + 3,
-    Y = 4 + 5 + X,
+    Y = 4 + 5 + 1,
+    io:fwriteln("string" + " oko"),
     io:fwriteln(Y).
