@@ -27,9 +27,9 @@ public class Handler {
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             Optimization[] opts = new Optimization[] {
+                    new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber()),
                     new ExpressionSimplification(),
                     new ConstantFolding(),
-                    new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber())
             };
             measurement.stop("Parse time");
             measurement.start("Optimization time");
@@ -41,6 +41,10 @@ public class Handler {
                     }
                 }
             }
+            for (Optimization opt : opts) {
+                System.out.println(opt.summary());
+            }
+            System.out.println(nodes);
             //System.out.println(nodes);
             measurement.stop("Optimization time");
             measurement.start("Execute time");

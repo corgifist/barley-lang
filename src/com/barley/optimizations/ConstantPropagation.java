@@ -34,11 +34,12 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(BinaryAST ast) {
-        optimize(ast.expr1);
-        optimize(ast.expr1);
-        ast.expr1.visit(this);
-        ast.expr2.visit(this);
-        return ast;
+        AST left = optimize(ast.expr1);
+        AST right = optimize(ast.expr2);
+        count++;
+        if ((left instanceof ConstantAST) && (right instanceof ConstantAST)) {
+            return new ConstantAST(ast.execute());
+        } else return ast;
     }
 
     @Override
@@ -88,6 +89,11 @@ public class ConstantPropagation implements Optimization {
     public AST optimize(ExtractBindAST ast) {
         count++;
         if (info.containsKey(ast.toString())) {
+            System.out.println(info);
+            count++;
+            if (info.get(ast.toString()).modifications != 0){
+                return ast;
+            }
             count++;
             return new ConstantAST(info.get(ast.toString()).value);
         }

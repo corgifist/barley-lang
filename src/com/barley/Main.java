@@ -9,7 +9,7 @@ public class Main {
         Modules.init();
         //Handler.tests();
         //Handler.magicBall();
-        Handler.entry("examples/chat.barley");
-        //Handler.console();
+        Handler.entry("program.barley");
+        Handler.console();
     }
 }

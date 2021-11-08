@@ -15,7 +15,7 @@ public class GeneratorAST implements AST, Serializable {
 
     private AST gen;
     private String var;
-    private AST iterable;
+    public AST iterable;
 
     public GeneratorAST(AST gen, String var, AST iterable) {
         this.gen = gen;
@@ -45,7 +45,7 @@ public class GeneratorAST implements AST, Serializable {
 
     @Override
     public void visit(Optimization optimization) {
-        optimization.optimize(iterable);
+        iterable = optimization.optimize(iterable);
     }
 
     @Override

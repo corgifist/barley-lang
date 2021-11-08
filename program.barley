@@ -1,7 +1,5 @@
 -module(test).
+-opt().
 
 main() ->
-    X = 2 + 3,
-    Y = 4 + 5 + 1,
-    io:fwriteln("string" + " oko"),
-    io:fwriteln(Y).
+    io:fwriteln(X + 2 || X -> [1, 2 + 3, 4 + 4]).

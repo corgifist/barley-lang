@@ -25,8 +25,8 @@ public class ConstantFolding implements Optimization {
     public AST optimize(BinaryAST ast) {
         AST left = optimize(ast.expr1);
         AST right = optimize(ast.expr2);
-        count++;
         if ((left instanceof ConstantAST) && (right instanceof ConstantAST)) {
+            count++;
             return new ConstantAST(ast.execute());
         } else return ast;
     }
@@ -82,6 +82,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(GeneratorAST ast) {
+        ast.iterable.visit(this);
         return ast;
     }
 
@@ -92,16 +93,18 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ListAST ast) {
-        count++;
         LinkedList<AST> result = new LinkedList<>();
         for (AST node : ast.getArray()) {
+            node.visit(this);
             result.add(optimize(node));
         }
+        count++;
         return new ListAST(result);
     }
 
     @Override
     public AST optimize(MethodAST ast) {
+        ast.visit(this);
         return ast;
     }
 
