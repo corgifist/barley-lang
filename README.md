@@ -364,5 +364,19 @@ You can run it using `dist:app(Dir)`
 
 Dist module also have a function to run a bare baked module by using `dist:raw_app(App)`
 
-
 It's all!
+
+## Rescue Trap (Selective Optimization)
+
+Usually programs written in Barley run within acceptable speed limits. 
+
+But sometimes the application can be so loaded that the speed drops below average, and sometimes low.
+
+
+Sometimes Barley's built-in optimization can speed up a program by 30-50%. But only for slow programs =( 
+
+Why is this happening?
+
+During optimization, there are many checks, cycles and replacements of the AST. With small programs, this will just slow it down!
+
+Optimization is disabled initially. It can be enabled using `-opt()`
