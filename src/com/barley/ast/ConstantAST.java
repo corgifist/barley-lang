@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class ConstantAST implements AST, Serializable {
 
-    private BarleyValue constant;
+    public BarleyValue constant;
 
     public ConstantAST(BarleyValue constant) {
         this.constant = constant;

@@ -1235,8 +1235,8 @@ public class Modules {
         lists.put("seq", args -> {
             Arguments.check(2, args.length);
             LinkedList<BarleyValue> result = new LinkedList<>();
-            BarleyValue obj = args[1];
-            int iteration = args[0].asFloat().intValue();
+            BarleyValue obj = args[0];
+            int iteration = args[1].asFloat().intValue();
             for (int i = 0; i < iteration; i++) {
                 result.add(obj);
             }

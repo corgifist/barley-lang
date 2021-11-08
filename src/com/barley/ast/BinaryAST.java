@@ -13,7 +13,7 @@ public class BinaryAST implements AST, Serializable {
 
     public AST expr1;
     public AST expr2;
-    private char op;
+    public char op;
 
     public BinaryAST(AST expr1, AST expr2, char op) {
         this.expr1 = expr1;

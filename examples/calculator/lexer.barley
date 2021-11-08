@@ -27,8 +27,10 @@ illegal_character(S, L) -> barley:throw("illegal char '" + S + "'").
 lex(String) -> lex(String, 1).
 
 lex(String, Line) ->
+    Operators = bts:new(),
     Pos = 0,
     operators(),
+    barley:b(),
     process_parts(string:split(String, "")).
 
 process_parts(Parts) ->

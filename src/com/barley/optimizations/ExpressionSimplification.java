@@ -1,58 +1,88 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
+import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyValue;
-import com.barley.runtime.Table;
 import com.barley.utils.AST;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
-public class ConstantPropagation implements Optimization {
+public class ExpressionSimplification implements Optimization {
 
-    private HashMap<String, VariableInfo> info;
-    private HashMap<String, Integer> mods;
     private int count;
-
-    public ConstantPropagation(ArrayList<AST> nodes, VariableGrabber grabber) {
-        this.mods = new HashMap<>();
-        this.info = new HashMap<>(grabber.getInfo(nodes));
-        this.count = 0;
-    }
 
     @Override
     public String summary() {
-        return "Performed " + count + " constant propagations";
+        return "Performed " + count + " expression simplifications";
     }
 
     @Override
     public int count() {
-        return count;
+        return 0;
     }
 
     @Override
     public AST optimize(BinaryAST ast) {
-        optimize(ast.expr1);
-        optimize(ast.expr1);
-        ast.expr1.visit(this);
-        ast.expr2.visit(this);
-        return ast;
+        boolean expr1Zero = isIntegerValue(ast.expr1, 0);
+        if (expr1Zero || isIntegerValue(ast.expr2, 0)) {
+            switch(ast.op) {
+                case '+':
+                    count++;
+                    return expr1Zero ? ast.expr2 : ast.expr1;
+                case '-':
+                    count++;
+                    if (expr1Zero)
+                        return new UnaryAST(ast.expr2, '-');
+                    return ast.expr1;
+                case '*':
+                    count++;
+                    return new ConstantAST(new BarleyNumber(0));
+                case '/':
+                    if (expr1Zero) {
+                        count++;
+                        return new ConstantAST(new BarleyNumber(0));
+                    }
+                    break;
+            }
+
+            boolean exprIsOne = isIntegerValue(ast.expr1, 1);
+            if (exprIsOne || isIntegerValue(ast.expr2, 1)) {
+                switch (ast.op) {
+                    case '*':
+                        count++;
+                        return exprIsOne ? ast.expr2 : ast.expr1;
+                    case '/':
+                        if (!exprIsOne) {
+                            count++;
+                            return ast.expr1;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean isIntegerValue(AST node, int valueToCheck) {
+        if (!(node instanceof ConstantAST)) return false;
+        final BarleyValue value = ((ConstantAST) node).constant;
+        if (!(value instanceof BarleyNumber)) return false;
+
+        final int number = value.asInteger().intValue();
+        return number == valueToCheck;
     }
 
     @Override
     public AST optimize(BindAST ast) {
-        ast.emulate(info, mods);
-        optimize(ast.right);
         ast.visit(this);
-        count++;
         return ast;
     }
 
     @Override
     public AST optimize(BlockAST ast) {
         ast.visit(this);
+        count++;
         return ast;
     }
 
@@ -75,7 +105,6 @@ public class ConstantPropagation implements Optimization {
     @Override
     public AST optimize(ConsAST ast) {
         ast.visit(this);
-        count++;
         return ast;
     }
 
@@ -86,11 +115,6 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(ExtractBindAST ast) {
-        count++;
-        if (info.containsKey(ast.toString())) {
-            return new ConstantAST(info.get(ast.toString()).value);
-        }
-        Table.clear();
         return ast;
     }
 
@@ -107,60 +131,48 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(ListAST ast) {
-        count++;
         LinkedList<AST> result = new LinkedList<>();
         for (AST node : ast.getArray()) {
             result.add(optimize(node));
         }
-        return new ListAST(result);
+        return ast;
     }
 
     @Override
     public AST optimize(MethodAST ast) {
+        ast.visit(this);
         return ast;
     }
 
     @Override
     public AST optimize(ProcessCallAST ast) {
-        optimize(ast.expr);
-        return ast;
+        ast.expr.visit(this);
+        return null;
     }
 
     @Override
     public AST optimize(RemoteAST ast) {
-        return ast;
+        return null;
     }
 
     @Override
     public AST optimize(TernaryAST ast) {
-        optimize(ast.term);
-        optimize(ast.right);
-        optimize(ast.left);
-        return ast;
+        return null;
     }
 
     @Override
     public AST optimize(RecieveAST ast) {
-        return ast;
+        return null;
     }
 
     @Override
     public AST optimize(UnaryAST ast) {
-        optimize(ast.expr1);
-        return ast;
+        return null;
     }
+
 
     @Override
     public AST optimize(AST ast) {
-        HashMap<String, VariableInfo> vars = info;
-        Map<String, BarleyValue> candidates = new HashMap<>();
-        for (Map.Entry<String, VariableInfo> e : vars.entrySet()) {
-            final VariableInfo info = e.getValue();
-            if (info.modifications != 0) continue;
-            if (info.value == null) continue;
-            candidates.put(e.getKey(), info.value);
-        }
-        Table.variables().putAll(candidates);
         if (ast instanceof BinaryAST) {
             return optimize((BinaryAST) ast);
         } else if (ast instanceof BindAST) {
