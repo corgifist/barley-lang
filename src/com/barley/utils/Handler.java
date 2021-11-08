@@ -1,6 +1,7 @@
 package com.barley.utils;
 
 import com.barley.optimizations.ConstantFolding;
+import com.barley.optimizations.ConstantPropagation;
 import com.barley.optimizations.Optimization;
 import com.barley.optimizations.VariableGrabber;
 import com.barley.parser.Lexer;
@@ -19,9 +20,6 @@ public class Handler {
     private static String RUNTIME_VERSION = "0.1";
 
     public static void handle(String input, boolean isExpr, boolean time) {
-        Optimization[] opts = new Optimization[] {
-                new ConstantFolding()
-        };
         try {
             final TimeMeasurement measurement = new TimeMeasurement();
             measurement.start("Lexer time");
@@ -31,8 +29,10 @@ public class Handler {
             measurement.start("Parse time");
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
-            VariableGrabber grabber = new VariableGrabber();
-            System.out.println(grabber.getInfo(new ArrayList<>(nodes)));
+            Optimization[] opts = new Optimization[] {
+                    new ConstantFolding(),
+                    new ConstantPropagation(new VariableGrabber().getInfo(new ArrayList<>(nodes)))
+            };
             measurement.stop("Parse time");
             measurement.start("Optimization time");
             for (AST node : nodes) {
@@ -43,7 +43,6 @@ public class Handler {
             }
             measurement.stop("Optimization time");
             measurement.start("Execute time");
-            System.out.println(nodes);
             for (AST node : nodes) {
                 node.execute();
             }

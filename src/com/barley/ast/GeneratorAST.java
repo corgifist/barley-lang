@@ -45,7 +45,7 @@ public class GeneratorAST implements AST, Serializable {
 
     @Override
     public void visit(Optimization optimization) {
-
+        optimization.optimize(iterable);
     }
 
     @Override

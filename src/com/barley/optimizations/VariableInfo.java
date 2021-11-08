@@ -4,10 +4,10 @@ import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
 public final class VariableInfo {
-    public AST value;
-    int modifications;
+    public BarleyValue value;
+    public int modifications;
 
-    public VariableInfo(AST value, int modifications) {
+    public VariableInfo(BarleyValue value, int modifications) {
         this.value = value;
         this.modifications = modifications;
     }

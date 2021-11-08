@@ -9,10 +9,12 @@ import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
+import javax.swing.text.html.HTMLDocument;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class BindAST implements AST, Serializable {
 
@@ -111,12 +113,19 @@ public class BindAST implements AST, Serializable {
     public HashMap<String, VariableInfo> emulate(HashMap<String, VariableInfo> storage, HashMap<String, Integer> mods) {
         Pattern root = pattern(left);
         if (root instanceof VariablePattern v) {
-            if (mods.containsKey(((VariablePattern) root).getVariable())) {
+            if (mods.containsKey(((VariablePattern) root).getVariable()) && canEvalNow(right, storage, mods)) {
+                AST tr = transform(right, storage, mods);
                 mods.put(((VariablePattern) root).getVariable(), mods.get(((VariablePattern) root).getVariable()) + 1);
-                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) root).getVariable())));
-            } else {
+                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(tr.execute(), mods.get(((VariablePattern) root).getVariable())));
+            } else if (canEvalNow(right, storage, mods)) {
+                for (Map.Entry<String, VariableInfo> entry : storage.entrySet()) {
+                    if (entry.getValue().modifications != 0) continue;
+                    BarleyValue n = entry.getValue().value;
+                    Table.define(entry.getKey(), n);
+                }
                 mods.put(((VariablePattern) root).getVariable(), 0);
-                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) root).getVariable())));
+                storage.put(((VariablePattern) root).getVariable(), new VariableInfo(right.execute(), mods.get(((VariablePattern) root).getVariable())));
+                Table.clear();
             }
         } else if (root instanceof ConstantPattern) {
             ;
@@ -126,6 +135,44 @@ public class BindAST implements AST, Serializable {
 
         }
         return storage;
+    }
+
+    private AST transform(AST a, HashMap<String, VariableInfo> info, HashMap<String, Integer> mods) {
+        ExtractBindAST ast = (ExtractBindAST) a;
+        if (!(info.containsKey(ast.toString()))) return a;
+        AST result = new ConstantAST(info.get(ast.toString()).value);
+        return result;
+    }
+
+    private boolean canEvalNow(AST ast, HashMap<String, VariableInfo> storage, HashMap<String, Integer> mods) {
+        if (ast instanceof BinaryAST p) {
+            boolean l = canEvalNow(p.expr1, storage, mods);
+            boolean r = canEvalNow(p.expr2, storage, mods);
+            return l && r;
+        } else if (ast instanceof ConstantAST) {
+            return true;
+        } else if (ast instanceof UnaryAST p) {
+            return canEvalNow(p.expr1, storage, mods);
+        } else if (ast instanceof ListAST p) {
+            for (AST node : p.getArray()) {
+                if (canEvalNow(node, storage, mods)) continue;
+                return false;
+            }
+            return true;
+        } else if (ast instanceof TernaryAST p) {
+            boolean t = canEvalNow(p.term, storage, mods);
+            boolean l = canEvalNow(p.left, storage, mods);
+            boolean r = canEvalNow(p.right, storage, mods);
+            return t && l && r;
+        } else if (ast instanceof ConsAST p) {
+            boolean l = canEvalNow(p.left, storage, mods);
+            boolean r = canEvalNow(p.right, storage, mods);
+            return l && r;
+        } else if (ast instanceof ExtractBindAST p) {
+            boolean result = storage.containsKey(p.toString());
+            return result;
+        }
+        return false;
     }
 
     private void emulate_list(HashMap<String, VariableInfo> storage, HashMap<String, Integer> mods, Pattern root) {
@@ -138,11 +185,11 @@ public class BindAST implements AST, Serializable {
             BarleyValue right = list.get(i);
             if (pattern1 instanceof VariablePattern) {
                 if (mods.containsKey(((VariablePattern) pattern1).getVariable())) {
-                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(new ConstantAST(right), mods.get(((VariablePattern) pattern1).getVariable())));
+                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) pattern1).getVariable())));
                     mods.put(((VariablePattern) pattern1).getVariable(), mods.get(((VariablePattern) pattern1).getVariable()) + 1);
                 } else {
                     mods.put(((VariablePattern) pattern1).getVariable(), 0);
-                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(new ConstantAST(right), mods.get(((VariablePattern) pattern1).getVariable())));
+                    storage.put(((VariablePattern) pattern1).getVariable(), new VariableInfo(right, mods.get(((VariablePattern) pattern1).getVariable())));
                 }
             } else if (pattern1 instanceof ConstantPattern) {
                 continue;
@@ -151,15 +198,15 @@ public class BindAST implements AST, Serializable {
                 processPattern(pattern1, new ConstantAST(right));
             } else if (pattern1 instanceof ConsPattern p1) {
                 if (mods.containsKey(p1.getLeft()) && mods.containsKey(p1.getRight())) {
-                    storage.put(p1.getLeft(), new VariableInfo(new ConstantAST(head((BarleyList) right)), mods.get(p1.getLeft()) + 1));
-                    storage.put(p1.getRight(), new VariableInfo(new ConstantAST(tail((BarleyList) right)), mods.get(p1.getRight()) + 1));
+                    storage.put(p1.getLeft(), new VariableInfo(head((BarleyList) right), mods.get(p1.getLeft()) + 1));
+                    storage.put(p1.getRight(), new VariableInfo(tail((BarleyList) right), mods.get(p1.getRight()) + 1));
                     mods.put(p1.getLeft(), mods.get(p1.getLeft()) + 1);
                     mods.put(p1.getRight(), mods.get(p1.getRight()) + 1);
                 } else {
                     mods.put(p1.getLeft(),0);
                     mods.put(p1.getRight(), 0);
-                    storage.put(p1.getLeft(), new VariableInfo(new ConstantAST(head((BarleyList) right)), mods.get(p1.getLeft()) + 1));
-                    storage.put(p1.getRight(), new VariableInfo(new ConstantAST(tail((BarleyList) right)), mods.get(p1.getRight()) + 1));
+                    storage.put(p1.getLeft(), new VariableInfo(head((BarleyList) right), mods.get(p1.getLeft()) + 1));
+                    storage.put(p1.getRight(), new VariableInfo(tail((BarleyList) right), mods.get(p1.getRight()) + 1));
                 }
             }
         }

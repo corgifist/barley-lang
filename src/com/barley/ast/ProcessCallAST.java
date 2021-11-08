@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 public class ProcessCallAST implements AST, Serializable {
 
-    private AST pid, expr;
+    public AST pid, expr;
 
     public ProcessCallAST(AST pid, AST expr) {
         this.pid = pid;

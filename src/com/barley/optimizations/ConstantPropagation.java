@@ -1,19 +1,27 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
+import com.barley.runtime.BarleyValue;
+import com.barley.runtime.Table;
 import com.barley.utils.AST;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Optional;
+import java.util.Map;
 
-public class ConstantFolding implements Optimization {
+public class ConstantPropagation implements Optimization {
 
+    private Map<String, VariableInfo> info;
     private int count;
+
+    public ConstantPropagation(Map<String, VariableInfo> info) {
+        this.info = info;
+        this.count = 0;
+    }
 
     @Override
     public String summary() {
-        return "Performed " + count + " folding optimizations";
+        return "Performed " + count + " constant propagations";
     }
 
     @Override
@@ -24,17 +32,15 @@ public class ConstantFolding implements Optimization {
     @Override
     public AST optimize(BinaryAST ast) {
         optimize(ast.expr1);
-        optimize(ast.expr2);
+        optimize(ast.expr1);
         ast.expr1.visit(this);
         ast.expr2.visit(this);
-        count++;
-        if ((ast.expr1 instanceof ConstantAST) && (ast.expr2 instanceof ConstantAST)) {
-            return new ConstantAST(ast.execute());
-        } else return ast;
+        return ast;
     }
 
     @Override
     public AST optimize(BindAST ast) {
+        optimize(ast.right);
         ast.visit(this);
         count++;
         return ast;
@@ -43,13 +49,11 @@ public class ConstantFolding implements Optimization {
     @Override
     public AST optimize(BlockAST ast) {
         ast.visit(this);
-        count++;
         return ast;
     }
 
     @Override
     public AST optimize(CallAST ast) {
-        count++;
         ast.visit(this);
         return ast;
     }
@@ -66,10 +70,9 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ConsAST ast) {
+        ast.visit(this);
         count++;
-        if ((ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
-            return new ConstantAST(ast.execute());
-        } else return ast;
+        return ast;
     }
 
     @Override
@@ -79,11 +82,27 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(ExtractBindAST ast) {
+        count++;
+        if (info.containsKey(ast.toString())) {
+            String var = ast.toString();
+            if (info.get(var).modifications == 0) {
+                BarleyValue n = null;
+                for (Map.Entry<String, VariableInfo> entry : info.entrySet()) {
+                    if (entry.getValue().modifications != 0) continue;
+                    n = entry.getValue().value;
+                    Table.define(entry.getKey(), n);
+                }
+                AST res = new ConstantAST(n);
+                Table.clear();
+                return res;
+            }
+        }
         return ast;
     }
 
     @Override
     public AST optimize(GeneratorAST ast) {
+        ast.visit(this);
         return ast;
     }
 
@@ -120,10 +139,9 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(TernaryAST ast) {
-        count++;
-        if ((ast.term instanceof ConstantAST) &&(ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
-            return new ConstantAST(ast.execute());
-        }
+        optimize(ast.term);
+        optimize(ast.right);
+        optimize(ast.left);
         return ast;
     }
 
@@ -134,11 +152,7 @@ public class ConstantFolding implements Optimization {
 
     @Override
     public AST optimize(UnaryAST ast) {
-        count++;
-        AST left = optimize(ast.expr1);
-        if (left instanceof ConstantAST) {
-            return new ConstantAST(ast.execute());
-        }
+        optimize(ast.expr1);
         return ast;
     }
 
