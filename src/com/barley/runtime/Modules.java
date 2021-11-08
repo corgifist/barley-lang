@@ -1054,7 +1054,9 @@ public class Modules {
                 for (Map.Entry<String, Function> ent : methods.entrySet()) {
                     method.add(new BarleyList(new BarleyString(ent.getKey()), new BarleyFunction(ent.getValue())));
                 }
-                method.add(new BarleyList(new BarleyString("doc"), new BarleyString(docs.get(module))));
+                if (docs.containsKey(module)) {
+                    method.add(new BarleyList(new BarleyString("doc"), new BarleyString(docs.get(module))));
+                } else method.add(new BarleyList(new BarleyString("doc"), new BarleyString("no docs provided")));
                 ms.add(new BarleyList(method));
             }
             result.add(new BarleyList(ms));
