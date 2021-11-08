@@ -19,7 +19,8 @@ operators() ->
     bts:insert(Operators, "*", star),
     bts:insert(Operators, "/", slash),
     bts:insert(Operators, "(", lparen),
-    bts:insert(Operators, ")", rparen).
+    bts:insert(Operators, ")", rparen),
+    bts:insert(Operators, "=", eq),.
 
 illegal_character(S, L) -> barley:throw("illegal char '" + S + "'").
 
@@ -34,7 +35,11 @@ process_parts(Parts) ->
     Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_symbol(Parts, First)]. end, Parts, []),
     WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),
     WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),
+    WithoutEOF = lists:filter(def (X) -> (not ((lists:nth(X, 0) == variable) and lists:nth(X, 2) == "")). end, WithoutEOF),
     WithoutEOF = WithoutEOF + [EOFToken].
+
+process_symbol(Parts, Symbol) when string:is_identifier(Symbol) ->
+    [variable, Line, catch_while_id(Parts)].
 
 process_symbol(Parts, Symbol) when Symbol == "\n" -> Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, ""].
 
@@ -52,6 +57,14 @@ process_symbol(Parts, Symbol) when not (string:as_number(Symbol) == error) ->
 process_symbol(Parts, Symbol) -> illegal_character(Symbol, Line).
 
 operator(Symbol) -> [bts:lookup(Operators, Symbol), Line, Symbol].
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when not (string:is_identifier(lists:nth(Parts, NewPos)) == false) ->
+    catch_while_id(Parts, OldPos, Pos = NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
 
 catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
 catch_while_number(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->

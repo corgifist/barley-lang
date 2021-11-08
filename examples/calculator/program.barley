@@ -2,6 +2,7 @@
 
 eval(String) ->
     Tokens = lexer:lex(String),
+    io:fwriteln(Tokens),
     Tree = parser:parse(Tokens),
     io:fwriteln(Tree),
     [Value] = lists:map(interpreter:eval, Tree),

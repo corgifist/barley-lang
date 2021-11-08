@@ -478,6 +478,11 @@ public class Modules {
             Arguments.check(1, args.length);
             return new BarleyString(args[0].toString().toUpperCase(Locale.ROOT));
         });
+        string.put("is_identifier", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(String.valueOf(Character.isLetter(args[0].toString().charAt(0))));
+        });
+
         string.put("split", args -> {
             Arguments.checkOrOr(1, 2, args.length);
             LinkedList<BarleyValue> result = new LinkedList<>();
