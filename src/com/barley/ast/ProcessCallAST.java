@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyPID;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.ProcessTable;
@@ -23,6 +24,11 @@ public class ProcessCallAST implements AST, Serializable {
         BarleyPID id = (BarleyPID) pid.execute();
         JavaFunctionAST ast = (JavaFunctionAST) ProcessTable.receives.get(id);
         return ast.execute();
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        expr = optimization.optimize(expr);
     }
 
     @Override

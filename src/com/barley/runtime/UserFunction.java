@@ -1,6 +1,7 @@
 package com.barley.runtime;
 
 import com.barley.ast.*;
+import com.barley.optimizations.Optimization;
 import com.barley.patterns.*;
 import com.barley.utils.*;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class UserFunction implements Function, Serializable {
 
-    private ArrayList<Clause> clauses;
+    public ArrayList<Clause> clauses;
 
     public UserFunction(ArrayList<Clause> clauses) {
         this.clauses = clauses;
@@ -91,6 +92,13 @@ public class UserFunction implements Function, Serializable {
         }
     }
 
+    public void optimize(Optimization opt) {
+        ArrayList<Clause> res = new ArrayList<>();
+        for (Clause cl : clauses) {
+            res.add(cl.optimize(opt));
+        }
+        clauses = res;
+    }
 
     private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
         if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");

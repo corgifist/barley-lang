@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
@@ -7,7 +8,7 @@ import java.io.Serializable;
 
 public class TernaryAST implements AST, Serializable {
 
-    AST term, left, right;
+    public AST term, left, right;
 
     public TernaryAST(AST term, AST left, AST right) {
         this.term = term;
@@ -22,6 +23,13 @@ public class TernaryAST implements AST, Serializable {
         BarleyValue r = right.execute();
         if (t.toString().equals("true")) return l;
         else return r;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        term = optimization.optimize(term);
+        left = optimization.optimize(left);
+        right = optimization.optimize(right);
     }
 
     @Override

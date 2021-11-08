@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
@@ -22,6 +23,11 @@ public class ListAST implements AST, Serializable {
             arr.add(ast.execute());
         }
         return new BarleyList(arr);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        optimization.optimize(this);
     }
 
     public LinkedList<AST> getArray() {

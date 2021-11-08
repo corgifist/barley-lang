@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.patterns.*;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class BindAST implements AST, Serializable {
 
-    private AST left, right;
+    public AST left, right;
 
     public BindAST(AST left, AST right) {
         this.left = left;
@@ -24,6 +25,11 @@ public class BindAST implements AST, Serializable {
     public BarleyValue execute() {
         Pattern pattern = pattern(left);
         return processPattern(pattern, right);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        right = optimization.optimize(right);
     }
 
     private BarleyValue processPattern(Pattern pattern, AST r) {

@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
@@ -10,7 +11,8 @@ import java.util.LinkedList;
 
 public class BinaryAST implements AST, Serializable {
 
-    public final AST expr1, expr2;
+    public AST expr1;
+    public AST expr2;
     private char op;
 
     public BinaryAST(AST expr1, AST expr2, char op) {
@@ -82,6 +84,12 @@ public class BinaryAST implements AST, Serializable {
                 badArith(val1, val2);
         }
         return null;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        this.expr1 = optimization.optimize(expr1);
+        this.expr2 = optimization.optimize(expr2);
     }
 
     private boolean istrue(BarleyValue value) {

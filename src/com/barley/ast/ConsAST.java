@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
@@ -9,7 +10,7 @@ import java.util.LinkedList;
 
 public class ConsAST implements AST, Serializable {
 
-    private AST left, right;
+    public AST left, right;
 
     public ConsAST(AST left, AST right) {
         this.left = left;
@@ -22,6 +23,12 @@ public class ConsAST implements AST, Serializable {
         list.add(left.execute());
         list.add(right.execute());
         return new BarleyList(list);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        left = optimization.optimize(left);
+        right = optimization.optimize(right);
     }
 
 

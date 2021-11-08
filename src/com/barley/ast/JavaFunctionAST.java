@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 import com.barley.utils.Function;
@@ -20,6 +21,11 @@ public class JavaFunctionAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         return function.execute(args);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

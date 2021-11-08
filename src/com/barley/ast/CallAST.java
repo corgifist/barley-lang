@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyFunction;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
@@ -32,6 +33,15 @@ public class CallAST implements AST, Serializable {
         result = function.execute(arguments);
         CallStack.exit();
         return result;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        ArrayList<AST> argss = new ArrayList<>();
+        for (AST node : args) {
+            argss.add(optimization.optimize(node));
+        }
+        args = argss;
     }
 
     @Override

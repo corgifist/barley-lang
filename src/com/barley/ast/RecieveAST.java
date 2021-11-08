@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyPID;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.ProcessTable;
@@ -42,6 +43,11 @@ public class RecieveAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         return p;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

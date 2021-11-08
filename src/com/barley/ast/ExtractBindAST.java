@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Table;
 import com.barley.utils.AST;
@@ -17,6 +18,11 @@ public class ExtractBindAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         return Table.get(constant);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.barley.utils;
 
+import com.barley.optimizations.Optimization;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -37,6 +39,11 @@ public class Clause implements Serializable {
 
     public void setResult(AST result) {
         this.result = result;
+    }
+
+    public Clause optimize(Optimization opt) {
+        result = opt.optimize(result);
+        return this;
     }
 
     @Override

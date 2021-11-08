@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyValue;
@@ -25,6 +26,11 @@ public final class CaseAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         return eval();
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     public BarleyValue eval() {
@@ -263,6 +269,11 @@ public final class CaseAST implements AST, Serializable {
             @Override
             public BarleyValue execute() {
                 return new BarleyNumber(1);
+            }
+
+            @Override
+            public void visit(Optimization optimization) {
+
             }
 
 

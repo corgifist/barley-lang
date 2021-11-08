@@ -1,5 +1,7 @@
 package com.barley.utils;
 
+import com.barley.optimizations.ConstantFolding;
+import com.barley.optimizations.Optimization;
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
 import com.barley.runtime.ProcessTable;
@@ -15,6 +17,9 @@ public class Handler {
     private static String RUNTIME_VERSION = "0.1";
 
     public static void handle(String input, boolean isExpr, boolean time) {
+        Optimization[] opts = new Optimization[] {
+                new ConstantFolding()
+        };
         try {
             final TimeMeasurement measurement = new TimeMeasurement();
             measurement.start("Lexer time");
@@ -25,7 +30,15 @@ public class Handler {
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             measurement.stop("Parse time");
+            measurement.start("Optimization time");
+            for (AST node : nodes) {
+                for (Optimization opt : opts) {
+                    node.visit(opt);
+                }
+            }
+            measurement.stop("Optimization time");
             measurement.start("Execute time");
+            System.out.println(nodes);
             for (AST node : nodes) {
                 node.execute();
             }
@@ -137,7 +150,7 @@ public class Handler {
         measurement.start("Tests time");
         for (String script : scripts) {
             try {
-                Handler.handle(SourceLoader.readSource(script), false, false);
+                Handler.handle(SourceLoader.readSource(script), false,true);
                 Handler.handle("test:main().", true);
             } catch (IOException e) {
                 e.printStackTrace();

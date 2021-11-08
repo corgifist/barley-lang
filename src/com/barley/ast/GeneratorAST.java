@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyValue;
@@ -40,6 +41,11 @@ public class GeneratorAST implements AST, Serializable {
         Table.remove(var);
         Table.remove("ITERATION");
         return new BarleyList(result);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

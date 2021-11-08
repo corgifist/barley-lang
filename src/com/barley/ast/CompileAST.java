@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.AtomTable;
 import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyValue;
@@ -24,6 +25,11 @@ public class CompileAST implements AST, Serializable {
     public BarleyValue execute() {
         Modules.put(module, methods);
         return new BarleyAtom(AtomTable.put("ok"));
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

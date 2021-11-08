@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
@@ -16,6 +17,11 @@ public class ConstantAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         return constant;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

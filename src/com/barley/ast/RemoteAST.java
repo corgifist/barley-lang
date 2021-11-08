@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyFunction;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Modules;
@@ -28,6 +29,11 @@ public class RemoteAST implements AST, Serializable {
         if (a == null)
             throw new BarleyException("Undef", "module '" + m + "' exists but function '" + t + "' doesn't");
         return new BarleyFunction(a);
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+
     }
 
     @Override

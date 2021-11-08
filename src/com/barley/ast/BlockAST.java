@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
 
@@ -22,6 +23,15 @@ public class BlockAST implements AST, Serializable {
             last = block.get(i).execute();
         }
         return last;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        ArrayList<AST> result = new ArrayList<>();
+        for (AST node : block) {
+            result.add(optimization.optimize(node));
+        }
+        block = result;
     }
 
     @Override

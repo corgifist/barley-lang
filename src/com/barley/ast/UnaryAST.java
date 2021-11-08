@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
@@ -8,7 +9,7 @@ import java.io.Serializable;
 
 public class UnaryAST implements AST, Serializable {
 
-    public final AST expr1;
+    public AST expr1;
     private char op;
 
     public UnaryAST(AST expr1, char op) {
@@ -29,6 +30,11 @@ public class UnaryAST implements AST, Serializable {
                 badArith();
         }
         return null;
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        expr1 = optimization.optimize(expr1);
     }
 
     private BarleyValue not(BarleyValue value) {

@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.optimizations.Optimization;
 import com.barley.parser.Parser;
 import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyValue;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 public class MethodAST implements AST, Serializable {
 
     private Parser parser;
-    private UserFunction method;
+    public UserFunction method;
     private String name;
 
     public MethodAST(Parser parser, UserFunction method, String name) {
@@ -24,6 +25,11 @@ public class MethodAST implements AST, Serializable {
     public BarleyValue execute() {
         parser.methods.put(name, method);
         return new BarleyAtom("ok");
+    }
+
+    @Override
+    public void visit(Optimization optimization) {
+        method.optimize(optimization);
     }
 
     @Override
