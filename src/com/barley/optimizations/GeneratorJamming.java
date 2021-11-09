@@ -1,19 +1,18 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
+import com.barley.utils.BarleyException;
 
 import java.util.LinkedList;
 
-public class ExpressionSimplification implements Optimization {
+public class GeneratorJamming implements Optimization {
 
     private int count;
 
     @Override
     public String summary() {
-        return "Performed " + count + " expression simplifications";
+        return "Performed " + count + " jams";
     }
 
     @Override
@@ -23,54 +22,8 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(BinaryAST ast) {
-        boolean expr1Zero = isIntegerValue(ast.expr1, 0);
-        if (expr1Zero || isIntegerValue(ast.expr2, 0)) {
-            switch(ast.op) {
-                case '+':
-                    count++;
-                    return expr1Zero ? ast.expr2 : ast.expr1;
-                case '-':
-                    count++;
-                    if (expr1Zero)
-                        return new UnaryAST(ast.expr2, '-');
-                    return ast.expr1;
-                case '*':
-                    count++;
-                    return new ConstantAST(new BarleyNumber(0));
-                case '/':
-                    if (expr1Zero) {
-                        count++;
-                        return new ConstantAST(new BarleyNumber(0));
-                    }
-                    break;
-            }
-
-            boolean exprIsOne = isIntegerValue(ast.expr1, 1);
-            if (exprIsOne || isIntegerValue(ast.expr2, 1)) {
-                switch (ast.op) {
-                    case '*':
-                        count++;
-                        return exprIsOne ? ast.expr2 : ast.expr1;
-                    case '/':
-                        if (!exprIsOne) {
-                            count++;
-                            return ast.expr1;
-                        }
-                        break;
-                }
-            }
-        }
-
+        ast.visit(this);
         return ast;
-    }
-
-    public static boolean isIntegerValue(AST node, int valueToCheck) {
-        if (!(node instanceof ConstantAST)) return false;
-        final BarleyValue value = ((ConstantAST) node).constant;
-        if (!(value instanceof BarleyNumber)) return false;
-
-        final int number = value.asInteger().intValue();
-        return number == valueToCheck;
     }
 
     @Override
@@ -82,7 +35,6 @@ public class ExpressionSimplification implements Optimization {
     @Override
     public AST optimize(BlockAST ast) {
         ast.visit(this);
-        count++;
         return ast;
     }
 
@@ -94,6 +46,7 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(CaseAST ast) {
+        ast.expression.visit(this);
         return ast;
     }
 
@@ -120,8 +73,12 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(GeneratorAST ast) {
-        ast.visit(this);
-        return ast;
+       try {
+           count++;
+           return new ConstantAST(ast.execute());
+       } catch (BarleyException ex) {
+           return ast;
+       }
     }
 
     @Override
@@ -147,7 +104,7 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(ProcessCallAST ast) {
-        ast.expr.visit(this);
+        ast.visit(this);
         return ast;
     }
 

@@ -7,9 +7,10 @@ public class Main {
 
     public static void main(String[] args) {
         Modules.init();
-        //Handler.tests();
+        Handler.tests();
         //Handler.magicBall();
+        //Handler.calculator();
         Handler.entry("program.barley");
-        Handler.console();
+        //Handler.console();
     }
 }

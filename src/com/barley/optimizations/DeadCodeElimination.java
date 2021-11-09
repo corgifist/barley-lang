@@ -1,19 +1,19 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
-import com.barley.runtime.BarleyNumber;
-import com.barley.runtime.BarleyValue;
+import com.barley.runtime.BarleyList;
 import com.barley.utils.AST;
+import com.barley.utils.BarleyException;
 
 import java.util.LinkedList;
 
-public class ExpressionSimplification implements Optimization {
+public class DeadCodeElimination implements Optimization {
 
     private int count;
 
     @Override
     public String summary() {
-        return "Performed " + count + " expression simplifications";
+        return "Performed " + count + " eliminations";
     }
 
     @Override
@@ -23,54 +23,9 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(BinaryAST ast) {
-        boolean expr1Zero = isIntegerValue(ast.expr1, 0);
-        if (expr1Zero || isIntegerValue(ast.expr2, 0)) {
-            switch(ast.op) {
-                case '+':
-                    count++;
-                    return expr1Zero ? ast.expr2 : ast.expr1;
-                case '-':
-                    count++;
-                    if (expr1Zero)
-                        return new UnaryAST(ast.expr2, '-');
-                    return ast.expr1;
-                case '*':
-                    count++;
-                    return new ConstantAST(new BarleyNumber(0));
-                case '/':
-                    if (expr1Zero) {
-                        count++;
-                        return new ConstantAST(new BarleyNumber(0));
-                    }
-                    break;
-            }
-
-            boolean exprIsOne = isIntegerValue(ast.expr1, 1);
-            if (exprIsOne || isIntegerValue(ast.expr2, 1)) {
-                switch (ast.op) {
-                    case '*':
-                        count++;
-                        return exprIsOne ? ast.expr2 : ast.expr1;
-                    case '/':
-                        if (!exprIsOne) {
-                            count++;
-                            return ast.expr1;
-                        }
-                        break;
-                }
-            }
-        }
-
+        ast.expr1.visit(this);
+        ast.expr2.visit(this);
         return ast;
-    }
-
-    public static boolean isIntegerValue(AST node, int valueToCheck) {
-        if (!(node instanceof ConstantAST)) return false;
-        final BarleyValue value = ((ConstantAST) node).constant;
-        if (!(value instanceof BarleyNumber)) return false;
-
-        final int number = value.asInteger().intValue();
-        return number == valueToCheck;
     }
 
     @Override
@@ -82,7 +37,6 @@ public class ExpressionSimplification implements Optimization {
     @Override
     public AST optimize(BlockAST ast) {
         ast.visit(this);
-        count++;
         return ast;
     }
 
@@ -94,6 +48,7 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(CaseAST ast) {
+        ast.expression.visit(this);
         return ast;
     }
 
@@ -105,7 +60,7 @@ public class ExpressionSimplification implements Optimization {
     @Override
     public AST optimize(ConsAST ast) {
         ast.visit(this);
-        return ast;
+        return null;
     }
 
     @Override
@@ -120,6 +75,14 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(GeneratorAST ast) {
+        try {
+            if (ast.iterable.execute().toString().equals("[]")) {
+                count++;
+                return new ConstantAST(new BarleyList());
+            }
+        } catch (BarleyException ex) {
+
+        }
         ast.visit(this);
         return ast;
     }
@@ -136,6 +99,7 @@ public class ExpressionSimplification implements Optimization {
             node.visit(this);
             result.add(optimize(node));
         }
+        count++;
         return ast;
     }
 
@@ -158,7 +122,15 @@ public class ExpressionSimplification implements Optimization {
 
     @Override
     public AST optimize(TernaryAST ast) {
-        ast.visit(this);
+        try {
+            if (ast.term.execute().toString().equals("true")) {
+                count++;
+                return ast.left;
+            }
+            return ast.right;
+        } catch (BarleyException ex) {
+
+        }
         return ast;
     }
 
@@ -172,7 +144,6 @@ public class ExpressionSimplification implements Optimization {
         ast.visit(this);
         return ast;
     }
-
 
     @Override
     public AST optimize(AST ast) {

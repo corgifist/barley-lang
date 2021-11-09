@@ -41,7 +41,8 @@ public class CallAST implements AST, Serializable {
         for (AST node : args) {
             argss.add(optimization.optimize(node));
         }
-        args = argss;
+        args.clear();
+        args.addAll(argss);
     }
 
     @Override
