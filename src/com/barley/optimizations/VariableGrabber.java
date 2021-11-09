@@ -1,6 +1,7 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
+import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.Clause;
 
@@ -12,10 +13,17 @@ public class VariableGrabber {
 
     private HashMap<String, VariableInfo> info;
     private HashMap<String, Integer> mods;
+    private TableEmulator result;
+
+    public TableEmulator emulate(ArrayList<AST> nodes) {
+        getInfo(nodes);
+        return result;
+    }
 
     public Map<String, VariableInfo> getInfo(ArrayList<AST> nodes) {
         info = new HashMap<>();
         mods = new HashMap<>();
+        result = new TableEmulator();
         for (AST node : nodes) {
             cast(node);
         }
@@ -23,7 +31,10 @@ public class VariableGrabber {
     }
 
     private AST optimize(BindAST ast) {
-        ast.emulate(info, mods);
+        HashMap<String, VariableInfo> vars = ast.emulate(info, mods);
+        for (Map.Entry<String, VariableInfo> entry : vars.entrySet()) {
+            result.set(entry.getKey(), entry.getValue());
+        }
         return ast;
     }
 
@@ -36,6 +47,7 @@ public class VariableGrabber {
 
     private AST optimize(MethodAST ast) {
         ArrayList<Clause> clauses = ast.method.clauses;
+        result.push();
         for (Clause cl : clauses) {
             cast(cl.getResult());
         }

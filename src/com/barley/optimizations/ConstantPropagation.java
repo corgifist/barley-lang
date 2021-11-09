@@ -12,13 +12,12 @@ import java.util.Map;
 
 public class ConstantPropagation implements Optimization {
 
-    private HashMap<String, VariableInfo> info;
-    private HashMap<String, Integer> mods;
+    private TableEmulator emulator;
     private int count;
 
     public ConstantPropagation(ArrayList<AST> nodes, VariableGrabber grabber) {
-        this.mods = new HashMap<>();
-        this.info = new HashMap<>(grabber.getInfo(nodes));
+        emulator = new TableEmulator();
+        emulator = grabber.emulate(nodes);
         this.count = 0;
     }
 
@@ -44,7 +43,6 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(BindAST ast) {
-        info = ast.emulate(info, mods);
         optimize(ast.right);
         ast.visit(this);
         count++;
@@ -88,8 +86,8 @@ public class ConstantPropagation implements Optimization {
     @Override
     public AST optimize(ExtractBindAST ast) {
         count++;
+        HashMap<String, VariableInfo> info = new HashMap<>(emulator.variables());
         if (info.containsKey(ast.toString())) {
-            System.out.println(info);
             count++;
             if (info.get(ast.toString()).modifications != 0){
                 return ast;
@@ -97,7 +95,6 @@ public class ConstantPropagation implements Optimization {
             count++;
             return new ConstantAST(info.get(ast.toString()).value);
         }
-        Table.clear();
         return ast;
     }
 
@@ -125,6 +122,7 @@ public class ConstantPropagation implements Optimization {
     @Override
     public AST optimize(MethodAST ast) {
         ast.visit(this);
+        emulator.pop();
         return ast;
     }
 
@@ -160,13 +158,16 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(AST ast) {
-        HashMap<String, VariableInfo> vars = info;
+        Map<String, VariableInfo> vars = emulator.variables();
         Map<String, BarleyValue> candidates = new HashMap<>();
         for (Map.Entry<String, VariableInfo> e : vars.entrySet()) {
             final VariableInfo info = e.getValue();
             if (info.modifications != 0) continue;
             if (info.value == null) continue;
             candidates.put(e.getKey(), info.value);
+        }
+        for (Map.Entry<String, BarleyValue> e : candidates.entrySet()) {
+            Table.set(e.getKey(), e.getValue());
         }
 
         if (ast instanceof BinaryAST) {

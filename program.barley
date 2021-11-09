@@ -2,4 +2,6 @@
 -opt().
 
 main() ->
-    io:fwriteln(X + 2 || X -> [1, 2 + 3, 4 + 4]).
+    A = 4 + 8 + 6 + 3 + 2,
+    io:fwriteln(5 == A ? 1 :: 2),
+    io:fwriteln(X || X -> [A, 12]).

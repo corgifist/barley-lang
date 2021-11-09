@@ -43,7 +43,6 @@ public class Handler {
                     }
                 }
             }
-            //System.out.println(nodes);
             measurement.stop("Optimization time");
             measurement.start("Execute time");
             for (AST node : nodes) {
@@ -73,6 +72,11 @@ public class Handler {
     public static void entry(String input) {
         Handler.file(input, false);
         handle("test:main().", true);
+    }
+
+    public static void entry(String input, String module) {
+        Handler.file(input, false);
+        handle(module + ":main().", true);
     }
 
     public static List<AST> parseAST(String input) {
