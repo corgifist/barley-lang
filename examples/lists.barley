@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 incr(X) -> X + 1.
 

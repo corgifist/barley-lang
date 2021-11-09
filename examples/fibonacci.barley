@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 fib(N) -> fib(N, 0, 1).
 

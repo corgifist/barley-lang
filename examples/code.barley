@@ -1,3 +1,4 @@
+-opt().
 -module(test).
 
 main() ->

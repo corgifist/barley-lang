@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 test_equals() ->
     b_unit:assert_equals(5, 5).

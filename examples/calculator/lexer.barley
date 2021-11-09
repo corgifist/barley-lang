@@ -1,4 +1,5 @@
 -module(lexer).
+-opt().
 
 global Pos = 0.
 global Line = 1.

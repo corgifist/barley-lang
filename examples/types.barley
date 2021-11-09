@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 -doc("Calculator").
 

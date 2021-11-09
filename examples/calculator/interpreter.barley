@@ -8,6 +8,7 @@ eval([binary_op, "-", Left, Right]) -> eval(Left) - eval(Right).
 eval([binary_op, "*", Left, Right]) -> eval(Left) * eval(Right).
 eval([binary_op, "/", Left, Right]) -> eval(Left) / eval(Right).
 eval([unary_op, Op, Left]) -> Value = eval(Left), -Value.
+eval([var, Test]) when not bts:member(Binding, Test) -> barley:throw("unbound var '" + Text + "'").
 eval([var, Text]) -> bts:lookup(Binding, Text).
 eval([assign, Var, Expr]) ->
     bts:insert(Binding, Var, eval(Expr)).

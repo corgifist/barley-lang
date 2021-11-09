@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 main() ->
    M = measurement:new(),

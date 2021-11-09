@@ -1,4 +1,5 @@
 -module(test).
+-opt().
 
 start() ->
     receive barley:spawn(0) -> Rest + Message.

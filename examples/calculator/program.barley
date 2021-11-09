@@ -1,11 +1,20 @@
 -module(test).
+-opt().
 
 eval(String) ->
+    M = measurement:new(),
+    measurement:start(M, "Lexing"),
     Tokens = lexer:lex(String),
+    measurement:stop(M, "Lexing"),
     io:fwriteln(Tokens),
+    measurement:start(M, "Parsing"),
     Tree = parser:parse(Tokens),
+    measurement:stop(M, "Parsing"),
     io:fwriteln(Tree),
+    measurement:start(M, "Evaluating")
     [Value] = lists:map(interpreter:eval, Tree),
+    measurement:stop(M, "Evaluating"),
+    measurement:summary(M),
     Value.
 
 prompt() ->
