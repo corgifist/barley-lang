@@ -380,3 +380,96 @@ Why is this happening?
 During optimization, there are many checks, cycles and replacements of the AST. With small programs, this will just slow it down!
 
 Optimization is disabled initially. It can be enabled using `-opt()`
+
+## Amethyst: Parser && Lexer Generator
+
+Barley comes with a bundle of useful modules to create a comfortable environment for programmers!
+
+A separate section will be dedicated to one of them.
+
+Amethyst is a module containing functions for generating parsers and lexers for a given grammar.
+
+### Amethyst Lexer Generator
+
+Let's look at the basics of grammar first.
+
+The grammar file is divided into three segments: Macros, Rules, Catches
+
+```
+**Macros**
+
+Rules
+
+**Rules**
+
+Catches
+
+**Catches**
+```
+
+#### Macros
+
+Macro is a variable that can be used in rules definitions.
+
+`PLUS = "+"`
+
+This is a simplest macro definition.
+
+### Rules
+
+Each rule is one line divided into segments!
+
+At the time of generation, they are converted into pointers for the lexer.
+
+The format of the rule is:
+`TYPE expr -> final_expr`
+
+### Rule Types
+
+Each rule has its own type. The type defines the shape and behavior of a pointer in a lexer
+
+The types can be:
+
+`once expr -> final_expr` at the moment of generation, this rule turns into:
+```
+process_part(Parts, Symbol) when Symbol == EXPR -> 
+  next(Parts),
+  FINAL_EXPR.
+```
+
+Example:
+`once "+" -> [plus, Line, "+"]`
+
+Turns into:
+
+```
+process_part(Parts, Symbol) when Symbol == "+" -> 
+  next(Parts),
+  [plus, Line, "+"].
+```
+
+`once_expr expr -> final_expr` at the moment of generation, this rule turns into:
+
+```
+process_part(Parts, Symbol) when EXPR -> 
+  next(Parts),
+  FINAL_EXPR.
+```
+
+`skip -> expr` at the moment of generation turns into:
+
+```
+process_part(Parts, Symbol) when Symbol == expr ->
+  next(Parts), 
+  [skip, Line, ""].
+```
+
+`line_increase -> expr`: skips the current char and increases Line variable.
+
+`no_advance expr -> final_expr`: it is like `once` but when it matches expr, it's not increases position.
+
+It is useful for creating ID or DIGIT tokens.
+
+`no_advance_expr expr -> final_expr`: it is like `once_expr` but when it matches expr, it's not increases position.
+
+Now you know a little bit more about Amethyst grammar.
