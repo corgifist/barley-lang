@@ -1,6 +1,6 @@
 # Barley
 
-[![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)]
+![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
 
