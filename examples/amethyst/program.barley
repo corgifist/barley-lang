@@ -1,0 +1,32 @@
+-module(test).
+
+filter(String) ->
+    T = lexer:lex(String),
+    T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == var) and lists:nth(X, 2) == "")). end, T),.
+
+eval(String) ->
+    barley:b(),
+    Tokens = filter(String),
+    io:fwriteln(Tokens),
+    Tree = parser:parse(Tokens),
+    lists:last(lists:map(interpreter:eval, Tree)).
+
+prepare() ->
+    amethyst:lexer("examples/amethyst/lexer.ams", "lexer"),
+    amethyst:parser("examples/amethyst/parser.ams", "parser").
+
+prompt() ->
+    P = read(),
+    io:fwriteln(eval(P)),
+    prompt().
+
+read() ->
+    io:write(">> "),
+    io:readline().
+
+main() ->
+    prepare(),
+    barley:reparse("examples/amethyst/lexer.barley"),
+    barley:reparse("examples/amethyst/parser.barley"),
+    io:writeln(code:modules()),
+    prompt().

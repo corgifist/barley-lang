@@ -31,7 +31,6 @@ lex(String, Line) ->
     Pos = 0,
     Line = 1,
     operators(),
-    barley:b(),
     process_parts(string:split(String, "")).
 
 process_parts(Parts) ->
