@@ -2,16 +2,23 @@ MINUS = "-"
 PLUS = "+"
 STAR = "*"
 SLASH = "/"
+EQ = "="
+
+LPAREN = "("
+RPAREN = ")"
+
 IS_DIGIT = def (S) -> not (string:as_number(S) == error). end
 IS_ID = def (S) -> string:is_identifier(S). end
 
 Rules
 
-once "+" -> [plus, Line, "+"]
-once "-" -> [minus, Line, "-"]
-once "*" -> [star, Line, "*"]
-once "/" -> [slash, Line, "/"]
-once "=" -> [eq, Line, "="]
+once PLUS -> [plus, Line, "+"]
+once MINUS -> [minus, Line, "-"]
+once STAR -> [star, Line, "*"]
+once SLASH -> [slash, Line, "/"]
+once EQ -> [eq, Line, "="]
+once LPAREN -> [lparen, Line, "("]
+once RPAREN -> [rparen, Line, ")"]
 
 no_advance_expr IS_DIGIT(Symbol) -> [number, Line, catch_while_numbers(Parts)]
 no_advance_expr IS_ID(Symbol) -> [var, Line, catch_while_id(Parts)]
@@ -20,14 +27,17 @@ skip -> " "
 
 line_increase -> "\n"
 
+anyway -> illegal_character(Symbol, Line)
+
 Catches
+
+-opt().
 
 catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
 catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
     string:join(barley:sublist(Parts, OldPos, NewPos), "").
 catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
     next(Parts),
-    io:fwriteln(NewPos),
     catch_while_id(Parts, OldPos, NewPos + 1).
 catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
 

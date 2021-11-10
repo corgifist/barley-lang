@@ -30,6 +30,8 @@ match(TokenType) ->
 expr() -> expression().
 
 
+-opt().
+
 %% Safe-Position state
 expression() -> assignment().
 

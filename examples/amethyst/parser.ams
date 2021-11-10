@@ -1,5 +1,7 @@
 Root expression
 
+-opt().
+
 %% Safe-Position state
 expression() -> assignment().
 

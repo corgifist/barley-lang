@@ -12,6 +12,15 @@ global STAR
 global SLASH
  = "/"
 .
+global EQ
+ = "="
+.
+global LPAREN
+ = "("
+.
+global RPAREN
+ = ")"
+.
 global IS_DIGIT
  = def (S) -> not (string:as_number(S) == error). end
 .
@@ -20,12 +29,13 @@ global IS_ID
 .
 
 
+-opt().
+
 catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
 catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
     string:join(barley:sublist(Parts, OldPos, NewPos), "").
 catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
     next(Parts),
-    io:fwriteln(NewPos),
     catch_while_id(Parts, OldPos, NewPos + 1).
 catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
 
@@ -59,34 +69,46 @@ lex(String, Line) ->
     process_parts(string:split(String, "")).
 
 process_part(Parts, Symbol) when Symbol == 
- "+" 
+ PLUS 
  -> 
   next(Parts),
   [plus, Line, "+"]
 .
 process_part(Parts, Symbol) when Symbol == 
- "-" 
+ MINUS 
  -> 
   next(Parts),
   [minus, Line, "-"]
 .
 process_part(Parts, Symbol) when Symbol == 
- "*" 
+ STAR 
  -> 
   next(Parts),
   [star, Line, "*"]
 .
 process_part(Parts, Symbol) when Symbol == 
- "/" 
+ SLASH 
  -> 
   next(Parts),
   [slash, Line, "/"]
 .
 process_part(Parts, Symbol) when Symbol == 
- "=" 
+ EQ 
  -> 
   next(Parts),
   [eq, Line, "="]
+.
+process_part(Parts, Symbol) when Symbol == 
+ LPAREN 
+ -> 
+  next(Parts),
+  [lparen, Line, "("]
+.
+process_part(Parts, Symbol) when Symbol == 
+ RPAREN 
+ -> 
+  next(Parts),
+  [rparen, Line, ")"]
 .
 process_part(Parts, Symbol) when 
 IS_DIGIT(Symbol) 
@@ -109,7 +131,9 @@ process_part(Parts, Symbol)
   "\n"
  -> 
 Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, ""].
-
+process_part(Parts, Symbol) ->
+    illegal_character(Symbol, Line)
+.
 process_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.
 
 process_parts(Parts) ->

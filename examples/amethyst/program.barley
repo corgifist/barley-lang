@@ -5,11 +5,20 @@ filter(String) ->
     T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == var) and lists:nth(X, 2) == "")). end, T),.
 
 eval(String) ->
-    barley:b(),
+    M = measurement:new(),
+    measurement:start(M, "Lexing"),
     Tokens = filter(String),
+    measurement:stop(M, "Lexing"),
     io:fwriteln(Tokens),
+    measurement:start(M, "Parsing"),
     Tree = parser:parse(Tokens),
-    lists:last(lists:map(interpreter:eval, Tree)).
+    io:fwriteln(Tree),
+    measurement:stop(M, "Parsing"),
+    measurement:start(M, "Evaluation"),
+    Res = lists:last(lists:map(interpreter:eval, Tree)),
+    measurement:stop(M, "Evaluation"),
+    measurement:summary(M),
+    Res.
 
 prepare() ->
     amethyst:lexer("examples/amethyst/lexer.ams", "lexer"),
