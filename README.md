@@ -381,7 +381,7 @@ During optimization, there are many checks, cycles and replacements of the AST. 
 
 Optimization is disabled initially. It can be enabled using `-opt()`
 
-## Amethyst: Parser && Lexer Generator
+# Amethyst: Parser && Lexer Generator
 
 Barley comes with a bundle of useful modules to create a comfortable environment for programmers!
 
@@ -464,6 +464,8 @@ process_part(Parts, Symbol) when Symbol == expr ->
   [skip, Line, ""].
 ```
 
+`anyway -> expr`: if no rules were matched, the anyway clause will run.
+
 `line_increase -> expr`: skips the current char and increases Line variable.
 
 `no_advance expr -> final_expr`: it is like `once` but when it matches expr, it's not increases position.
@@ -473,3 +475,72 @@ It is useful for creating ID or DIGIT tokens.
 `no_advance_expr expr -> final_expr`: it is like `once_expr` but when it matches expr, it's not increases position.
 
 Now you know a little bit more about Amethyst grammar.
+
+## Example Grammar
+
+Ok, now you can understand the Amethsyt grammar.
+
+So, let's write a simple lexer!
+
+It is will support +-*/, digits and words
+
+```
+MINUS = "-"
+PLUS = "+"
+STAR = "*"
+SLASH = "/"
+IS_DIGIT = def (S) -> not (string:as_number(S) == error). end
+IS_ID = def (S) -> string:is_identifier(S). end
+
+Rules
+
+once "+" -> [plus, Line, "+"]
+once "-" -> [minus, Line, "-"]
+once "*" -> [star, Line, "*"]
+once "/" -> [slash, Line, "/"]
+once "=" -> [eq, Line, "="]
+
+no_advance_expr IS_DIGIT(Symbol) -> [number, Line, catch_while_numbers(Parts)]
+no_advance_expr IS_ID(Symbol) -> [var, Line, catch_while_id(Parts)]
+
+skip -> " "
+
+line_increase -> "\n"
+
+anyway -> illegal_character(Symbol, Line)
+
+Catches
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
+catch_while_numbers(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_numbers(Parts, OldPos, NewPos) when not (string:as_number(lists:nth(Parts, NewPos)) == error) ->
+    next(Parts),
+    catch_while_numbers(Parts, OldPos, NewPos + 1).
+catch_while_numbers(Parts, OldPos, NewPos) -> Pos = NewPos, string:join(barley:sublist(Parts, OldPos, NewPos), "").
+```
+
+You are probably wondering why catch functions are needed
+
+Catch function captures all characters as long as the condition given to it in its guard is true
+
+### Filtering the output
+
+By default, Amethyst filters the result from unnecessary EOF and SKIP. 
+But with incorrect catch functions, extra tokens can be generated. 
+You can get rid of them with `lists:filter`
+
+Example of cleaning output of empty VAR tokens: 
+```
+filter(String) ->
+    T = lexer:lex(String),
+    T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == var) and lists:nth(X, 2) == "")). end, T),.
+```
