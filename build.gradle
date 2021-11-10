@@ -6,3 +6,9 @@ buildscript {
         classpath 'net.sf.proguard:proguard-gradle:6.0.1'
     }
 }
+
+tasks.register('test') {
+    doLast {
+        println 'TODO: tests!'
+    }
+}
