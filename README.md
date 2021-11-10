@@ -1,6 +1,6 @@
 # Barley
 
-![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)
+![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)(https://app.circleci.com/pipelines/github/corgifist/barley-lang/9/workflows/ec36c76b-db28-4a14-b313-367da6778daa)
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
 
