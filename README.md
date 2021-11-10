@@ -1,6 +1,6 @@
 # Barley
 
-[![Build Status](https://travis-ci.org/aNNiMON/Own-Programming-Language-Tutorial.svg?branch=latest)](https://travis-ci.org/aNNiMON/Own-Programming-Language-Tutorial)
+[![Build Status](https://travis-ci.org/aNNiMON/Own-Programming-Language-Tutorial.svg?branch=latest)]https://app.circleci.com/pipelines/github/corgifist/barley-lang/1/workflows/2e8f40f7-188f-42d4-b676-8899ff5efda0/jobs/1)
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
 
