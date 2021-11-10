@@ -544,3 +544,231 @@ filter(String) ->
     T = lexer:lex(String),
     T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == var) and lists:nth(X, 2) == "")). end, T),.
 ```
+
+### Amethyst Parser Generator
+
+The Amethyst's parser generator have simple structure.
+
+But hard syntax.
+
+Each grammar file has only 2 sections: the root expression and states. 
+
+Usually the root expression is one line, it looks like `Root EXPR_NAME`
+
+States is the largest section of the grammar. It contains all the expressions for generating the parser.
+
+Example of grammar that returns math tree:
+ 
+```
+Root expression
+
+-opt().
+
+%% Safe-Position state
+expression() -> assignment().
+
+assignment() -> make_assign(Pos, text(get(0))).
+make_assign(OldPos, Text) when match(var) and match(eq) -> [assign, Text, additive()].
+make_assign(OldPos, T) -> Pos = OldPos, additive().
+
+additive() ->  make_add(multiplicative()).
+make_add(Expr) when match(plus) -> make_add([binary_op, "+", Expr, multiplicative()]).
+make_add(Expr) when match(minus) -> make_add([binary_op, "-", Expr, multiplicative()]).
+make_add(Expr) -> Expr.
+
+multiplicative() -> make_mult(unary()).
+make_mult(Expr) when match(star) -> make_mult([binary_op, "*", Expr, unary()]).
+make_mult(Expr) when match(slash) -> make_mult([binary_op, "/", Expr, unary()]).
+make_mult(Expr) -> Expr.
+
+unary() when match(minus) -> [unary_op, "-", primary(text(get(0)))].
+unary() -> primary(text(get(0))).
+
+primary(Text) when match(lparen) ->
+    Expr = expr(),
+    match(rparen),
+    Expr.
+
+primary(Text) when match(number) ->
+    [value, Text].
+
+primary(Text) when match(var) ->
+    [var, Text].
+```
+
+The `%% ...` is a comment
+
+This grammar generates this:
+
+```
+-module(parser).
+
+global Pos = 0.
+global Size = 0.
+global Tokens = [].
+global Result = [].
+
+
+type(Tok) -> lists:nth(Tok, 0).
+text(Tok) -> lists:nth(Tok, 2).
+
+consume_in_bounds(P) when P < Size -> P.
+consume_in_bounds(P) -> Size - 1.
+
+consume_type(Token, Type) -> type(Token) == Type.
+
+get(RelativePos) ->
+    FinalPosition = Pos + RelativePos,
+    P = consume_in_bounds(FinalPosition),
+    lists:nth(Tokens, P).
+
+eval_match(C, T) when type(C) == T -> Pos = Pos + 1, true.
+
+eval_match(C, T) -> false.
+
+match(TokenType) ->
+    C = get(0),
+    eval_match(C, TokenType).
+
+expr() -> expression
+().
+
+
+-opt().
+
+%% Safe-Position state
+expression() -> assignment().
+
+assignment() -> make_assign(Pos, text(get(0))).
+make_assign(OldPos, Text) when match(var) and match(eq) -> [assign, Text, additive()].
+make_assign(OldPos, T) -> Pos = OldPos, additive().
+
+additive() ->  make_add(multiplicative()).
+make_add(Expr) when match(plus) -> make_add([binary_op, "+", Expr, multiplicative()]).
+make_add(Expr) when match(minus) -> make_add([binary_op, "-", Expr, multiplicative()]).
+make_add(Expr) -> Expr.
+
+multiplicative() -> make_mult(unary()).
+make_mult(Expr) when match(star) -> make_mult([binary_op, "*", Expr, unary()]).
+make_mult(Expr) when match(slash) -> make_mult([binary_op, "/", Expr, unary()]).
+make_mult(Expr) -> Expr.
+
+unary() when match(minus) -> [unary_op, "-", primary(text(get(0)))].
+unary() -> primary(text(get(0))).
+
+primary(Text) when match(lparen) ->
+    Expr = expr(),
+    match(rparen),
+    Expr.
+
+primary(Text) when match(number) ->
+    [value, Text].
+
+primary(Text) when match(var) ->
+    [var, Text].
+make_parse() when match(eof) -> Result.
+make_parse() -> Expr = [expr()],
+                Result = Result + Expr,
+                make_parse().
+
+parse(Toks) ->
+    Pos = 0,
+    Tokens = Toks,
+    Size = barley:length(Toks),
+    Result = [],
+    make_parse().
+```
+
+Ok, let's combine a power of generated lexer and generated parser...
+
+And we will get...
+
+(I made a simple interpreter for evaluating tree)
+
+```
+>> a = 2 * 3 + 4
+[[var, 1, a], [eq, 1, =], [number, 1, 2], [star, 1, *], [number, 1, 3], [plus, 1, +], [number, 1, 4], [eof, -1, ]]
+[[assign, a, [binary_op, +, [binary_op, *, [value, 2], [value, 3]], [value, 4]]]]
+======================
+Evaluation: 0 milliseconds
+Lexing: 13 milliseconds
+Parsing: 8 milliseconds
+Summary: 21 milliseconds
+
+#Reference<1973538135>
+```
+
+Yay!!!
+
+It works! Let's try another expression.
+
+```
+>> a + 2 + 1
+[[var, 1, a], [plus, 1, +], [number, 1, 2], [plus, 1, +], [number, 1, 1], [eof, -1, ]]
+[[binary_op, +, [binary_op, +, [var, a], [value, 2]], [value, 1]]]
+======================
+Evaluation: 0 milliseconds
+Lexing: 10 milliseconds
+Parsing: 3 milliseconds
+Summary: 13 milliseconds
+
+13.00
+>> 
+```
+
+It is very cool, but our calculator don't support grouping expression.
+
+Grouping expression: `(2 + 2)`
+
+### Adding new expressions
+
+First, let's add a new rule for lexer.
+
+Add a new macros:
+```
+LPAREN = "("
+RPAREN = ")"
+```
+
+And a new rules:
+```
+once LPAREN -> [lparen, Line, "("]
+once RPAREN -> [rparen, Line, ")"]
+```
+
+Let's test:
+```
+>> (2 + 2)
+[[lparen, 1, (], [number, 1, 2], [plus, 1, +], [number, 1, 2], [rparen, 1, )], [eof, -1, ]]
+```
+
+Ok, lexer is done.
+
+Grouping state:
+```
+primary(Text) when match(lparen) ->
+    Expr = expr(),
+    match(rparen),
+    Expr.
+```
+
+I made a grouping expression as the primary.
+
+Let's test:
+
+```
+>> (2 + 2) * 2
+[[lparen, 1, (], [number, 1, 2], [plus, 1, +], [number, 1, 2], [rparen, 1, )], [star, 1, *], [number, 1, 2], [eof, -1, ]]
+[[binary_op, *, [binary_op, +, [value, 2], [value, 2]], [value, 2]]]
+======================
+Evaluation: 0 milliseconds
+Lexing: 4 milliseconds
+Parsing: 2 milliseconds
+Summary: 6 milliseconds
+
+8.00
+```
+
+Yay!!! We did it!
+
+That's all. Have a nice day!
