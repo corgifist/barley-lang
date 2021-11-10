@@ -1,16 +1,3 @@
 -module(test).
 
-eval(String) ->
-    barley:b(),
-    Tokens = lexer:lex(String),
-    Tree = parser:parse(Tokens).
-
-prepare() ->
-    amethyst:lexer("lexer.ams"),
-    amethyst:parser("parser.ams").
-
-main() ->
-    prepare(),
-    barley:reparse("lexer.barley"),
-    barley:reparse("parser.barley"),
-    io:fwriteln(eval("2 + 2")).
+main() -> io:fwriteln("Hello, World!").
