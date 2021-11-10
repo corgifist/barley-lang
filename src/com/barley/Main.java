@@ -10,6 +10,6 @@ public class Main {
         //Handler.tests();
         //Handler.calculator();
         //Handler.entry("program.barley");
-        Handler.entry("program.barley");
+        Handler.amethyst();
     }
 }

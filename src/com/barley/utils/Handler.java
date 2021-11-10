@@ -169,7 +169,15 @@ public class Handler {
 
     public static void magicBall() {
         Handler.file("examples/magic_ball/m_ball_server.barley");
-        Handler.file("Examples/magic_ball/m_ball_client.barley");
+        Handler.file("examples/magic_ball/m_ball_client.barley");
         Handler.handle("ball_client:main().", true);
+    }
+
+    public static void amethyst() {
+        Handler.file("examples/amethyst/lexer.barley");
+        Handler.file("examples/amethyst/parser.barley");
+        Handler.file("examples/amethyst/program.barley");
+        Handler.file("examples/amethyst/interpreter.barley");
+        Handler.handle("test:main().", true);
     }
 }

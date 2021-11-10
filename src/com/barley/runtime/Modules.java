@@ -840,9 +840,8 @@ public class Modules {
         code.put("modules", args -> {
             Arguments.check(0, args.length);
             LinkedList<BarleyValue> strings = new LinkedList<>();
-            Set<String> names = modules.keySet();
-            for (String key : names) {
-                strings.add(new BarleyString(key));
+            for (Map.Entry<String, HashMap<String, Function>> entry : modules.entrySet()) {
+                strings.add(new BarleyString(entry.getKey()));
             }
             return new BarleyList(strings);
         });
@@ -1150,6 +1149,7 @@ public class Modules {
         HashMap<String, Function> am = new HashMap<>();
 
         am.put("lexer", args -> {
+            Arguments.checkOrOr(1, 2, args.length);
             try {
                 String lexerFile = SourceLoader.readSource(args[0].toString());
                 String result = "";
@@ -1175,10 +1175,8 @@ public class Modules {
                     if (line.length() == 7) break;
                     cutToCatches++;
                 }
-                List<String> catches = List.of(List.of(lines).toArray(new String[] {})).subList(cutToCatches, lines.length);
-                for (String l : catches) {
-                    result += l + "\n";
-                }
+                String[] sCatch = lexerFile.split("Catches");
+                result += sCatch[sCatch.length - 1];
                 result += "\n";
                 // Rules transformation
                 result += "\n";
@@ -1265,7 +1263,15 @@ public class Modules {
                         process.append("process_part(Parts, Symbol)\n when Symbol == \n  ")
                                 .append(expr)
                                 .append("\n -> \n")
-                                .append("Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, \"\"].");
+                                .append("Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, \"\"].\n");
+                    }
+
+                    if (parts[0].equals("anyway")) {
+                        String r = String.join(" ", List.of(parts).subList(2, parts.length));
+                        process.append("process_part(Parts, Symbol) ->\n    ")
+                                .append(r)
+                                .append("\n")
+                                .append(".");
                     }
                 }
                 result += process + "\nprocess_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.\n";
@@ -1275,7 +1281,7 @@ public class Modules {
                         "    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),\n" +
                         "    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),\n" +
                         "    WithoutEOF = WithoutEOF + [EOFToken].";
-                result = "-module(" + args[0].toString().split("\\.")[0] + ").\n\n" + result;
+                result = "-module(" + (args.length == 1 ? args[0].toString().split("\\.")[0] : args[1].toString()) + ").\n\n" + result;
                 try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".barley")) {
                     writer.write(result);
                 }
@@ -1290,7 +1296,7 @@ public class Modules {
                 String root = parserFile.split("\n")[0].split(" ")[1];
                 String result = String.join("\n", List.of(parserFile.split("\n")).subList(1, parserFile.split("\n").length));
                 String parser = "";
-                parser += "-module(" + args[0].toString().split("\\.")[0] + ").\n\n";
+                parser += "-module(" + (args.length == 1 ? args[0].toString().split("\\.")[0] : args[1].toString()) + ").\n\n";
                 parser += "global Pos = 0.\n" +
                         "global Size = 0.\n" +
                         "global Tokens = [].\n" +
