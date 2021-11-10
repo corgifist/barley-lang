@@ -1146,6 +1146,206 @@ public class Modules {
         return modules.toString();
     }
 
+    private static void initAmethyst() {
+        HashMap<String, Function> am = new HashMap<>();
+
+        am.put("lexer", args -> {
+            try {
+                String lexerFile = SourceLoader.readSource(args[0].toString());
+                String result = "";
+                String[] lines = lexerFile.split("\\n");
+                Map<String, String> macros = new HashMap<>();
+                int cutAfterRules = 1;
+                for (String line : lines) {
+                    if (line.isEmpty() || line.isBlank()) continue;
+                    String[] parts = line.split(" ");
+                    cutAfterRules++;
+                    if (parts.length == 1) break;
+                    String id = parts[0];
+                    if (!parts[1].equals("=")){
+                        System.err.println("Lexer Warning: Expected '=' after macros name, got '" + parts[1] + "'");
+                        break;
+                    }
+                    String rep = String.join(" ", List.of(parts).subList(2, parts.length));
+                    result += "global " + id + "\n = " + rep + "\n.\n";
+                }
+                List<String> rules =  List.of(lines).subList(cutAfterRules, lines.length);
+                int cutToCatches = 0;
+                for (String line : rules) {
+                    if (line.length() == 7) break;
+                    cutToCatches++;
+                }
+                List<String> catches = List.of(List.of(lines).toArray(new String[] {})).subList(cutToCatches, lines.length);
+                for (String l : catches) {
+                    result += l + "\n";
+                }
+                result += "\n";
+                // Rules transformation
+                result += "\n";
+                result += "global Pos = 0.\n";
+                result += "global Line = 1.\n";
+                result += "global EOFToken = [eof, -1, \"\"].\n\n";
+                result += "peek(Parts, RelativePos) ->\n" +
+                        "    FinalPosition = RelativePos + Pos,\n" +
+                        "    lists:nth(Parts, FinalPosition).\n" +
+                        "\n" +
+                        "next(Parts) ->\n" +
+                        "    barley:define(\"Pos\", Pos + 1),\n" +
+                        "    peek(Parts, 0).\n";
+                result += "illegal_character(S, L) -> barley:throw(\"illegal char '\" + S + \"'\").\n" +
+                        "\n" +
+                        "lex(String) -> lex(String, 1).\n" +
+                        "\n" +
+                        "lex(String, Line) ->\n" +
+                        "    Pos = 0,\n" +
+                        "    Line = 1,\n" +
+                        "    process_parts(string:split(String, \"\")).\n";
+                StringBuilder process = new StringBuilder("\n");
+                for (String rule : rules) {
+                    if (rule.isEmpty() || rule.isBlank()) continue;
+                    String[] parts = rule.split(" ");
+                    StringBuilder buffer = new StringBuilder();
+                    if (parts[0].equals("once")) {
+                        String expr = macros.containsKey(parts[1]) ? rule.substring(5, rule.indexOf("->")).replaceAll(parts[1], macros.get(parts[1])) : String.format("%s", rule.substring(5, rule.indexOf("->")));
+                        String res = String.join(" ", List.of(parts).subList(List.of(parts).indexOf("->") + 1, parts.length));
+                        buffer.append("process_part(Parts, Symbol) when Symbol == \n ")
+                                .append(expr)
+                                .append("\n -> \n")
+                                .append("  next(Parts),\n  ")
+                                .append(res)
+                                .append("\n.\n");
+                        process.append(buffer);
+                        continue;
+                    }
+                    if (parts[0].equals("no_advance")) {
+                        String expr = macros.containsKey(parts[1]) ? rule.substring(5, rule.indexOf("->")).replaceAll(parts[1], macros.get(parts[1])) : String.format("%s", rule.substring(5, rule.indexOf("->")));
+                        String res = String.join(" ", List.of(parts).subList(List.of(parts).indexOf("->") + 1, parts.length));
+                        buffer.append("process_part(Parts, Symbol) when Symbol == \n")
+                                .append(expr)
+                                .append("\n -> \n")
+                                .append(res)
+                                .append("\n.\n");
+                        process.append(buffer);
+                        continue;
+                    }
+                    if (parts[0].equals("no_advance_expr")) {
+                        String expr = String.format("%s", rule.substring(16, rule.indexOf("->")));
+                        String res = String.join(" ", List.of(parts).subList(List.of(parts).indexOf("->") + 1, parts.length));
+                        buffer.append("process_part(Parts, Symbol) when \n")
+                                .append(expr)
+                                .append("\n -> \n  ")
+                                .append(res)
+                                .append("\n.\n");
+                        process.append(buffer);
+                        continue;
+                    }
+                    if (parts[0].equals("once_expr")) {
+                        String expr = String.format("%s", rule.substring(10, rule.indexOf("->")));
+                        String res = String.join(" ", List.of(parts).subList(List.of(parts).indexOf("->") + 1, parts.length));
+                        process.append("process_part(Parts, Symbol) when ").append(expr).append(" -> \n").append("  next(Parts), \n  ").append(res).append("\n");
+                        process.append(".\n");
+                        continue;
+                    }
+                    if (parts[0].equals("skip")) {
+                        List<String> ps = List.of(parts).subList(2, parts.length);
+                        String expr = String.join(" ", ps);
+
+                        process.append("process_part(Parts, Symbol)\n when Symbol == \n  ")
+                                .append(expr)
+                                .append("\n -> \n")
+                                .append("  next(Parts), \n  ")
+                                .append("[skip, Line, \"\"]")
+                                .append(".\n");
+                    }
+
+                    if (parts[0].equals("line_increase")) {
+                        List<String> ps = List.of(parts).subList(2, parts.length);
+                        String expr = String.join(" ", ps);
+
+                        process.append("process_part(Parts, Symbol)\n when Symbol == \n  ")
+                                .append(expr)
+                                .append("\n -> \n")
+                                .append("Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, \"\"].");
+                    }
+                }
+                result += process + "\nprocess_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.\n";
+                result += "\n";
+                result += "process_parts(Parts) ->\n" +
+                        "    Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_part(Parts, First)]. end, Parts, []),\n" +
+                        "    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),\n" +
+                        "    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),\n" +
+                        "    WithoutEOF = WithoutEOF + [EOFToken].";
+                result = "-module(" + args[0].toString().split("\\.")[0] + ").\n\n" + result;
+                try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".barley")) {
+                    writer.write(result);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+        am.put("parser", args -> {
+            try {
+                String parserFile = SourceLoader.readSource(args[0].toString());
+                String root = parserFile.split("\n")[0].split(" ")[1];
+                String result = String.join("\n", List.of(parserFile.split("\n")).subList(1, parserFile.split("\n").length));
+                String parser = "";
+                parser += "-module(" + args[0].toString().split("\\.")[0] + ").\n\n";
+                parser += "global Pos = 0.\n" +
+                        "global Size = 0.\n" +
+                        "global Tokens = [].\n" +
+                        "global Result = [].\n" +
+                        "\n" +
+                        "\n" +
+                        "type(Tok) -> lists:nth(Tok, 0).\n" +
+                        "text(Tok) -> lists:nth(Tok, 2).\n" +
+                        "\n" +
+                        "consume_in_bounds(P) when P < Size -> P.\n" +
+                        "consume_in_bounds(P) -> Size - 1.\n" +
+                        "\n" +
+                        "consume_type(Token, Type) -> type(Token) == Type.\n" +
+                        "\n" +
+                        "get(RelativePos) ->\n" +
+                        "    FinalPosition = Pos + RelativePos,\n" +
+                        "    P = consume_in_bounds(FinalPosition),\n" +
+                        "    lists:nth(Tokens, P).\n" +
+                        "\n" +
+                        "eval_match(C, T) when type(C) == T -> Pos = Pos + 1, true.\n" +
+                        "\n" +
+                        "eval_match(C, T) -> false.\n" +
+                        "\n" +
+                        "match(TokenType) ->\n" +
+                        "    C = get(0),\n" +
+                        "    eval_match(C, TokenType).\n\n";
+                 parser += "expr() -> " + root + "().\n\n";
+                 parser += result + "\n";
+                 parser += "make_parse() when match(eof) -> Result.\n" +
+                         "make_parse() -> Expr = [expr()],\n" +
+                         "                Result = Result + Expr,\n" +
+                         "                make_parse().\n" +
+                         "\n" +
+                         "parse(Toks) ->\n" +
+                         "    Pos = 0,\n" +
+                         "    Tokens = Toks,\n" +
+                         "    Size = barley:length(Toks),\n" +
+                         "    Result = [],\n" +
+                         "    make_parse().\n";
+                 try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".barley")) {
+                     writer.write(parser);
+                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
+        });
+
+        put("amethyst", am);
+    }
+
+    private static void dumpMacros(String key, String value) {
+        System.out.printf("Key: %s, Value: %s\n", key, value);
+    }
+
     public static void init() {
         initBarley();
         initIo();
@@ -1163,6 +1363,7 @@ public class Modules {
         initSocket();
         initDist();
         initLists();
+        initAmethyst();
     }
 
     private static void initLists() {

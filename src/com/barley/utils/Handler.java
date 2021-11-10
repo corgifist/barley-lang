@@ -28,10 +28,10 @@ public class Handler {
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             Optimization[] opts = new Optimization[] {
                     new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber()),
-                    new GeneratorJamming(),
-                    new ExpressionSimplification(),
                     new ConstantFolding(),
-                    new DeadCodeElimination()
+                    new ExpressionSimplification(),
+                    new DeadCodeElimination(),
+                    new GeneratorJamming(),
             };
             measurement.stop("Parse time");
             measurement.start("Optimization time");

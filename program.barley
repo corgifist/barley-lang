@@ -1,7 +1,16 @@
 -module(test).
--opt().
+
+eval(String) ->
+    barley:b(),
+    Tokens = lexer:lex(String),
+    Tree = parser:parse(Tokens).
+
+prepare() ->
+    amethyst:lexer("lexer.ams"),
+    amethyst:parser("parser.ams").
 
 main() ->
-    A = 4 + 8 + 6 + 3 + 2,
-    io:fwriteln(5 == A ? 1 :: 2),
-    io:fwriteln(X || X -> [A, 12]).
+    prepare(),
+    barley:reparse("lexer.barley"),
+    barley:reparse("parser.barley"),
+    io:fwriteln(eval("2 + 2")).

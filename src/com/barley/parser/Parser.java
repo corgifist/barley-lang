@@ -92,7 +92,7 @@ public final class Parser implements Serializable {
     }
 
     private AST global() {
-        return new GlobalAST(expression());
+        return expression();
     }
 
     private AST receive() {

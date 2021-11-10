@@ -1,0 +1,93 @@
+-module(lexer).
+
+global MINUS
+ = "-"
+.
+global PLUS
+ = "+"
+.
+global STAR
+ = "*"
+.
+global SLASH
+ = "/"
+.
+global IS_DIGIT
+ = def (S) -> not (string:as_number(S) == error). end
+.
+
+catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
+catch_while_number(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_numbers(Parts, OldPos, NewPos) when not (string:as_number(lists:nth(Parts, NewPos)) == error) ->
+    catch_while_numbers(Parts, OldPos, NewPos + 1).
+catch_while_numbers(Parts, OldPos, NewPos) -> Pos = NewPos, string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+
+global Pos = 0.
+global Line = 1.
+global EOFToken = [eof, -1, ""].
+
+peek(Parts, RelativePos) ->
+    FinalPosition = RelativePos + Pos,
+    lists:nth(Parts, FinalPosition).
+
+next(Parts) ->
+    barley:define("Pos", Pos + 1),
+    peek(Parts, 0).
+illegal_character(S, L) -> barley:throw("illegal char '" + S + "'").
+
+lex(String) -> lex(String, 1).
+
+lex(String, Line) ->
+    Pos = 0,
+    Line = 1,
+    process_parts(string:split(String, "")).
+
+process_part(Parts, Symbol) when Symbol == 
+ "+" 
+ -> 
+  next(Parts),
+  [plus, Line, "+"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ "-" 
+ -> 
+  next(Parts),
+  [minus, Line, "-"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ "*" 
+ -> 
+  next(Parts),
+  [star, Line, "*"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ "/" 
+ -> 
+  next(Parts),
+  [slash, Line, "/"]
+.
+process_part(Parts, Symbol) when 
+IS_DIGIT(Symbol) 
+ -> 
+  [number, Line, catch_while_numbers(Parts)]
+.
+process_part(Parts, Symbol)
+ when Symbol == 
+  " "
+ -> 
+  next(Parts), 
+  [skip, Line, ""].
+process_part(Parts, Symbol)
+ when Symbol == 
+  "\n"
+ -> 
+Line = Line + 1, Pos = Pos + 1, [skip, Line + 1, ""].
+process_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.
+
+process_parts(Parts) ->
+    Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_part(Parts, First)]. end, Parts, []),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),
+    WithoutEOF = WithoutEOF + [EOFToken].
