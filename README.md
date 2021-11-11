@@ -1,6 +1,29 @@
-# Barley
+<div align="center">
+<p>
+    <img width="80" src="https://github.com/corgifist/barley-lang/blob/main/dist/logo.png">
+</p>
+<h1>The Barley Programming Language</h1>
+ </div>
 
 [![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)](https://app.circleci.com/pipelines/github/corgifist/barley-lang/10/workflows/45b5d058-5c12-49f8-a44a-0a7f76fdf0c9)
+
+ ## Key features
+    
+ - Functional programming, manage data in functional style
+ - Pattern matching 
+ -  - Variables (see `Pattern matching` in `Examples`)
+ -  - Functions (see `Pattern matching` in `Examples`)
+ -  - Case Expression `case [1, 2, 2] -> of [H :: T]: io:fwriteln("%s | %s", H, T). end.`
+ - Multi-assignment
+ - Null safety
+ - Spawn processe, send message and don't worry about errors in it
+ - Generator jamming (eval GeneratorAST before running the program)
+ - Easily distribute programs by using `dist` module
+ - Usually, distributed program is very small in terms of memory
+ - Built-in optimization (constant folding, propagation, expression simplification and more)
+ - Two Barley instances can talk to each other by sending signals (see `examples/chat.barley`)
+ - Clean syntax
+
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
 
