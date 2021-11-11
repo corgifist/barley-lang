@@ -6,6 +6,18 @@ Barley is a interpreted erlang-like language based on JVM. It have simplified sy
 
 It have a stack of useful modules like: BTS (Barley-Term-Storage), string, lists, math, types and also barley (the main module)
 
+## Installation
+
+Install the latest release and Java SE 16.
+
+If you are using windows, use `runner.bat` for running scripts and baked apps.
+
+### My `script.barley` doesn't work!
+
+If your script is running in shell, but don't working in Barley.jar
+
+Try to bake it! See more in `Coding our first distributed program`
+
 ## Examples
 
 Barley have simplified syntax and other cool things that normal erlang don't have
