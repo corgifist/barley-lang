@@ -1,15 +1,31 @@
 package com.barley;
 
+import com.barley.runtime.BarleyString;
 import com.barley.runtime.Modules;
 import com.barley.utils.Handler;
+import com.barley.utils.SourceLoader;
+
+import javax.xml.transform.Source;
+import java.io.IOException;
 
 public class Main {
 
     public static void main(String[] args) {
         Modules.init();
-        //Handler.tests();
-        //Handler.calculator();
-        //Handler.entry("program.barley");
-        Handler.amethyst();
+        if (args.length == 0) {
+            Handler.console();
+        }
+
+        String file = args[0];
+        String[] dotParts = file.split("\\.");
+        if (dotParts[dotParts.length - 1].equals("app")) {
+            Modules.get("dist").get("app").execute(new BarleyString(file));
+        } else {
+            try {
+                Handler.handle(SourceLoader.readSource(file), false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
