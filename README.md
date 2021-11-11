@@ -16,7 +16,7 @@
  -  - Case Expression `case [1, 2, 2] -> of [H :: T]: io:fwriteln("%s | %s", H, T). end.`
  - Multi-assignment
  - Null safety
- - Spawn processe, send message and don't worry about errors in it
+ - Spawn process, send message and don't worry about errors in it
  - Generator jamming (eval GeneratorAST before running the program)
  - Easily distribute programs by using `dist` module
  - Usually, distributed program is very small in terms of memory
