@@ -65,8 +65,9 @@ public final class Parser implements Serializable {
 
     private AST declaration() {
         Token current = get(0);
-        if (match(TokenType.ATOM)) {
-            return method(current.getText());
+        String text = current.getText();
+        if (match(TokenType.ATOM) || (match(TokenType.DEFGUARD) && !(text = consume(TokenType.ATOM, "expected guard name at line " + line()).getText()).equals(""))) {
+            return method(text);
         } else if (match(TokenType.MINUS)) {
             if (match(TokenType.MODULE)) {
                 consume(TokenType.LPAREN, "expected '(' before module name");

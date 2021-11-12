@@ -1,3 +1,11 @@
 -module(test).
 
-main() -> io:fwriteln("Hello, World!").
+defguard consume_in_bound(N) -> N == 0 or N < 0.
+
+ghoul() -> ghoul(1000).
+
+ghoul(N) when consume_in_bound(N) -> ok.
+
+ghoul(N) -> io:fwriteln("%s - 7 = %s", N, N - 7), ghoul(N - 7).
+
+main() -> ghoul(), barley:sleep(100000).

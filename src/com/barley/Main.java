@@ -17,6 +17,10 @@ public class Main {
         }
 
         String file = args[0];
+        if (file.equals("-entry")) {
+            Handler.entry(args[1], args[2]);
+            return;
+        }
         if (file.equals("-tests")) {
             Handler.tests();
             return;
