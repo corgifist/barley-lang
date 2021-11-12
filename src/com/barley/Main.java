@@ -2,6 +2,7 @@ package com.barley;
 
 import com.barley.runtime.BarleyString;
 import com.barley.runtime.Modules;
+import com.barley.utils.Editor;
 import com.barley.utils.Handler;
 import com.barley.utils.SourceLoader;
 
@@ -18,8 +19,11 @@ public class Main {
         }
 
         String file = args[0];
+        if (file.equals("-editor")) {
+            Editor.main(args);
+            return;
+        }
         if (file.equals("-entry")) {
-            System.out.println(List.of(args));
             Handler.entry(args[1], args[2]);
             return;
         }
