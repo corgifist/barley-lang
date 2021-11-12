@@ -17,6 +17,10 @@ public class Main {
         }
 
         String file = args[0];
+        if (file.equals("-tests")) {
+            Handler.tests();
+            return;
+        }
         String[] dotParts = file.split("\\.");
         if (dotParts[dotParts.length - 1].equals("app")) {
             Modules.get("dist").get("app").execute(new BarleyString(file));

@@ -125,6 +125,20 @@ public class Modules {
             map.remove(args[1]);
             return ref;
         });
+        bts.put("merge", args -> {
+            Arguments.check(2, args.length);
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            if (!(args[1] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference r = (BarleyReference) args[1];
+            HashMap<BarleyValue, BarleyValue> m = (HashMap<BarleyValue, BarleyValue>) r.getRef();
+            HashMap<BarleyValue, BarleyValue> result = new HashMap<>(map);
+            result.putAll(m);
+            return new BarleyReference(result);
+        });
 
         put("bts", bts);
     }

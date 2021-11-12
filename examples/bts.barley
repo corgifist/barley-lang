@@ -12,4 +12,9 @@ main() ->
     io:writeln(bts:lookup(Table, "key")),
     io:writeln(bts:lookup(Table, "key2"))
     bts:remove(Table, "key"),
-    io:writeln(bts:tabtolist(Table)).
+    io:writeln(bts:tabtolist(Table)),
+    Other = bts:new(),
+    bts:insert(Other, "key12", 15),
+    bts:insert(Other, "key17", 5),
+    Result = bts:merge(Table, Other),
+    io:fwriteln("Merged: %s", bts:tabtolist(Result)).
