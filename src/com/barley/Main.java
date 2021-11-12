@@ -7,10 +7,11 @@ import com.barley.utils.SourceLoader;
 
 import javax.xml.transform.Source;
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Modules.init();
         if (args.length == 0) {
             Handler.console();
@@ -18,6 +19,7 @@ public class Main {
 
         String file = args[0];
         if (file.equals("-entry")) {
+            System.out.println(List.of(args));
             Handler.entry(args[1], args[2]);
             return;
         }

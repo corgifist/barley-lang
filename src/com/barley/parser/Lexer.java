@@ -216,7 +216,7 @@ public final class Lexer {
         final StringBuilder buffer = new StringBuilder();
         char current = peek(0);
         while (true) {
-            if (current == '.' && Character.isDigit(peek(1))) {
+            if (current == '.' && Character.isDigit(peek(1)) || current == '_') {
                 if (buffer.indexOf(".") != -1) throw new BarleyException("BadCompiler", "Invalid float number");
             } else if (!Character.isDigit(current)) {
                 break;
@@ -224,7 +224,7 @@ public final class Lexer {
             buffer.append(current);
             current = next();
         }
-        addToken(TokenType.NUMBER, buffer.toString());
+        addToken(TokenType.NUMBER, buffer.toString().replaceAll("_", ""));
     }
 
     private void tokenizeOperator() {
