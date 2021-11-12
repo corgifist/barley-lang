@@ -2,12 +2,11 @@ package com.barley.utils;
 
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.awt.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Editor {
 
@@ -119,8 +118,8 @@ public class Editor {
         return view;
     }
 
-    private static void processLine() throws IOException {
-        System.out.printf("%s - ", buffer.size() + 1);
+    private static void processLine() throws IOException, AWTException {
+        System.out.printf("%s - ", formatLine(buffer, buffer.size() + 1));
         String input = input();
         if (input.isBlank()) {
             buffer.add(input + "\n");
@@ -128,9 +127,18 @@ public class Editor {
         }
         String[] parts = input.split(" ");
         if (parts[0].equals("go")) {
+            int index = Integer.parseInt(parts[1]) - 1;
+            System.out.print("Old was: \n" + buffer.get(index));
             System.out.printf("%s > ", parts[1]);
             String line = input();
-            buffer.set(Integer.parseInt(parts[1]) - 1, line + "\n");
+            buffer.add(index, line + "\n");
+            return;
+        } else if (parts[0].equals("insert")) {
+            int index = Integer.parseInt(parts[1]) - 1;
+            System.out.print("Old was: \n" + buffer.get(index));
+            System.out.printf("%s > ", parts[1]);
+            String line = input();
+            buffer.set(index, line + "\n");
             return;
         } else if (parts[0].equals("save")) {
             try (FileWriter writer = new FileWriter(parts[1], false)) {
@@ -151,9 +159,37 @@ public class Editor {
         } else if (parts[0].equals("exit")) {
             System.exit(0);
             return;
-        } else if (parts[0].equals("eval"))
+        } else if (parts[0].equals("eval")) {
+            if (parts.length == 2) {
+                String code = String.join("", buffer);
+                Handler.handle(code, false);
+                Handler.handle(parts[1] + ":main().", true);
+            } else {
+                Handler.entry(parts[1], parts[2]);
+            }
+            return;
+        } else if (parts[0].equals("del_range")) {
+            int start = Integer.parseInt(parts[1]);
+            int end = Integer.parseInt(parts[2]);
+            List<String> result = new ArrayList<>();
+            for (int i = 0; i < buffer.size(); i++) {
+                System.out.println(i);
+                if (betweenExclusive(i - 1, start, end)) continue;
+                result.add(buffer.get(i));
+            }
+            buffer = result;
+            return;
+        } else if (parts[0].equals("del")) {
+            int index = Integer.parseInt(parts[1]);
+            buffer.remove(index - 1);
+            return;
+        }
+        buffer.add(input + "\n");
+    }
 
-            buffer.add(input + "\n");
+    public static boolean betweenExclusive(int x, int min, int max)
+    {
+        return x>min && x<max;
     }
 
     private static String input() throws IOException {
@@ -161,10 +197,11 @@ public class Editor {
     }
 
     private static void bar() {
-        System.out.println(ANSI_YELLOW + "=================================================================================");
-        System.out.println("'go LINE' - edit LINE line; 'save FILE' save file; 'load FILE' load FILE;");
-        System.out.println("'clear' clears buffer; 'exit' - exit editor; 'eval FILE?' eval current code (file if provided)");
-        System.out.println("===============================================================================================" + ANSI_RESET);
+        System.out.println(ANSI_YELLOW + "=====================================================================================================");
+        System.out.println("'go LINE' - edit LINE line; 'save FILE' save file; 'clear' clears buffer; 'insert INDX' inserts a txt ");
+        System.out.println("'load FILE' load FILE; 'exit' - exit editor; 'eval FILE?' compiles and runs `main` (file if provided)");
+        System.out.println("'del INDX' deletes line at INDX; 'del_range START END' deletes a range from START to END");
+        System.out.println("=====================================================================================================" + ANSI_RESET);
     }
 
     public final static void cls() {
