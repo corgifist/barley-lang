@@ -1,7 +1,6 @@
 package com.barley.optimizations;
 
 import com.barley.ast.*;
-import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.Clause;
 

@@ -82,7 +82,8 @@ public class UserFunction implements Function, Serializable {
                 toExecute = clause.getResult();
                 break;
             }
-            if (toExecute == null) throw new BarleyException("FunctionClause", "can't find function clause for args " + List.of(args) + " with clauses:\n   " + clauses);
+            if (toExecute == null)
+                throw new BarleyException("FunctionClause", "can't find function clause for args " + List.of(args) + " with clauses:\n   " + clauses);
             BarleyValue result = toExecute.execute();
             Table.pop();
             return result;

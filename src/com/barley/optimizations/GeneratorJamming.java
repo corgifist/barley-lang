@@ -73,12 +73,12 @@ public class GeneratorJamming implements Optimization {
 
     @Override
     public AST optimize(GeneratorAST ast) {
-       try {
-           count++;
-           return new ConstantAST(ast.execute());
-       } catch (BarleyException ex) {
-           return ast;
-       }
+        try {
+            count++;
+            return new ConstantAST(ast.execute());
+        } catch (BarleyException ex) {
+            return ast;
+        }
     }
 
     @Override

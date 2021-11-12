@@ -26,7 +26,7 @@ public class Handler {
             measurement.start("Parse time");
             Parser parser = new Parser(tokens);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
-            Optimization[] opts = new Optimization[] {
+            Optimization[] opts = new Optimization[]{
                     new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber()),
                     new ConstantFolding(),
                     new ExpressionSimplification(),
@@ -148,7 +148,7 @@ public class Handler {
         measurement.start("Tests time");
         for (String script : scripts) {
             try {
-                Handler.handle(SourceLoader.readSource(script), false,true);
+                Handler.handle(SourceLoader.readSource(script), false, true);
                 Handler.handle("test:main().", true);
             } catch (IOException e) {
                 e.printStackTrace();

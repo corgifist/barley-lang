@@ -11,8 +11,8 @@ import java.io.Serializable;
 
 public class MethodAST implements AST, Serializable {
 
-    private Parser parser;
     public UserFunction method;
+    private Parser parser;
     private String name;
 
     public MethodAST(Parser parser, UserFunction method, String name) {

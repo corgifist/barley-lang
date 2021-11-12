@@ -16,9 +16,8 @@ public final class Parser implements Serializable {
     private final List<Token> tokens;
     private final int size;
     public HashMap<String, Function> methods;
-    private int pos;
     public boolean opt;
-
+    private int pos;
     private String module, doc;
 
     public Parser(List<Token> tokens) {

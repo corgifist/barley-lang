@@ -1,7 +1,6 @@
 package com.barley.optimizations;
 
 import com.barley.runtime.BarleyValue;
-import com.barley.utils.AST;
 
 public final class VariableInfo {
     public BarleyValue value;

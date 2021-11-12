@@ -3,9 +3,7 @@ package com.barley.optimizations;
 import com.barley.ast.*;
 import com.barley.utils.AST;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Optional;
 
 public class ConstantFolding implements Optimization {
 
@@ -122,7 +120,7 @@ public class ConstantFolding implements Optimization {
     @Override
     public AST optimize(TernaryAST ast) {
         count++;
-        if ((ast.term instanceof ConstantAST) &&(ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
+        if ((ast.term instanceof ConstantAST) && (ast.left instanceof ConstantAST) && (ast.right instanceof ConstantAST)) {
             return new ConstantAST(ast.execute());
         }
         return ast;

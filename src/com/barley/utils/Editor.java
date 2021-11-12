@@ -1,7 +1,6 @@
 package com.barley.utils;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.fusesource.jansi.internal.JansiLoader;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -12,10 +11,7 @@ import java.util.List;
 
 public class Editor {
 
-    private static List<String> buffer = new ArrayList<>();
-    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     public static final String ANSI_RESET = "\033[0m";  // Text Reset
-
     // Regular Colors
     public static final String ANSI_BLACK = "\033[0;30m";   // BLACK
     public static final String ANSI_RED = "\033[0;31m";     // RED
@@ -25,6 +21,8 @@ public class Editor {
     public static final String ANSI_PURPLE = "\033[0;35m";  // PURPLE
     public static final String ANSI_CYAN = "\033[0;36m";    // CYAN
     public static final String ANSI_WHITE = "\033[0;37m";   // WHITE
+    private static List<String> buffer = new ArrayList<>();
+    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException {
         AnsiConsole.systemInstall();
@@ -37,18 +35,44 @@ public class Editor {
                 String view = String.join("", buffer);
                 view = colorizeNumbers(view);
                 view = fixNumbers(view);
-                view = view.replaceAll("\\(", ANSI_YELLOW + "(" + ANSI_RESET);
-                view = view.replaceAll("\\)", ANSI_YELLOW + ")" + ANSI_RESET);
-                view = view.replaceAll("\\.", ANSI_YELLOW + "." + ANSI_RESET);
-                view = view.replaceAll("-module", ANSI_GREEN + "-module" + ANSI_RESET);
-                view = view.replaceAll("-opt", ANSI_GREEN + "-opt" + ANSI_RESET);
-                view = view.replaceAll("-doc", ANSI_GREEN + "-doc" + ANSI_RESET);
-                System.out.print(view);
+                view = string(view);
+                view = operators(view);
+                view = keywords(view);
+                List<String> lines = List.of(view.split("\n"));
+                for (int i = 0; i < lines.size(); i++) {
+                    System.out.printf("%s ~ %s\n", formatLine(lines, i + 1), lines.get(i));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             main(args);
         }
+    }
+
+    private static String formatLine(List<String> lines, int i) {
+        int length = String.valueOf(lines.size()).length();
+        String format = "0%" + length + "d";
+        return String.format(format, i);
+    }
+
+
+    private static String operators(String view) {
+        view = view.replaceAll("\\(", ANSI_YELLOW + "(" + ANSI_RESET);
+        view = view.replaceAll("\\)", ANSI_YELLOW + ")" + ANSI_RESET);
+        view = view.replaceAll("\\.", ANSI_YELLOW + "." + ANSI_RESET);
+        view = view.replaceAll("\\=", ANSI_YELLOW + "=" + ANSI_RESET);
+        view = view.replaceAll("\\>", ANSI_YELLOW + ">" + ANSI_RESET);
+        view = view.replaceAll("\\<", ANSI_YELLOW + "<" + ANSI_RESET);
+        view = view.replaceAll("\\-", ANSI_YELLOW + "-" + ANSI_RESET);
+        view = view.replaceAll("\\|", ANSI_YELLOW + "|" + ANSI_RESET);
+        view = view.replaceAll("\\?", ANSI_YELLOW + "?" + ANSI_RESET);
+        view = view.replaceAll("\\:", ANSI_YELLOW + ":" + ANSI_RESET);
+        return view;
+    }
+
+    private static String string(String view) {
+        view = view.replaceAll("\"", ANSI_YELLOW + '"' + ANSI_RESET);
+        return view;
     }
 
     private static String fixNumbers(String view) {
@@ -71,8 +95,37 @@ public class Editor {
         return view;
     }
 
+    private static String keywords(String view) {
+        view = view.replaceAll("guard", ANSI_CYAN + "guard" + ANSI_RESET);
+        view = view.replaceAll("when", ANSI_YELLOW + "when" + ANSI_RESET);
+        view = view.replaceAll("receive", ANSI_YELLOW + "receive" + ANSI_RESET);
+        view = view.replaceAll("case", ANSI_YELLOW + "case" + ANSI_RESET);
+        view = view.replaceAll("of", ANSI_YELLOW + "of" + ANSI_RESET);
+        view = view.replaceAll("end", ANSI_YELLOW + "end" + ANSI_RESET);
+        view = view.replaceAll("and", ANSI_CYAN + "and" + ANSI_RESET);
+        view = view.replaceAll("or", ANSI_CYAN + "or" + ANSI_RESET);
+        view = view.replaceAll("global", ANSI_YELLOW + "global" + ANSI_YELLOW);
+        view = view.replaceAll("not", ANSI_CYAN + "not" + ANSI_RESET);
+        view = view.replaceAll("def", ANSI_YELLOW + "def" + ANSI_RESET);
+        view = view.replaceAll("module", ANSI_GREEN + "module" + ANSI_RESET);
+        view = view.replaceAll("doc", ANSI_GREEN + "doc" + ANSI_RESET);
+        view = view.replaceAll("opt", ANSI_GREEN + "opt" + ANSI_RESET);
+        view = view.replaceAll("Rules", ANSI_PURPLE + "Rules" + ANSI_RESET);
+        view = view.replaceAll("once", ANSI_PURPLE + "once" + ANSI_RESET);
+        view = view.replaceAll("once_expr", ANSI_PURPLE + "once_expr" + ANSI_RESET);
+        view = view.replaceAll("_expr", ANSI_PURPLE + "_expr" + ANSI_RESET);
+        view = view.replaceAll("no_advance", ANSI_PURPLE + "no_advance" + ANSI_RESET);
+        view = view.replaceAll("Catches", ANSI_PURPLE + "Catches" + ANSI_RESET);
+        return view;
+    }
+
     private static void processLine() throws IOException {
+        System.out.printf("%s - ", buffer.size() + 1);
         String input = input();
+        if (input.isBlank()) {
+            buffer.add(input + "\n");
+            return;
+        }
         String[] parts = input.split(" ");
         if (parts[0].equals("go")) {
             System.out.printf("%s > ", parts[1]);
@@ -98,9 +151,9 @@ public class Editor {
         } else if (parts[0].equals("exit")) {
             System.exit(0);
             return;
-        }
+        } else if (parts[0].equals("eval"))
 
-        buffer.add(input + "\n");
+            buffer.add(input + "\n");
     }
 
     private static String input() throws IOException {
@@ -108,14 +161,13 @@ public class Editor {
     }
 
     private static void bar() {
-        System.out.println(ANSI_YELLOW + "=========================================================================");
+        System.out.println(ANSI_YELLOW + "=================================================================================");
         System.out.println("'go LINE' - edit LINE line; 'save FILE' save file; 'load FILE' load FILE;");
-        System.out.println("'clear' clears buffer; 'exit' - exit editor");
-        System.out.println("=========================================================================" + ANSI_RESET);
+        System.out.println("'clear' clears buffer; 'exit' - exit editor; 'eval FILE?' eval current code (file if provided)");
+        System.out.println("===============================================================================================" + ANSI_RESET);
     }
 
-    public final static void cls()
-    {
+    public final static void cls() {
         for (int i = 0; i < 100; i++) {
             System.out.println();
         }

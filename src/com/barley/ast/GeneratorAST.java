@@ -13,9 +13,9 @@ import java.util.LinkedList;
 
 public class GeneratorAST implements AST, Serializable {
 
+    public AST iterable;
     private AST gen;
     private String var;
-    public AST iterable;
 
     public GeneratorAST(AST gen, String var, AST iterable) {
         this.gen = gen;

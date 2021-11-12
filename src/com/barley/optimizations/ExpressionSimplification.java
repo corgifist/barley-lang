@@ -11,6 +11,15 @@ public class ExpressionSimplification implements Optimization {
 
     private int count;
 
+    public static boolean isIntegerValue(AST node, int valueToCheck) {
+        if (!(node instanceof ConstantAST)) return false;
+        final BarleyValue value = ((ConstantAST) node).constant;
+        if (!(value instanceof BarleyNumber)) return false;
+
+        final int number = value.asInteger().intValue();
+        return number == valueToCheck;
+    }
+
     @Override
     public String summary() {
         return "Performed " + count + " expression simplifications";
@@ -25,7 +34,7 @@ public class ExpressionSimplification implements Optimization {
     public AST optimize(BinaryAST ast) {
         boolean expr1Zero = isIntegerValue(ast.expr1, 0);
         if (expr1Zero || isIntegerValue(ast.expr2, 0)) {
-            switch(ast.op) {
+            switch (ast.op) {
                 case '+':
                     count++;
                     return expr1Zero ? ast.expr2 : ast.expr1;
@@ -62,15 +71,6 @@ public class ExpressionSimplification implements Optimization {
         }
 
         return ast;
-    }
-
-    public static boolean isIntegerValue(AST node, int valueToCheck) {
-        if (!(node instanceof ConstantAST)) return false;
-        final BarleyValue value = ((ConstantAST) node).constant;
-        if (!(value instanceof BarleyNumber)) return false;
-
-        final int number = value.asInteger().intValue();
-        return number == valueToCheck;
     }
 
     @Override

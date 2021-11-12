@@ -1,7 +1,6 @@
 package com.barley.optimizations;
 
 import com.barley.runtime.BarleyNumber;
-import com.barley.utils.BarleyException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

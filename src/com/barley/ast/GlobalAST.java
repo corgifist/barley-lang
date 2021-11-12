@@ -3,7 +3,6 @@ package com.barley.ast;
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyValue;
-import com.barley.runtime.Table;
 import com.barley.utils.AST;
 
 import java.io.Serializable;

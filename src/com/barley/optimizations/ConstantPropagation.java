@@ -89,7 +89,7 @@ public class ConstantPropagation implements Optimization {
         HashMap<String, VariableInfo> info = new HashMap<>(emulator.variables());
         if (info.containsKey(ast.toString())) {
             count++;
-            if (info.get(ast.toString()).modifications != 0){
+            if (info.get(ast.toString()).modifications != 0) {
                 return ast;
             }
             count++;

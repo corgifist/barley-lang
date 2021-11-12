@@ -2,7 +2,10 @@ package com.barley.runtime;
 
 import com.barley.utils.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
@@ -13,8 +16,8 @@ import java.util.stream.Collectors;
 
 public class Modules {
 
-    public static HashMap<String, String> docs = new HashMap<>();
     private static final HashMap<String, HashMap<String, Function>> modules = new HashMap<>();
+    public static HashMap<String, String> docs = new HashMap<>();
 
     private static void initIo() {
         HashMap<String, Function> io = new HashMap<>();
@@ -635,8 +638,8 @@ public class Modules {
             return new BarleyAtom(AtomTable.put(String.valueOf(args[0] instanceof BarleyString)));
         });
 
-        types.put("ref_to_string",args -> {
-            Arguments.check(1,args.length);
+        types.put("ref_to_string", args -> {
+            Arguments.check(1, args.length);
             return new BarleyString(((BarleyReference) args[0]).getRef().toString());
         });
 
@@ -806,7 +809,7 @@ public class Modules {
                 String[] messageParts = SourceLoader.readSource("tmp/signals.txt").split(" ");
                 if (List.of(messageParts).isEmpty()) return new BarleyAtom("empty");
                 String type = messageParts[0];
-                if (m.equals(type));
+                if (m.equals(type)) ;
                 else return new BarleyAtom("unmatch");
                 String message = String.join(" ", List.of(messageParts).subList(1, messageParts.length));
                 fun.execute(new BarleyString(type), new BarleyString(message));
@@ -916,49 +919,6 @@ public class Modules {
         put("b_unit", unit);
     }
 
-    private static class runTests implements Function {
-
-        @Override
-        public BarleyValue execute(BarleyValue... args) {
-            HashMap<String, Function> methods = modules.get(args[0].toString());
-            List<TestInfo> tests = methods.entrySet().stream()
-                    .filter(e -> e.getKey().toLowerCase().startsWith("test"))
-                    .map(e -> runTest(e.getKey(), e.getValue()))
-                    .collect(Collectors.toList());
-
-            int failures = 0;
-            long summaryTime = 0;
-            final StringBuilder result = new StringBuilder();
-            for (TestInfo test : tests) {
-                if (!test.isPassed) failures++;
-                summaryTime += test.elapsedTimeInMicros;
-                result.append("\n");
-                result.append(test.info());
-            }
-            result.append("\n");
-            result.append(String.format("Tests run: %d, Failures: %d, Time elapsed: %s",
-                    tests.size(), failures,
-                    microsToSeconds(summaryTime)));
-            return new BarleyString(result.toString());
-        }
-
-        private TestInfo runTest(String name, Function f) {
-            final long startTime = System.nanoTime();
-            boolean isSuccessfull;
-            String failureDescription;
-            try {
-                f.execute();
-                isSuccessfull = true;
-                failureDescription = "";
-            } catch (BUnitAssertionException oae) {
-                isSuccessfull = false;
-                failureDescription = oae.getText();
-            }
-            final long elapsedTime = System.nanoTime() - startTime;
-            return new TestInfo(name, isSuccessfull, failureDescription, elapsedTime / 1000);
-        }
-    }
-
     private static void initFile() {
         HashMap<String, Function> file = new HashMap<>();
 
@@ -1032,7 +992,6 @@ public class Modules {
         });
 
 
-
         put("socket", socket);
     }
 
@@ -1103,7 +1062,7 @@ public class Modules {
             Table.define("APP_DESC", new BarleyString(desc));
             LinkedList<BarleyValue> globals = ((BarleyList) root.getList().get(2)).getList();
             for (BarleyValue global : globals) {
-                if(global.toString().equals("globals")) continue;
+                if (global.toString().equals("globals")) continue;
                 BarleyList g = (BarleyList) global;
                 String n = g.getList().get(0).toString();
                 BarleyValue val = g.getList().get(1);
@@ -1134,13 +1093,13 @@ public class Modules {
         dist.put("app", args -> {
             Arguments.check(1, args.length);
             Function fun = dist.get("raw_app");
-            try  {
+            try {
                 String[] bts = SourceLoader.readSource(args[0].toString()).split(" ");
                 List<Byte> bs = new ArrayList<>();
                 for (String str : bts) {
                     bs.add(Byte.parseByte(str));
                 }
-                Byte[] bt = bs.toArray(new Byte[] {});
+                Byte[] bt = bs.toArray(new Byte[]{});
                 byte[] bytes = toPrimitives(bt);
                 BarleyValue app = SerializeUtils.deserialize(bytes);
                 return fun.execute(app);
@@ -1176,14 +1135,14 @@ public class Modules {
                     cutAfterRules++;
                     if (parts.length == 1) break;
                     String id = parts[0];
-                    if (!parts[1].equals("=")){
+                    if (!parts[1].equals("=")) {
                         System.err.println("Lexer Warning: Expected '=' after macros name, got '" + parts[1] + "'");
                         break;
                     }
                     String rep = String.join(" ", List.of(parts).subList(2, parts.length));
                     result += "global " + id + "\n = " + rep + "\n.\n";
                 }
-                List<String> rules =  List.of(lines).subList(cutAfterRules, lines.length);
+                List<String> rules = List.of(lines).subList(cutAfterRules, lines.length);
                 int cutToCatches = 0;
                 for (String line : rules) {
                     if (line.length() == 7) break;
@@ -1337,22 +1296,22 @@ public class Modules {
                         "match(TokenType) ->\n" +
                         "    C = get(0),\n" +
                         "    eval_match(C, TokenType).\n\n";
-                 parser += "expr() -> " + root + "().\n\n";
-                 parser += result + "\n";
-                 parser += "make_parse() when match(eof) -> Result.\n" +
-                         "make_parse() -> Expr = [expr()],\n" +
-                         "                Result = Result + Expr,\n" +
-                         "                make_parse().\n" +
-                         "\n" +
-                         "parse(Toks) ->\n" +
-                         "    Pos = 0,\n" +
-                         "    Tokens = Toks,\n" +
-                         "    Size = barley:length(Toks),\n" +
-                         "    Result = [],\n" +
-                         "    make_parse().\n";
-                 try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".barley")) {
-                     writer.write(parser);
-                 }
+                parser += "expr() -> " + root + "().\n\n";
+                parser += result + "\n";
+                parser += "make_parse() when match(eof) -> Result.\n" +
+                        "make_parse() -> Expr = [expr()],\n" +
+                        "                Result = Result + Expr,\n" +
+                        "                make_parse().\n" +
+                        "\n" +
+                        "parse(Toks) ->\n" +
+                        "    Pos = 0,\n" +
+                        "    Tokens = Toks,\n" +
+                        "    Size = barley:length(Toks),\n" +
+                        "    Result = [],\n" +
+                        "    make_parse().\n";
+                try (FileWriter writer = new FileWriter(args[0].toString().split("\\.")[0] + ".barley")) {
+                    writer.write(parser);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1536,6 +1495,49 @@ public class Modules {
 
     public static boolean isExists(String name) {
         return modules.containsKey(name);
+    }
+
+    private static class runTests implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            HashMap<String, Function> methods = modules.get(args[0].toString());
+            List<TestInfo> tests = methods.entrySet().stream()
+                    .filter(e -> e.getKey().toLowerCase().startsWith("test"))
+                    .map(e -> runTest(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+
+            int failures = 0;
+            long summaryTime = 0;
+            final StringBuilder result = new StringBuilder();
+            for (TestInfo test : tests) {
+                if (!test.isPassed) failures++;
+                summaryTime += test.elapsedTimeInMicros;
+                result.append("\n");
+                result.append(test.info());
+            }
+            result.append("\n");
+            result.append(String.format("Tests run: %d, Failures: %d, Time elapsed: %s",
+                    tests.size(), failures,
+                    microsToSeconds(summaryTime)));
+            return new BarleyString(result.toString());
+        }
+
+        private TestInfo runTest(String name, Function f) {
+            final long startTime = System.nanoTime();
+            boolean isSuccessfull;
+            String failureDescription;
+            try {
+                f.execute();
+                isSuccessfull = true;
+                failureDescription = "";
+            } catch (BUnitAssertionException oae) {
+                isSuccessfull = false;
+                failureDescription = oae.getText();
+            }
+            final long elapsedTime = System.nanoTime() - startTime;
+            return new TestInfo(name, isSuccessfull, failureDescription, elapsedTime / 1000);
+        }
     }
 
     private static class BUnitAssertionException extends BarleyException {

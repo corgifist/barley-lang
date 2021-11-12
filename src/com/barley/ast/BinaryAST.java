@@ -6,7 +6,6 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.LinkedList;
 
 public class BinaryAST implements AST, Serializable {

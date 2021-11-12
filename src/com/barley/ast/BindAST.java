@@ -9,7 +9,6 @@ import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
-import javax.swing.text.html.HTMLDocument;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -208,7 +207,7 @@ public class BindAST implements AST, Serializable {
                     mods.put(p1.getLeft(), mods.get(p1.getLeft()) + 1);
                     mods.put(p1.getRight(), mods.get(p1.getRight()) + 1);
                 } else {
-                    mods.put(p1.getLeft(),0);
+                    mods.put(p1.getLeft(), 0);
                     mods.put(p1.getRight(), 0);
                     storage.put(p1.getLeft(), new VariableInfo(head((BarleyList) right), mods.get(p1.getLeft()) + 1));
                     storage.put(p1.getRight(), new VariableInfo(tail((BarleyList) right), mods.get(p1.getRight()) + 1));
