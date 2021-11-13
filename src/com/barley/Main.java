@@ -2,10 +2,11 @@ package com.barley;
 
 import com.barley.runtime.BarleyString;
 import com.barley.runtime.Modules;
-import com.barley.utils.Editor;
+import com.barley.editor.Editor;
 import com.barley.utils.Handler;
 import com.barley.utils.SourceLoader;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class Main {
@@ -18,7 +19,11 @@ public class Main {
 
         String file = args[0];
         if (file.equals("-editor")) {
-            Editor.main(args);
+            try {
+                Editor.main(args);
+            } catch (AWTException e) {
+                e.printStackTrace();
+            }
             return;
         }
         if (file.equals("-entry")) {
