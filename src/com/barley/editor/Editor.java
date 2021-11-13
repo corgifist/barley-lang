@@ -1,8 +1,5 @@
 package com.barley.editor;
 
-import com.barley.utils.Handler;
-import com.barley.utils.SourceLoader;
-import io.github.devlinuxuser.JKey;
 import jline.console.ConsoleReader;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -15,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 
@@ -44,18 +42,23 @@ public class Editor {
     private static final ConsoleReader reader = new ConsoleReader();
     private static List<String> buffer = new ArrayList<>();
 
-    private static int BACKSPACE = 8;
-    private static int SHIFT = 16;
-    private static int ARROW_UP = 38;
-    private static int ARROW_DOWN = 40;
-    private static int ESCAPE = 27;
-    private static int ENTER = 10;
-    private static int SAVE = 112;
-    private static int FILENAME = 113;
-    private static int SAVES = 114;
+    private static final int BACKSPACE = 8;
+    private static final int SHIFT = 16;
+    private static final int ARROW_UP = 38;
+    private static final int ARROW_DOWN = 40;
+    private static final int ARROW_LEFT = 37;
+    private static final int ARROW_RIGHT = 39;
+    private static final int ESCAPE = 27;
+    private static final int ENTER = 10;
+    private static final int SAVE = 112;
+    private static final int FILENAME = 113;
+    private static final int SAVES = 114;
+    private static final int CLEAR = 18;
+    private static final int CTRL = 17;
     private static int LINE = 1;
     private static String filename = null;
-    private static int POS = 1;
+    private static int POS = 0;
+    private static int RAW_POS = 0;
     private static boolean autoSave = false;
     private static boolean defined = false;
 
@@ -64,76 +67,127 @@ public class Editor {
         bar();
 
         try {
-            while (true) {
-                final JFrame frame = new JFrame();
-                JKey j = new JKey();
-                
-                synchronized (frame) {
-                    if (filename != null && !defined) {
-                        Timer t = new Timer();
-                        t.schedule(new SaveTask(filename, String.join("", buffer)), 0, 60 * 1000);
-                        System.out.println(ANSI_RED_BACKGROUND + "AUTO-SAVE TASK ENABLED" + ANSI_RESET);
-                    }
-                    frame.setUndecorated(true);
-                    frame.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
-                    frame.addKeyListener(new KeyListener() {
-                        public void keyPressed(KeyEvent e) {
-                            synchronized (frame) {
-                                frame.setVisible(false);
-                                frame.dispose();
-                                frame.notify();
-                                if (e.getKeyCode() == BACKSPACE) {
-                                    if (!buffer.isEmpty()) {
-                                        if (buffer.get(buffer.size() - 1) == "\n") LINE--;
-                                        buffer.remove(buffer.size() - 1);
-                                    }
-                                } else if (e.getKeyCode() == SHIFT) {
-                                    return;
-                                } else if (e.getKeyCode() == ARROW_UP) {
+            final JFrame frame = new JFrame();
+            frame.setUndecorated(true);
+            frame.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
+            synchronized (frame) {
+                frame.addKeyListener(new KeyListener() {
+                    public void keyPressed(KeyEvent e) {
+                        if (filename != null && !defined) {
+                            Timer t = new Timer();
+                            t.schedule(new SaveTask(filename, String.join("", buffer)), 0, 60 * 1000);
+                            System.out.println(ANSI_RED_BACKGROUND + "AUTO-SAVE TASK ENABLED" + ANSI_RESET);
+                            defined = true;
+                        }
+                        frame.setVisible(false);
+                        frame.dispose();
+                        System.out.println(e.getKeyCode());
+                        if (e.getKeyCode() == BACKSPACE) {
+                            if (!buffer.isEmpty()) {
+                                if (buffer.get(buffer.size() - 1).equals("\n")) {
                                     LINE--;
-                                    return;
-                                } else if (e.getKeyCode() == ARROW_DOWN) {
-                                    LINE++;
-                                    return;
-                                } else if (e.getKeyCode() == ESCAPE) {
-                                    System.exit(0);
-                                } else if (e.getKeyCode() == ENTER) {
-                                    buffer.add("\n");
-                                    LINE++;
-                                } else if (e.getKeyCode() == SAVE) {
-                                    save();
-                                    return;
-                                } else if (e.getKeyCode() == FILENAME) {
-                                    file();
-                                    return;
-                                } else if (e.getKeyCode() == SAVES) {
-                                    enableSaves();
-                                } else  buffer.add(String.valueOf(e.getKeyChar()));
-                                cls();
-                                System.out.println(e.getKeyCode());
-                                bar();
-                                code();
-                                System.out.println(ANSI_CYAN_BACKGROUND + "'ESC' - EXIT;" +
-                                        "'F1' - SAVE FILE; 'F2' - ENTER FILENAME FOR AUTO-SAVES; 'F3' - ENABLE/DISABLE AUTO-SAVES" + ANSI_RESET);
+                                    POS = 0;
+                                    RAW_POS--;
+                                } else {
+                                    POS--;
+                                    RAW_POS--;
+                                }
+                                buffer.remove(RAW_POS);
+                            } else {
+                                LINE = 1;
+                                POS = 0;
+                                RAW_POS = 0;
                             }
-                        }
+                        } else if (e.getKeyCode() == SHIFT) {
+                        } else if (e.getKeyCode() == ARROW_UP) {
+                            LINE--;
+                        } else if (e.getKeyCode() == ARROW_DOWN) {
+                            LINE++;
+                        } else if (e.getKeyCode() == ESCAPE) {
+                            System.exit(0);
+                        } else if (e.getKeyCode() == ENTER) {
+                            buffer.add("\n");
+                            LINE++;
+                            POS = 0;
+                        } else if (e.getKeyCode() == SAVE) {
+                            save();
+                        } else if (e.getKeyCode() == FILENAME) {
+                            file();
+                        } else if (e.getKeyCode() == SAVES) {
+                            enableSaves();
+                        } else if (e.getKeyCode() == CLEAR) {
+                            buffer.clear();
+                        } else if (e.getKeyCode() == ARROW_LEFT) {
+                            RAW_POS--;
+                        } else if (e.getKeyCode() == ARROW_RIGHT) {
+                            RAW_POS++;
+                        } else if (e.getKeyCode() == CTRL) {
 
-                        public void keyReleased(KeyEvent e) {
-                        }
+                        } else {
+                            POS++;
+                            RAW_POS++;
+                            try {
+                                buffer.add(RAW_POS, String.valueOf(e.getKeyChar()));
+                            } catch (IndexOutOfBoundsException ex) {
+                                buffer.add(String.valueOf(e.getKeyChar()));
+                            }
+//                            String[] lines = String.join("", buffer).split("\n");
+//                            String targetLine = lines[LINE - 1];
+//                            ArrayList<String> listRepr = new ArrayList<>();
+//                            for (char c : targetLine.toCharArray()) {
+//                                try {
+//                                    listRepr.set(POS, String.valueOf(c));
+//                                } catch (IndexOutOfBoundsException ex ){
+//                                    listRepr.add(String.valueOf(c));
+//                                }
+//                            }
+//                            try {
+//                                listRepr.set(POS, String.valueOf(e.getKeyChar()));
+//                            } catch (IndexOutOfBoundsException ex) {
+//                                listRepr.add(String.valueOf(e.getKeyChar()));
+//                            }
+//                            List<String> result = new ArrayList<>();
+//                            for (int i = 0; i < lines.length; i++) {
+//                                String current = lines[i];
+//                                String[] chars = current.split("");
+//                                List<String> collection = new ArrayList<>(Arrays.asList(chars));
+//                                if (i + 1 == LINE) result.addAll(listRepr);
+//                                else result.addAll(collection);
+//                            }
+//                            buffer.addAll(result);
 
-                        public void keyTyped(KeyEvent e) {
                         }
-                    });
-                    frame.setVisible(true);
-                    try {
-                        frame.wait();
-                    } catch (InterruptedException e1) {
+                        cls();
+
+                        System.out.println(buffer);
+                        System.out.println(e.getKeyCode());
+                        bar();
+                        code();
+                        System.out.println(ANSI_CYAN_BACKGROUND + "'ESC' - EXIT;" +
+                                "'F1' - SAVE FILE; 'F2' - ENTER FILENAME FOR AUTO-SAVES; 'F3' - ENABLE/DISABLE AUTO-SAVES" + ANSI_RESET);
+                        frame.setVisible(true);
                     }
+
+                    public void keyReleased(KeyEvent e) {
+                    }
+
+                    public void keyTyped(KeyEvent e) {
+                    }
+                });
+                frame.setVisible(true);
+                try {
+                    frame.wait();
+                } catch (InterruptedException e1) {
                 }
             }
-        } catch (HeadlessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            main(args);
         }
+    }
+
+    private static void transformRight() {
+
     }
 
     private static void enableSaves() {
@@ -141,7 +195,7 @@ public class Editor {
         code();
         System.out.println("\n");
         System.out.println(ANSI_CYAN_BACKGROUND +
-                           "-------------------------------------------");
+                "-------------------------------------------");
         System.out.println("| You seriously want to enable auto-saves? |");
         System.out.println("-------------------------------------------");
         System.out.println("|        [Y] - YES   |  [N] - NO           |");
@@ -152,13 +206,36 @@ public class Editor {
     }
 
     private static void code() {
+        String currentCode = getCode();
+        String[] parts = currentCode.split("\n");
+        System.out.println("parts: " + List.of(parts));
+        String pointed = "";
+        for (int i = 0; i < parts.length; i++) {
+            String str = parts[i];
+            if (i + 1 == LINE) {
+                String result = "";
+                char[] chars = str.toCharArray();
+                for (int p = 0; p < chars.length; p++) {
+                    char c = chars[p];
+                    if (p + 1 == POS) result += ANSI_YELLOW_BACKGROUND + c + ANSI_RESET;
+                    else result += c;
+                }
+                pointed += result + "\n";
+                continue;
+            }
+            pointed += str + "\n";
+        }
+        System.out.println(pointed);
+    }
+
+    private static String getCode() {
         String view = String.join("", buffer);
         view = colorizeNumbers(view);
         view = fixNumbers(view);
         view = string(view);
         view = operators(view);
         view = keywords(view);
-        System.out.println(view);
+        return view;
     }
 
     private static void file() {
@@ -172,7 +249,7 @@ public class Editor {
     private static void save() {
         cls();
         System.out.println(ANSI_CYAN_BACKGROUND +
-                           "-----------------------------------------");
+                "-----------------------------------------");
         System.out.println("| You seriously want to save the file?  |");
         System.out.println("-----------------------------------------");
         System.out.println("|      [Y] - YES   |  [N] - NO          |");
@@ -342,7 +419,7 @@ public class Editor {
     }
 
     private static void bar() {
-        System.out.println(ANSI_CYAN_BACKGROUND + "LINE: " + LINE + "; POS = " + POS + "; 'ESC' - EXIT;" + ANSI_RESET);
+        System.out.println(ANSI_CYAN_BACKGROUND + "LINE: " + LINE + "; POS = " + POS + "; 'ESC' - EXIT; 'ALT' - clear buffer; RAW_POS: " + RAW_POS + ";" + ANSI_RESET);
     }
 
     public final static void cls() {
@@ -353,8 +430,7 @@ public class Editor {
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
             try {
                 Runtime.getRuntime().exec("clear");
             } catch (IOException e) {
