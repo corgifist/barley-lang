@@ -503,4 +503,9 @@ public class Buffer {
     public Path getPath() {
         return _path;
     }
+
+    @Override
+    public String toString() {
+        return _string.toString();
+    }
 }

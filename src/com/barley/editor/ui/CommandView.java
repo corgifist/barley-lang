@@ -1,5 +1,6 @@
 package com.barley.editor.ui;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -143,6 +144,18 @@ public class CommandView extends View {
             case "l":
                 list();
                 break;
+            case "s":
+                save(args);
+                break;
+        }
+    }
+
+    private void save(String[] args) {
+        String file = args[1];
+        try (FileWriter writer = new FileWriter(file, false)) {
+            writer.write(Window.getInstance().getBufferContext().getBuffer().toString());
+        } catch (IOException exception) {
+
         }
     }
 

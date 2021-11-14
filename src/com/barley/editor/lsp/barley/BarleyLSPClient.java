@@ -24,6 +24,7 @@ public class BarleyLSPClient implements LanguageMode {
     private static Pattern string = Pattern.compile("\\\"([^\\\\\\\"]|(\\\\.))*\\\"", Pattern.MULTILINE);
     private static Pattern operators = Pattern.compile("[+\\-*/()=;!<>:|\\[\\]]");
     private static Pattern digit = Pattern.compile("^\\d*(\\.\\d+)?$");
+    private static Pattern var = Pattern.compile("[A-Z]([a-z]|_)*");
 
     @Override
     public void didInsert(BufferContext bufferContext, int position, String text) {
@@ -118,6 +119,7 @@ public class BarleyLSPClient implements LanguageMode {
     @Override
     public void applyColouring(BufferContext bufferContext, AttributedString str) {
         var stri = str.toString();
+        formatToken(str, stri, var, TextColor.ANSI.MAGENTA);
         formatToken(str, stri, comment, TextColor.ANSI.GREEN);
         formatToken(str, stri, digit, TextColor.ANSI.CYAN);
         formatToken(str, stri, keyword, TextColor.ANSI.CYAN);
