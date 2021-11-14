@@ -19,11 +19,7 @@ public class Main {
 
         String file = args[0];
         if (file.equals("-editor")) {
-            try {
-                Editor.main(args);
-            } catch (AWTException e) {
-                e.printStackTrace();
-            }
+            Editor.main(args);
             return;
         }
         if (file.equals("-entry")) {
