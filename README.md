@@ -23,6 +23,7 @@
  - Built-in optimization (constant folding, propagation, expression simplification and more)
  - Two Barley instances can talk to each other by sending signals (see `examples/chat.barley`)
  - Clean syntax
+ - Built-in terminal code editor
 
 
 Barley is a interpreted erlang-like language based on JVM. It have simplified syntax and normal strings XD
