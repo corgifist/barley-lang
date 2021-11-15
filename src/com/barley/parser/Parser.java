@@ -342,6 +342,14 @@ public final class Parser implements Serializable {
             return lambda();
         }
 
+        if (match(TokenType.LTLT)) {
+            AST toBinary = expression();
+            match(TokenType.GTGT);
+            ArrayList<AST> list = new ArrayList<>();
+            list.add(toBinary);
+            return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom("barley")), new ConstantAST(new BarleyAtom("binary"))), list);
+        }
+
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
     }

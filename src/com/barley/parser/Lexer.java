@@ -45,6 +45,8 @@ public final class Lexer {
         OPERATORS.put("||", TokenType.BARBAR);
         OPERATORS.put("::", TokenType.CC);
         OPERATORS.put("?", TokenType.QUESTION);
+        OPERATORS.put(">>", TokenType.GTGT);
+        OPERATORS.put("<<", TokenType.LTLT);
     }
 
     static {

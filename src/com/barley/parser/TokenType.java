@@ -28,6 +28,8 @@ public enum TokenType implements Serializable {
     BAR,
     BARBAR,
     CC,
+    LTLT,
+    GTGT,
 
     LPAREN, // (
     RPAREN, // )
