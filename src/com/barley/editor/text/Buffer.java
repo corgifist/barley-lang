@@ -433,9 +433,6 @@ public class Buffer {
                         var charNum = token.character;
                         int index = _bufferContext.getTextLayout().getIndexForPhysicalLineCharacter(lineNum, charNum);
                         _log.info("Format range [" + index + ", " + (index + token.length) + ")");
-                        decoration._str.format(index, index + token.length, 
-                                JavaLSPClient.getInstance().foregroundColourForScope(token.scope), 
-                                TextColor.ANSI.DEFAULT);
                     }
                 }
                 _languageMode.applyColouring(_bufferContext, decoration._str);

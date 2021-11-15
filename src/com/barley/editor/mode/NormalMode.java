@@ -25,21 +25,6 @@ public class NormalMode extends Mode {
         String leader = "<SPACE>";
         _fancyJump = new FancyJumpResponder(bufferContext, 'w');
         _rootResponder.addEventResponder(_fancyJump);
-        _rootResponder.addEventResponder(leader + " e i", () -> {
-            JavaLSPClient.getInstance().organizeImports(window.getBufferContext());
-        });
-        _rootResponder.addEventResponder(leader + " e f", () -> {
-            JavaLSPClient.getInstance().makeFinal(window.getBufferContext());
-        });
-        _rootResponder.addEventResponder(leader + " e a", () -> {
-            JavaLSPClient.getInstance().generateAccessors(window.getBufferContext());
-        });
-        _rootResponder.addEventResponder(leader + " e s", () -> {
-            JavaLSPClient.getInstance().generateToString(window.getBufferContext());
-        });
-        _rootResponder.addEventResponder(leader + " e l", () -> {
-            JavaLSPClient.getInstance().codeLens(window.getBufferContext());
-        });
         _rootResponder.addEventResponder("i", () -> { window.switchToMode(window.getInputMode()); });
         _rootResponder.addEventResponder("v", () -> { window.switchToMode(window.getVisualMode()); });
         _rootResponder.addEventResponder("V", () -> { window.switchToMode(window.getVisualLineMode()); });

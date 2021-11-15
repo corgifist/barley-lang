@@ -93,15 +93,10 @@ public class Window implements Drawable {
     private void setupViews(Path path) {
         var terminalContext = TerminalContext.getInstance();
         var terminalSize = terminalContext.getScreen().getTerminalSize();
-        terminalContext.getTerminal().addResizeListener(new TerminalResizeListener() {
-            @Override
-            public void onResized(Terminal terminal, TerminalSize newSize) {
-                EventThread.getInstance().enqueue(new RunnableEvent(() -> {
-                    _log.info("Resize detected");
-                    Window.this.update(true /* forced */);
-                }));
-            }
-        });
+        terminalContext.getTerminal().addResizeListener((terminal, newSize) -> EventThread.getInstance().enqueue(new RunnableEvent(() -> {
+            _log.info("Resize detected");
+            Window.this.update(true /* forced */);
+        })));
 
         _log.info("Terminal size: " + terminalSize.getColumns() + ", " + terminalSize.getRows());
 
