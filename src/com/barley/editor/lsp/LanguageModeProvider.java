@@ -1,7 +1,9 @@
 package com.barley.editor.lsp;
 
 import java.nio.file.Path;
+import java.util.Map;
 
+import com.barley.editor.Editor;
 import com.barley.editor.lsp.barley.BarleyLSPClient;
 import org.eclipse.lsp4j.TextDocumentItem;
 import com.barley.editor.lsp.java.JavaLSPClient;
@@ -25,6 +27,17 @@ public class LanguageModeProvider {
             extension = fileName.substring(i + 1);
         }
         return extension.equals(ending);
+    }
+
+    private String ext(Path path) {
+        String extension = "";
+        String fileName = path.getFileName().toString();
+
+        int i = fileName.lastIndexOf('.');
+        if (i >= 0) {
+            extension = fileName.substring(i + 1);
+        }
+        return extension;
     }
     
     private LanguageMode getPlainLanguageMode() {
@@ -81,9 +94,38 @@ public class LanguageModeProvider {
         if (endsIn(path, "tex")) {
             return new LatexLSPClient();
         }
-        if (endsIn(path, "barley")) {
+        if (endsIn(path, "barley") || endsIn(path, "ams")) {
             return new BarleyLSPClient();
         }
+        System.out.println(hardCheck(ext(path), "configuration"));
+        for (Map.Entry<String, CustomLanguageMode> entry : Editor.configs.entrySet()) {
+            String formatted = fix(entry.getKey());
+            if (hardCheck(ext(path), "configuration"))
+                return entry.getValue();
+            System.out.println("skip if");
+        }
         return getPlainLanguageMode();
+    }
+
+    private String fix(String key) {
+        char cs[] = key.toCharArray();
+        String s = "";
+        for (char c : cs) {
+            s += c;
+        }
+        return s;
+    }
+
+    private boolean hardCheck(String s1, String s2) {
+        if (s1.length() != s2.length()) return false;
+        if (s1 == null) return false;
+        char[] c1 = s1.toCharArray();
+        char[] c2 = s2.toCharArray();
+        for (int i = 0; i < c1.length; i++) {
+            char current1 = c1[i];
+            char current2 = c2[i];
+            if (current1 != current2) return false;
+        }
+        return true;
     }
 }

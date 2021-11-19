@@ -6,6 +6,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.barley.editor.event.EventResponder;
@@ -15,6 +18,7 @@ import com.barley.editor.event.Response;
 import com.barley.editor.terminal.TerminalContext;
 import com.barley.editor.text.AttributedString;
 
+import com.barley.utils.Handler;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
@@ -30,7 +34,8 @@ public class CommandView extends View {
     private ListEventResponder _responders = new ListEventResponder();
     private boolean _searchForward;
     private String _searchString;
-    private static final Logger _log = LogFactory.createLog();    
+    private static final Logger _log = LogFactory.createLog();
+    private static Map<String, String> macros = new HashMap<>();
 
     private boolean isSearch() {
         // Is this hacky? Yeah it is. Buy hey deal with it later.
@@ -132,6 +137,12 @@ public class CommandView extends View {
             return;
         }
         String command = args[0];
+        if (macros.containsKey(command)) {
+            String key = command;
+            String repr = macros.get(command);
+            String c = key + " " + repr;
+            runCommand(c.split(" "));
+        }
         switch (command) {
             case "q":
                 System.exit(0);
@@ -147,7 +158,39 @@ public class CommandView extends View {
             case "s":
                 save(args);
                 break;
+            case "n":
+                try (FileWriter writer = new FileWriter(args[1], false)) {
+                    writer.write("");
+                } catch (IOException ex) {
+
+                }
+                setMessage("Successful");
+                break;
+            case "entry":
+                entry(args);
+                break;
+            case "m":
+                registerMacros(args);
+                break;
         }
+    }
+
+    private void registerMacros(String[] args) {
+        String name = args[1];
+        if (!args[2].equals("=")) {
+            setMessage("KernelPanic: Can't find '=' as the third operand");
+            return;
+        }
+        String result = String.join(" ", List.of(args).subList(3, args.length));
+        macros.put(name, result);
+    }
+
+    private void entry(String[] args) {
+        String code = Window.getInstance().getBufferContext().getBuffer().toString();
+        String module = args[1];
+        String method = args[2];
+        Handler.handle(code, false);
+        Handler.handle(module + ":" + method + "().", true);
     }
 
     private void save(String[] args) {

@@ -154,6 +154,20 @@ public class JavaLSPClient extends Thread implements LanguageMode {
     @Override
     public int getIndentationLevel(BufferContext bufferContext) {
         int indentation = 0;
+        int cursor = bufferContext.getBuffer().getCursor().getPosition();
+        Pattern _bracketPattern = Pattern.compile("[{}]");
+        var matcher = _bracketPattern.matcher( bufferContext.getBuffer().getString());
+        while (matcher.find()) {
+            if (matcher.start() >= cursor) {
+                return indentation;
+            }
+            if (matcher.group(0).equals("{")) {
+                ++indentation;
+            }
+            if (matcher.group(0).equals("}")) {
+                --indentation;
+            }
+        }
         return indentation;
     }
 
