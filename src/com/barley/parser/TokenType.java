@@ -30,6 +30,7 @@ public enum TokenType implements Serializable {
     CC,
     LTLT,
     GTGT,
+    UNBIN,
 
     LPAREN, // (
     RPAREN, // )

@@ -5,6 +5,7 @@ import com.barley.runtime.Modules;
 import com.barley.editor.Editor;
 import com.barley.utils.Handler;
 import com.barley.utils.SourceLoader;
+import io.github.devlinuxuser.JKey;
 
 import java.awt.*;
 import java.io.IOException;

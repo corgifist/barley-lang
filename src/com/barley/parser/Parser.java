@@ -269,6 +269,10 @@ public final class Parser implements Serializable {
             return new UnaryAST(call(), 'n');
         }
 
+        if (match(TokenType.UNBIN))
+        {
+            return buildCall("barley", "from_binary", new ArrayList<>(List.of(primary())));
+        }
         return call();
     }
 
@@ -347,8 +351,9 @@ public final class Parser implements Serializable {
             match(TokenType.GTGT);
             ArrayList<AST> list = new ArrayList<>();
             list.add(toBinary);
-            return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom("barley")), new ConstantAST(new BarleyAtom("binary"))), list);
+            return buildCall("barley", "binary", list);
         }
+
 
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
@@ -481,5 +486,9 @@ public final class Parser implements Serializable {
         final int position = pos + relativePosition;
         if (position >= size) return EOF;
         return tokens.get(position);
+    }
+
+    private AST buildCall(String module, String method, ArrayList<AST> args) {
+        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), new ConstantAST(new BarleyAtom(method))), args);
     }
 }
