@@ -18,12 +18,13 @@ public class BarleyLSPClient implements LanguageMode {
     private static final Logger _log = LogFactory.createLog();
     private static Pattern attributes = Pattern.compile("(\\bmodule\\b)|(\\bopt\\b)|(\\bdoc\\b)", Pattern.MULTILINE);
     private static Pattern keyword = Pattern.compile("(\\bwhen\\b)|(\\breceive\\b)|(\\bcase\\b)" +
-            "(\\bcase\\b)|(\\bof\\b)|(\\bend\\b)" +
+            "|(\\bend\\b)" +
             "(\\band\\b)|(\\bor\\b)|(\\bglobal\\b)|" +
-            "(\\bnot\\b)|(\\bdef\\b)|(\\bdefguard\\b)");
+            "(\\bnot\\b)|(\\bdef\\b)|(\\bdefguard\\b)|" +
+            "(\\bcase\\b)|(\\bof\\b)");
     private static Pattern comment = Pattern.compile("(//.*)");
     private static Pattern string = Pattern.compile("\\\"([^\\\\\\\"]|(\\\\.))*\\\"", Pattern.MULTILINE);
-    private static Pattern operators = Pattern.compile("[+\\-*/()=;!<>:|\\[\\]]");
+    private static Pattern operators = Pattern.compile("[+\\-*/()=;!<>:|\\[\\]]|&");
     private static Pattern digit = Pattern.compile("^\\d*(\\.\\d+)?$");
     private static Pattern var = Pattern.compile("[A-Z]([a-z]|_)*");
     private static Pattern amethyst = Pattern.compile("(\\bRules\\b)|(\\bCatches\\b)|(\\bonce\\b)|(\\bonce_expr\\b)|(\\bno_advance\\b)|" +

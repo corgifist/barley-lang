@@ -97,13 +97,6 @@ public class LanguageModeProvider {
         if (endsIn(path, "barley") || endsIn(path, "ams")) {
             return new BarleyLSPClient();
         }
-        System.out.println(hardCheck(ext(path), "configuration"));
-        for (Map.Entry<String, CustomLanguageMode> entry : Editor.configs.entrySet()) {
-            String formatted = fix(entry.getKey());
-            if (hardCheck(ext(path), "configuration"))
-                return entry.getValue();
-            System.out.println("skip if");
-        }
         return getPlainLanguageMode();
     }
 
