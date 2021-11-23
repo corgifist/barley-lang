@@ -1,7 +1,16 @@
 package com.barley.runtime;
 
+import com.annimon.ownlang.lib.NumberValue;
+import com.annimon.ownlang.modules.canvas.canvas;
 import com.barley.utils.*;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,6 +19,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -18,6 +28,14 @@ public class Modules {
 
     private static final HashMap<String, HashMap<String, Function>> modules = new HashMap<>();
     public static HashMap<String, String> docs = new HashMap<>();
+
+    private static JFrame frame;
+    private static CanvasPanel panel;
+    private static Graphics2D graphics;
+    private static BufferedImage img;
+
+    private static BarleyValue lastKey = new BarleyNumber(-1);
+    private static BarleyList mouseHover = new BarleyList(new BarleyNumber(0), new BarleyNumber(0));
 
     private static void initIo() {
         HashMap<String, Function> io = new HashMap<>();
@@ -397,6 +415,12 @@ public class Modules {
             return new BarleyAtom("ok");
         });
 
+        shell.put("loop", args -> {
+            while (true) {
+                ((BarleyFunction) args[0]).execute();
+            }
+        });
+
         put("barley", shell);
     }
 
@@ -475,6 +499,11 @@ public class Modules {
         math.put("range", args -> {
             Arguments.check(2, args.length);
             return new BarleyNumber(getRandomNumber(args[0].asInteger().intValue(), args[1].asInteger().intValue()));
+        });
+
+        math.put("rem", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(args[0].asInteger().intValue() % args[1].asInteger().intValue());
         });
 
         modules.put("math", math);
@@ -1343,6 +1372,94 @@ public class Modules {
         initDist();
         initLists();
         initAmethyst();
+        initInterface();
+    }
+
+    private static void initInterface() {
+        HashMap<String, Function> inter = new HashMap<>();
+        inter.put("vk_up", args -> new BarleyNumber(KeyEvent.VK_UP));
+        inter.put("vk_down", args -> new BarleyNumber(KeyEvent.VK_DOWN));
+        inter.put("vk_left", args -> new BarleyNumber(KeyEvent.VK_LEFT));
+        inter.put("vk_right", args -> new BarleyNumber(KeyEvent.VK_RIGHT));
+        inter.put("vk_fire", args -> new BarleyNumber(KeyEvent.VK_ENTER));
+        inter.put("vk_escape", args -> new BarleyNumber(KeyEvent.VK_ESCAPE));
+
+        inter.put("window", new CreateWindow());
+        inter.put("prompt", new Prompt());
+        inter.put("key_pressed", new KeyPressed());
+        inter.put("mouse_hover", new MouseHover());
+
+        inter.put("line", args -> {
+            line(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("oval", args -> {
+            oval(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("foval", args -> {
+            foval(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("rect", args -> {
+            rect(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("frect", args -> {
+            frect(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("clip", args -> {
+            clip(args[0].asInteger().intValue()
+                    , args[1].asInteger().intValue()
+                    , args[2].asInteger().intValue()
+                    , args[3].asInteger().intValue());
+            return new BarleyAtom("ok");
+        });
+        inter.put("string", new DrawString());
+        inter.put("color", new SetColor());
+        inter.put("repaint", new Repaint());
+
+        put("interface", inter);
+    }
+
+    private static void line(int x1, int y1, int x2, int y2) {
+        graphics.drawLine(x1, y1, x2, y2);
+    }
+
+    private static void oval(int x, int y, int w, int h) {
+        graphics.drawOval(x, y, w, h);
+    }
+
+    private static void foval(int x, int y, int w, int h) {
+        graphics.fillOval(x, y, w, h);
+    }
+
+    private static void rect(int x, int y, int w, int h) {
+        graphics.drawRect(x, y, w, h);
+    }
+
+    private static void frect(int x, int y, int w, int h) {
+        graphics.fillRect(x, y, w, h);
+    }
+
+    private static void clip(int x, int y, int w, int h) {
+        graphics.setClip(x, y, w, h);
     }
 
     private static void initLists() {
@@ -1568,5 +1685,136 @@ public class Modules {
                     microsToSeconds(elapsedTimeInMicros)
             );
         }
+    }
+
+    private static class CanvasPanel extends JPanel {
+
+        public CanvasPanel(int width, int height) {
+            setPreferredSize(new Dimension(width, height));
+            img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            graphics = img.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            setFocusable(true);
+            requestFocus();
+            addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    lastKey = new BarleyNumber(e.getKeyCode());
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    lastKey = new BarleyNumber(-1);
+                }
+            });
+            addMouseMotionListener(new MouseMotionAdapter() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    mouseHover.set(0, new BarleyNumber(e.getX()));
+                    mouseHover.set(1, new BarleyNumber(e.getY()));
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.drawImage(img, 0, 0, null);
+        }
+    }
+
+    private static class CreateWindow implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            String title = "";
+            int width = 640;
+            int height = 480;
+            switch (args.length) {
+                case 1:
+                    title = args[0].toString();
+                    break;
+                case 2:
+                    width = args[0].asInteger().intValue();
+                    height = args[1].asFloat().intValue();
+                    break;
+                case 3:
+                    title = args[0].toString();
+                    width = args[1].asInteger().intValue();
+                    height = args[2].asInteger().intValue();
+                    break;
+            }
+            panel = new CanvasPanel(width, height);
+
+            frame = new JFrame(title);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.add(panel);
+            frame.pack();
+            frame.setVisible(true);
+            return new BarleyNumber(0);
+        }
+    }
+
+    private static class KeyPressed implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            return lastKey;
+        }
+    }
+
+    private static class MouseHover implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            return mouseHover;
+        }
+    }
+
+    private static class DrawString implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            Arguments.check(3, args.length);
+            int x = args[1].asInteger().intValue();
+            int y = args[2].asInteger().intValue();
+            graphics.drawString(args[0].toString(), x, y);
+            return new BarleyNumber(0);
+        }
+    }
+
+    private static class Prompt implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            final String v = JOptionPane.showInputDialog(args[0].toString());
+            return new BarleyString(v == null ? "0" : v);
+        }
+    }
+
+    private static class Repaint implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            panel.invalidate();
+            panel.repaint();
+            return new BarleyNumber(0);
+        }
+    }
+
+    private static class SetColor implements Function {
+
+        @Override
+        public BarleyValue execute(BarleyValue... args) {
+            if (args.length == 1) {
+                graphics.setColor(new Color(args[0].asInteger().intValue()));
+                return new BarleyNumber(0);
+            }
+            int r = args[0].asInteger().intValue();
+            int g = args[1].asInteger().intValue();
+            int b = args[2].asInteger().intValue();
+            graphics.setColor(new Color(r, g, b));
+            return new BarleyNumber(0);
+        }
+
     }
 }
