@@ -3,6 +3,7 @@ package com.barley.runtime;
 import com.annimon.ownlang.lib.NumberValue;
 import com.annimon.ownlang.modules.canvas.canvas;
 import com.barley.utils.*;
+import org.jline.terminal.TerminalBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -419,6 +420,24 @@ public class Modules {
             while (true) {
                 ((BarleyFunction) args[0]).execute();
             }
+        });
+
+        shell.put("width", args -> {
+            try {
+                return new BarleyNumber(TerminalBuilder.terminal().getWidth());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
+        });
+
+        shell.put("height", args -> {
+            try {
+                return new BarleyNumber(TerminalBuilder.terminal().getHeight());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
         });
 
         put("barley", shell);
