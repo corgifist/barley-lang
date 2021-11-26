@@ -116,7 +116,21 @@ public final class Parser implements Serializable {
     }
 
     private AST expression() {
-        return ternary();
+        return assignment();
+    }
+
+    private AST assignment() {
+        AST result = ternary();
+
+        while (true) {
+            if (match(TokenType.EQ)) {
+                result = new BindAST(result, ternary());
+                continue;
+            }
+            break;
+        }
+
+        return result;
     }
 
     private AST ternary() {
@@ -176,19 +190,6 @@ public final class Parser implements Serializable {
         return generator;
     }
 
-    private AST assignment() {
-        AST result = conditional();
-
-        while (true) {
-            if (match(TokenType.EQ)) {
-                result = new BindAST(result, conditional());
-                continue;
-            }
-            break;
-        }
-
-        return result;
-    }
 
     private AST conditional() {
         AST result = additive();
