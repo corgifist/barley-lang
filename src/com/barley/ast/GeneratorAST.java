@@ -30,6 +30,7 @@ public class GeneratorAST implements AST, Serializable {
         BarleyList list = (BarleyList) value;
         LinkedList<BarleyValue> result = new LinkedList<>();
         int size = list.getList().size();
+        Table.push();
         for (int i = 0; i < size; i++) {
             BarleyValue obj = list.getList().get(i);
             Table.set(var, obj);
@@ -38,8 +39,7 @@ public class GeneratorAST implements AST, Serializable {
             if (res.toString().equals("generator_skip")) continue;
             result.add(res);
         }
-        Table.remove(var);
-        Table.remove("ITERATION");
+        Table.pop();
         return new BarleyList(result);
     }
 

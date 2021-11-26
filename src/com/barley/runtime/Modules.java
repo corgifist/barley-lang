@@ -1591,6 +1591,36 @@ public class Modules {
 
         });
 
+        lists.put("max", args -> {
+            Arguments.check(1, args.length);
+            LinkedList<BarleyValue> list = ((BarleyList) args[0]).getList();
+            ArrayList<Integer> ints = new ArrayList<>();
+            for (BarleyValue val : list) {
+                ints.add(val.asInteger().intValue());
+            }
+            Integer[] arr1 = ints.toArray(new Integer[] {});
+            int[] arr = new int[arr1.length];
+            for (int i = 0; i < arr1.length; i++) {
+                arr[i] = arr1[i];
+            }
+            return new BarleyNumber(Arrays.stream(arr).max().getAsInt());
+        });
+
+        lists.put("min", args -> {
+            Arguments.check(1, args.length);
+            LinkedList<BarleyValue> list = ((BarleyList) args[0]).getList();
+            ArrayList<Integer> ints = new ArrayList<>();
+            for (BarleyValue val : list) {
+                ints.add(val.asInteger().intValue());
+            }
+            Integer[] arr1 = ints.toArray(new Integer[] {});
+            int[] arr = new int[arr1.length];
+            for (int i = 0; i < arr1.length; i++) {
+                arr[i] = arr1[i];
+            }
+            return new BarleyNumber(Arrays.stream(arr).min().getAsInt());
+        });
+
         lists.put("concat", args -> {
             Arguments.check(1, args.length);
             BarleyList list = (BarleyList) args[0];
