@@ -6,6 +6,8 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 
 public class BinaryAST implements AST, Serializable {
@@ -62,7 +64,7 @@ public class BinaryAST implements AST, Serializable {
             case '*':
                 return new BarleyNumber(val1.asFloat().multiply(val2.asFloat()));
             case '/':
-                return new BarleyNumber(val1.asFloat().divide(val2.asFloat()));
+                return new BarleyNumber(val1.asFloat().divide(val2.asFloat(), new MathContext(2, RoundingMode.HALF_UP)));
             case '+':
                 return new BarleyNumber(val1.asFloat().add(val2.asFloat()));
             case '>':
@@ -96,7 +98,7 @@ public class BinaryAST implements AST, Serializable {
     }
 
     public void badArith(BarleyValue val1, BarleyValue val2) {
-        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    " + String.format("%s %s %s", val1, op, val2));
+        throw new BarleyException("BadArithmetic", "an error occurred when evaluating an arithmetic expression\n  called as: \n    " + String.format("%s %s %s", val1, op, val2));
     }
 
     @Override

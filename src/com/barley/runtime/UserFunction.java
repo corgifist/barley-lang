@@ -109,16 +109,14 @@ public class UserFunction implements Function, Serializable {
         for (int i = 0; i < pattern.getArr().size(); i++) {
             Pattern p = pattern(pattern.getArr().get(i));
             BarleyValue obj = list.getList().get(i);
-            if (p instanceof VariablePattern) {
-                VariablePattern c = (VariablePattern) p;
+            if (p instanceof VariablePattern c) {
                 Table.define(c.getVariable(), obj);
                 toDelete.add(c.getVariable());
-            } else if (p instanceof ConstantPattern) {
-                ConstantPattern c = (ConstantPattern) p;
+            } else if (p instanceof ConstantPattern c) {
                 if (!(c.getConstant().equals(obj))) return false;
-            } else if (p instanceof ListPattern) {
-                ListPattern c = (ListPattern) p;
-                if (processList(c, obj, toDelete)) continue;
+            } else if (p instanceof ListPattern c) {
+                if (processList(c, obj, toDelete)) {
+                }
                 else return false;
             } else if (p instanceof ConsPattern) {
                 ConsPattern c = (ConsPattern) p;

@@ -181,4 +181,11 @@ public class Handler {
         Handler.file("examples/amethyst/interpreter.barley");
         Handler.handle("test:main().", true);
     }
+
+    public static List<AST> parseASTExpr(String input) {
+        Lexer lexer = new Lexer(input);
+        List<Token> tokens = lexer.tokenize();
+        Parser parser = new Parser(tokens);
+        return parser.parseExpr();
+    }
 }

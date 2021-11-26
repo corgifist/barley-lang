@@ -19,10 +19,8 @@ public class TernaryAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         BarleyValue t = term.execute();
-        BarleyValue l = left.execute();
-        BarleyValue r = right.execute();
-        if (t.toString().equals("true")) return l;
-        else return r;
+        if (t.toString().equals("true")) return left.execute();
+        else return right.execute();
     }
 
     @Override

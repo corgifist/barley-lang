@@ -3,6 +3,7 @@ package com.barley.runtime;
 import com.annimon.ownlang.lib.NumberValue;
 import com.annimon.ownlang.modules.canvas.canvas;
 import com.barley.utils.*;
+import org.fusesource.jansi.AnsiConsole;
 import org.jline.terminal.TerminalBuilder;
 
 import javax.swing.*;
@@ -37,6 +38,25 @@ public class Modules {
 
     private static BarleyValue lastKey = new BarleyNumber(-1);
     private static BarleyList mouseHover = new BarleyList(new BarleyNumber(0), new BarleyNumber(0));
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
+    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
+    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
     private static void initIo() {
         HashMap<String, Function> io = new HashMap<>();
@@ -135,7 +155,7 @@ public class Modules {
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             if (!(map.containsKey(args[1])))
-                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[0] + "'");
+                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[1] + "'");
             return map.get(args[1]);
         });
         bts.put("remove", args -> {
@@ -153,13 +173,22 @@ public class Modules {
                 throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
-            if (!(args[1] instanceof BarleyReference))
+            if (!(args[1] instanceof BarleyReference r))
                 throw new BarleyException("BadArg", "expected REFERENCE as bts table");
-            BarleyReference r = (BarleyReference) args[1];
             HashMap<BarleyValue, BarleyValue> m = (HashMap<BarleyValue, BarleyValue>) r.getRef();
             HashMap<BarleyValue, BarleyValue> result = new HashMap<>(map);
             result.putAll(m);
             return new BarleyReference(result);
+        });
+        bts.put("copy", args -> {
+            Arguments.check(1, args.length);
+            if (!(args[0] instanceof BarleyReference))
+                throw new BarleyException("BadArg", "expected REFERENCE as bts table");
+            BarleyReference ref = (BarleyReference) args[0];
+            HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
+            HashMap<BarleyValue, BarleyValue> r = new HashMap<>();
+            r.putAll(map);
+            return new BarleyReference(r);
         });
 
         put("bts", bts);
@@ -168,6 +197,14 @@ public class Modules {
     private static void initBarley() {
         HashMap<String, Function> shell = new HashMap<>();
 
+        shell.put("expr_eval", args -> {
+            List<AST> exprs = Handler.parseASTExpr(args[0].toString());
+            return exprs.get(exprs.size() - 1).execute();
+        });
+        shell.put("ansi", args -> {
+            AnsiConsole.systemInstall();
+            return new BarleyAtom("ok");
+        });
         shell.put("reparse", (args -> {
             Arguments.check(1, args.length);
             try {
@@ -426,19 +463,19 @@ public class Modules {
             try {
                 return new BarleyNumber(TerminalBuilder.terminal().getWidth());
             } catch (IOException e) {
-                e.printStackTrace();
+                return new BarleyNumber(60);
             }
-            return new BarleyAtom("error");
         });
 
         shell.put("height", args -> {
             try {
                 return new BarleyNumber(TerminalBuilder.terminal().getHeight());
             } catch (IOException e) {
-                e.printStackTrace();
+                return new BarleyNumber(120);
             }
-            return new BarleyAtom("error");
         });
+
+        shell.put("date", args -> new BarleyString(new Date().toString()));
 
         put("barley", shell);
     }
@@ -689,6 +726,11 @@ public class Modules {
         types.put("ref_to_string", args -> {
             Arguments.check(1, args.length);
             return new BarleyString(((BarleyReference) args[0]).getRef().toString());
+        });
+
+        types.put("as_atom", args -> {
+            Arguments.check(1, args.length);
+            return new BarleyAtom(args[0].toString());
         });
 
         put("types", types);
@@ -1392,6 +1434,26 @@ public class Modules {
         initLists();
         initAmethyst();
         initInterface();
+        initAnsi();
+    }
+
+    private static void initAnsi() {
+        HashMap<String, Function> ansi = new HashMap<>();
+
+        ansi.put("reset", args -> new BarleyString(ANSI_RESET));
+        ansi.put("red", args -> new BarleyString(ANSI_RED));
+        ansi.put("red_bg", args -> new BarleyString(ANSI_RED_BACKGROUND));
+        ansi.put("blue", args -> new BarleyString(ANSI_BLUE));
+        ansi.put("blue_bg", args -> new BarleyString(ANSI_BLUE_BACKGROUND));
+        ansi.put("purple", args -> new BarleyString(ANSI_PURPLE));
+        ansi.put("purple_bg", args -> new BarleyString(ANSI_PURPLE_BACKGROUND));
+        ansi.put("yellow", args -> new BarleyString(ANSI_YELLOW));
+        ansi.put("yellow_bg", args -> new BarleyString(ANSI_YELLOW_BACKGROUND));
+        ansi.put("black", args -> new BarleyString(ANSI_BLACK));
+        ansi.put("white", args -> new BarleyString(ANSI_WHITE));
+        ansi.put("white_bg", args -> new BarleyString(ANSI_WHITE_BACKGROUND));
+
+        put("ansi", ansi);
     }
 
     private static void initInterface() {
@@ -1487,6 +1549,8 @@ public class Modules {
         lists.put("map", args -> {
             Arguments.check(2, args.length);
             BarleyFunction fun = (BarleyFunction) args[0];
+            if (!(args[1] instanceof BarleyList))
+                throw new BarleyException("BadArg", "Expected LIST, got " + args[1]);
             BarleyList list = (BarleyList) args[1];
             LinkedList<BarleyValue> result = new LinkedList<>();
             for (BarleyValue val : list.getList()) {
