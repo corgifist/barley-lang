@@ -16,10 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
@@ -213,7 +210,6 @@ public class Modules {
             return exprs.get(exprs.size() - 1).execute();
         });
         shell.put("ansi", args -> {
-            AnsiConsole.systemInstall();
             return new BarleyAtom("ok");
         });
         shell.put("reparse", (args -> {
@@ -579,6 +575,8 @@ public class Modules {
     private static void initString() {
         HashMap<String, Function> string = new HashMap<>();
 
+        string.put("tab_count", args -> new BarleyNumber(new Results().getTabCount()));
+        string.put("space_count", args -> new BarleyNumber(new Results().getSpaceCount()));
         string.put("length", args -> {
             Arguments.check(1, args.length);
             return new BarleyNumber(args[0].toString().length());
@@ -642,6 +640,11 @@ public class Modules {
         string.put("charAt", args -> {
             Arguments.check(2, args.length);
             return new BarleyString(String.valueOf(args[0].toString().charAt(args[1].asInteger().intValue())));
+        });
+
+        string.put("replace", args -> {
+            Arguments.check(3, args.length);
+            return new BarleyString(args[0].toString().replaceAll(args[1].toString(), args[2].toString()));
         });
 
         put("string", string);
@@ -1454,12 +1457,16 @@ public class Modules {
 
         unit.put("new", args -> {
             Arguments.check(1, args.length);
-           UnitBase base = Units.get(args[0].toString());
-           HashMap<String, BarleyValue> fields = new HashMap<>();
-           for (String f : base.getFields()) {
-               fields.put(f, new BarleyAtom("not_assigned"));
-           }
-           return new BarleyReference(new Unit(fields));
+            UnitBase base = Units.get(args[0].toString());
+            HashMap<String, BarleyValue> fields = new HashMap<>();
+            for (String f : base.getFields()) {
+                fields.put(f, new BarleyAtom("not_assigned"));
+            }
+
+            for (Map.Entry<String, AST> entry : base.getDefaults().entrySet()) {
+                fields.put(entry.getKey(), entry.getValue().execute());
+            }
+            return new BarleyReference(new Unit(fields));
         });
 
         unit.put("unit_to_string", args -> {
@@ -1469,6 +1476,20 @@ public class Modules {
             return new BarleyString(u.toString());
         });
 
+        unit.put("set", args -> {
+            Arguments.check(3, args.length);
+            Unit base = (Unit) ((BarleyReference) args[0]).getRef();
+            base.put(args[1].toString(), args[2]);
+            return args[0];
+        });
+
+        unit.put("get", args -> {
+            Arguments.check(2, args.length);
+            Unit base = (Unit) ((BarleyReference) args[0]).getRef();
+            BarleyValue b = base.get(args[1].toString());
+            if (b == null) throw new BarleyException("BadArg", "unit '" + base + "' doesn't have key '" + args[1] + "'");
+            return b;
+        });
 
 
         put("unit", unit);
@@ -1635,7 +1656,7 @@ public class Modules {
             for (BarleyValue val : list) {
                 ints.add(val.asInteger().intValue());
             }
-            Integer[] arr1 = ints.toArray(new Integer[] {});
+            Integer[] arr1 = ints.toArray(new Integer[]{});
             int[] arr = new int[arr1.length];
             for (int i = 0; i < arr1.length; i++) {
                 arr[i] = arr1[i];
@@ -1650,7 +1671,7 @@ public class Modules {
             for (BarleyValue val : list) {
                 ints.add(val.asInteger().intValue());
             }
-            Integer[] arr1 = ints.toArray(new Integer[] {});
+            Integer[] arr1 = ints.toArray(new Integer[]{});
             int[] arr = new int[arr1.length];
             for (int i = 0; i < arr1.length; i++) {
                 arr[i] = arr1[i];
@@ -1851,6 +1872,7 @@ public class Modules {
                 public void keyPressed(KeyEvent e) {
                     lastKey = new BarleyNumber(e.getKeyCode());
                 }
+
                 @Override
                 public void keyReleased(KeyEvent e) {
                     lastKey = new BarleyNumber(-1);
@@ -1966,5 +1988,76 @@ public class Modules {
             return new BarleyNumber(0);
         }
 
+    }
+
+    static class Results {
+        private int tabs = 0;
+        private int spaces = 0;
+
+        public void incTabCount() {
+            ++tabs;
+        }
+
+        public void incSpaceCount() {
+            ++spaces;
+        }
+
+        public int getTabCount() {
+            return tabs;
+        }
+
+        public int getSpaceCount() {
+            return spaces;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("tabs: ");
+            sb.append(tabs);
+            sb.append("\nspaces: ");
+            sb.append(spaces);
+
+            return sb.toString();
+        }
+    }
+
+
+    /**
+     * Iterate the file once, checking for all desired characters,
+     * and store in the Results object
+     */
+    private static Results countInStream(String s) throws IOException {
+        InputStream is = new ByteArrayInputStream(s.getBytes("UTF8"));
+        return countInStream(is);
+    }
+
+    private static Results countInStream(InputStream is) throws IOException
+    {
+        // create results
+        Results res = new Results();
+        try {
+            byte[] c = new byte[1024];
+
+            int readChars = 0;
+            while ((readChars = is.read(c)) != -1) {
+                for (int i = 0; i < readChars; ++i) {
+                    // see if we have a tab
+                    if (c[i] == '\t') {
+                        res.incTabCount();
+                    }
+
+                    // see if we have a space
+                    if (c[i] == ' ') {
+                        res.incSpaceCount();
+                    }
+
+                }
+            }
+        }
+        finally {
+        }
+
+        return res;
     }
 }

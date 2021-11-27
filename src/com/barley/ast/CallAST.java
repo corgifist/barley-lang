@@ -8,6 +8,7 @@ import com.barley.utils.CallStack;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CallAST implements AST, Serializable {
 
@@ -29,7 +30,7 @@ public class CallAST implements AST, Serializable {
         BarleyValue temporal = obj.execute();
         BarleyFunction function = (BarleyFunction) temporal;
         BarleyValue result = null;
-        CallStack.enter(obj.toString(), function);
+        CallStack.enter(obj.toString() + Arrays.toString(arguments), function);
         result = function.execute(arguments);
         CallStack.exit();
         return result;

@@ -24,7 +24,7 @@ public class Handler {
             List<Token> tokens = lexer.tokenize();
             measurement.stop("Lexer time");
             measurement.start("Parse time");
-            Parser parser = new Parser(tokens);
+            Parser parser = new Parser(tokens, input);
             List<AST> nodes = isExpr ? parser.parseExpr() : parser.parse();
             Optimization[] opts = new Optimization[]{
                     new ConstantPropagation(new ArrayList<>(nodes), new VariableGrabber()),
@@ -39,7 +39,6 @@ public class Handler {
                 for (AST node : nodes) {
                     for (Optimization opt : opts) {
                         node.visit(opt);
-                        //System.out.println(opt.summary());
                     }
                 }
             }
@@ -82,7 +81,7 @@ public class Handler {
     public static List<AST> parseAST(String input) {
         Lexer lexer = new Lexer(input);
         List<Token> tokens = lexer.tokenize();
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, input);
         return parser.parse();
     }
 
@@ -90,7 +89,7 @@ public class Handler {
         System.out.printf("Barley/Java%s [barley-runtime%s] [%s] [threads-%s]\n", getVersion(), RUNTIME_VERSION, System.getProperty("os.arch"), Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
-            System.out.printf(">>> ", Thread.activeCount() + ProcessTable.storage.size() + ProcessTable.receives.size());
+            System.out.printf(">>> ");
             try {
                 Handler.handle(br.readLine(), true);
             } catch (IOException e) {
@@ -141,7 +140,8 @@ public class Handler {
                 "examples/fibonacci.barley",
                 "examples/bunit.barley",
                 "examples/code.barley",
-                "examples/expanded_remote.barley"
+                "examples/expanded_remote.barley",
+                "examples/unit.barley"
         };
 
         measurement.start("Tests time");
@@ -184,7 +184,7 @@ public class Handler {
     public static List<AST> parseASTExpr(String input) {
         Lexer lexer = new Lexer(input);
         List<Token> tokens = lexer.tokenize();
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, input);
         return parser.parseExpr();
     }
 }

@@ -21,14 +21,21 @@ public final class Parser implements Serializable {
     public boolean opt;
     private int pos;
     private String module, doc;
+    private String source;
 
-    public Parser(List<Token> tokens) {
+    public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
         size = tokens.size();
         opt = false;
         methods = new HashMap<>();
         module = null;
         doc = null;
+        this.source = filename;
+    }
+
+    private String currentLine() {
+        List<String> lines = List.of(source.split("\n"));
+        return lines.get(line() - 1);
     }
 
     public List<AST> parse() {
@@ -76,11 +83,15 @@ public final class Parser implements Serializable {
                 consume(TokenType.RPAREN, "expected ')' after unit name");
                 consume(TokenType.STABBER, "expected '->' after ')'");
                 ArrayList<String> fields = new ArrayList<>();
+                HashMap<String, AST> defaults = new HashMap<>();
                 while (!lookMatch(0, TokenType.DOT)) {
                     fields.add(consume(TokenType.VAR, "expected var name ").getText());
+                    if (match(TokenType.EQ)) {
+                        defaults.put(fields.get(fields.size() - 1), expression());
+                    }
                     match(TokenType.COMMA);
                 }
-                Units.put(name, new UnitBase(fields));
+                Units.put(name, new UnitBase(fields, defaults));
             }
             if (match(TokenType.MODULE)) {
                 consume(TokenType.LPAREN, "expected '(' before module name");
@@ -277,6 +288,41 @@ public final class Parser implements Serializable {
 
     private AST unary() {
         if (match(TokenType.MINUS)) {
+            if (match(TokenType.UNIT)) {
+                consume(TokenType.LPAREN, "expected '(' before unit name");
+                String name = consume(TokenType.ATOM, "expected unit name").getText();
+                consume(TokenType.RPAREN, "expected ')' after unit name");
+                consume(TokenType.STABBER, "expected '->' after ')'");
+                ArrayList<String> fields = new ArrayList<>();
+                HashMap<String, AST> defaults = new HashMap<>();
+                while (!lookMatch(0, TokenType.DOT)) {
+                    fields.add(consume(TokenType.VAR, "expected var name ").getText());
+                    if (match(TokenType.EQ)) {
+                        defaults.put(fields.get(fields.size() - 1), expression());
+                    }
+                    match(TokenType.COMMA);
+                }
+                Units.put(name, new UnitBase(fields, defaults));
+                return new ConstantAST(new BarleyNumber(0));
+            }
+            if (match(TokenType.MODULE)) {
+                consume(TokenType.LPAREN, "expected '(' before module name");
+                module = expression().toString();
+                consume(TokenType.RPAREN, "expected ')' after module name");
+                return new ConstantAST(new BarleyNumber(0));
+            }
+            if (match(TokenType.MODULEDOC)) {
+                consume(TokenType.LPAREN, "expected '(' before module doc");
+                doc = expression().toString();
+                consume(TokenType.RPAREN, "expected ')' after module doc");
+                return new ConstantAST(new BarleyNumber(0));
+            }
+            if (match(TokenType.OPT)) {
+                consume(TokenType.LPAREN, "expected '(' before opt");
+                consume(TokenType.RPAREN, "expected ')' after opt");
+                opt = true;
+                return new ConstantAST(new BarleyNumber(0));
+            }
             return new UnaryAST(call(), '-');
         }
 
@@ -371,7 +417,7 @@ public final class Parser implements Serializable {
 
 
         if (match(TokenType.RECIEVE)) return receive();
-        throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current);
+        throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current + "\n      when current line:\n      " + currentLine());
     }
 
     private AST lambda() {
@@ -485,7 +531,7 @@ public final class Parser implements Serializable {
 
     private Token consume(TokenType type, String text) {
         final Token current = get(0);
-        if (type != current.getType()) throw new BarleyException("BadCompiler", text + "\n at line " + line());
+        if (type != current.getType()) throw new BarleyException("BadCompiler", text + "\n    at line " + current.getLine() + "\n      when current line:\n            " + currentLine());
         pos++;
         return current;
     }

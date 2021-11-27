@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class ConstantPropagation implements Optimization {
 
-    private TableEmulator emulator;
+    public TableEmulator emulator;
     private int count;
 
     public ConstantPropagation(ArrayList<AST> nodes, VariableGrabber grabber) {
@@ -85,10 +85,8 @@ public class ConstantPropagation implements Optimization {
 
     @Override
     public AST optimize(ExtractBindAST ast) {
-        count++;
         HashMap<String, VariableInfo> info = new HashMap<>(emulator.variables());
         if (info.containsKey(ast.toString())) {
-            count++;
             if (info.get(ast.toString()).modifications != 0) {
                 return ast;
             }
