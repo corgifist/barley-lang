@@ -210,6 +210,7 @@ public class Modules {
             return exprs.get(exprs.size() - 1).execute();
         });
         shell.put("ansi", args -> {
+            AnsiConsole.systemInstall();
             return new BarleyAtom("ok");
         });
         shell.put("reparse", (args -> {

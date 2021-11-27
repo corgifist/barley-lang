@@ -6,6 +6,7 @@ import com.barley.runtime.BarleyAtom;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.UserFunction;
 import com.barley.utils.AST;
+import com.barley.utils.Clause;
 
 import java.io.Serializable;
 
@@ -34,6 +35,13 @@ public class MethodAST implements AST, Serializable {
 
     @Override
     public String toString() {
-        return name + method.toString();
+        String result = name;
+        for (Clause cl : method.clauses) {
+            result += cl.getArgs();
+            if (cl.getGuard() != null) result += " when " + cl.getGuard();
+            result += " -> ";
+            result += cl.getResult();
+        }
+        return result;
     }
 }

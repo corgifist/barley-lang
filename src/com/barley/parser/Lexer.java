@@ -67,6 +67,7 @@ public final class Lexer {
         KEYWORDS.put("opt", TokenType.OPT);
         KEYWORDS.put("defguard", TokenType.DEFGUARD);
         KEYWORDS.put("unitbase", TokenType.UNIT);
+        KEYWORDS.put("strict", TokenType.STRICT);
     }
 
     private final String input;

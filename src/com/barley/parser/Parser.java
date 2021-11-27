@@ -22,6 +22,7 @@ public final class Parser implements Serializable {
     private int pos;
     private String module, doc;
     private String source;
+    private boolean parserStrict = false;
 
     public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -108,6 +109,12 @@ public final class Parser implements Serializable {
                 consume(TokenType.RPAREN, "expected ')' after opt");
                 opt = true;
             }
+            if (match(TokenType.STRICT)) {
+                consume(TokenType.LPAREN, "expected '(' before strict");
+                parserStrict = true;
+                consume(TokenType.RPAREN, "expected ')' after strict");
+                return new StrictAST();
+            }
             match(TokenType.COMMA);
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
@@ -132,6 +139,11 @@ public final class Parser implements Serializable {
         Clause clause = clause();
         consume(TokenType.STABBER, "error at '" + name + "' declaration");
         clause.setResult(block());
+        if (name.equals("main")) {
+            BlockAST as = ((BlockAST) clause.getResult());
+            as.block.add(new UnStrictAST());
+            clause.result = as;
+        }
         ArrayList<Clause> clauses = new ArrayList<>();
         if (methods.containsKey(name)) {
             clauses.addAll(((UserFunction) methods.get(name)).getClauses());
@@ -322,6 +334,13 @@ public final class Parser implements Serializable {
                 consume(TokenType.RPAREN, "expected ')' after opt");
                 opt = true;
                 return new ConstantAST(new BarleyNumber(0));
+            }
+
+            if (match(TokenType.STRICT)) {
+                consume(TokenType.LPAREN, "expected '(' before strict");
+                Table.strict = true;
+                consume(TokenType.RPAREN, "expected ')' after strict");
+                return new UnStrictAST();
             }
             return new UnaryAST(call(), '-');
         }

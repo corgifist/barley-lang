@@ -9,7 +9,7 @@ public class Clause implements Serializable {
 
     private ArrayList<AST> args;
     private AST guard;
-    private AST result;
+    public AST result;
 
     public Clause(ArrayList<AST> args, AST guard, AST result) {
         this.args = args;

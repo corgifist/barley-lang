@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Table {
 
     private static final Object lock = new Object();
+    public static boolean strict = false;
     public static volatile Scope scope;
 
     static {
@@ -26,12 +27,14 @@ public final class Table {
     }
 
     public static void push() {
+        if (strict) return;
         synchronized (lock) {
             scope = new Scope(scope);
         }
     }
 
     public static void pop() {
+        if (strict) return;
         synchronized (lock) {
             if (scope.parent != null) {
                 scope = scope.parent;
@@ -56,6 +59,10 @@ public final class Table {
     }
 
     public static void set(String key, BarleyValue value) {
+        if (strict) {
+            scope.variables.put(key, value);
+            return;
+        }
         synchronized (lock) {
             findScope(key).scope.variables.put(key, value);
         }

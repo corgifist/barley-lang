@@ -4,6 +4,7 @@ import com.barley.optimizations.*;
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
 import com.barley.runtime.ProcessTable;
+import com.barley.runtime.Table;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -141,7 +142,8 @@ public class Handler {
                 "examples/bunit.barley",
                 "examples/code.barley",
                 "examples/expanded_remote.barley",
-                "examples/unit.barley"
+                "examples/unit.barley",
+                "examples/strict.barley"
         };
 
         measurement.start("Tests time");
