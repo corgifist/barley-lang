@@ -2,6 +2,8 @@ package com.barley.parser;
 
 import com.barley.ast.*;
 import com.barley.runtime.*;
+import com.barley.units.UnitBase;
+import com.barley.units.Units;
 import com.barley.utils.*;
 
 import java.io.Serializable;
@@ -68,6 +70,18 @@ public final class Parser implements Serializable {
         if (match(TokenType.ATOM) || (match(TokenType.DEFGUARD) && !(text = consume(TokenType.ATOM, "expected guard name at line " + line()).getText()).equals(""))) {
             return method(text);
         } else if (match(TokenType.MINUS)) {
+            if (match(TokenType.UNIT)) {
+                consume(TokenType.LPAREN, "expected '(' before unit name");
+                String name = consume(TokenType.ATOM, "expected unit name").getText();
+                consume(TokenType.RPAREN, "expected ')' after unit name");
+                consume(TokenType.STABBER, "expected '->' after ')'");
+                ArrayList<String> fields = new ArrayList<>();
+                while (!lookMatch(0, TokenType.DOT)) {
+                    fields.add(consume(TokenType.VAR, "expected var name ").getText());
+                    match(TokenType.COMMA);
+                }
+                Units.put(name, new UnitBase(fields));
+            }
             if (match(TokenType.MODULE)) {
                 consume(TokenType.LPAREN, "expected '(' before module name");
                 module = expression().toString();
@@ -83,6 +97,7 @@ public final class Parser implements Serializable {
                 consume(TokenType.RPAREN, "expected ')' after opt");
                 opt = true;
             }
+            match(TokenType.COMMA);
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
             return receive();
@@ -470,7 +485,7 @@ public final class Parser implements Serializable {
 
     private Token consume(TokenType type, String text) {
         final Token current = get(0);
-        if (type != current.getType()) throw new BarleyException("BadCompiler", text);
+        if (type != current.getType()) throw new BarleyException("BadCompiler", text + "\n at line " + line());
         pos++;
         return current;
     }

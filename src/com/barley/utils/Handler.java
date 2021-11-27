@@ -75,7 +75,6 @@ public class Handler {
     }
 
     public static void entry(String input, String module) {
-        System.out.println("end");
         Handler.file(input, false);
         handle(module + ":main().", true);
     }

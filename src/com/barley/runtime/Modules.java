@@ -2,6 +2,9 @@ package com.barley.runtime;
 
 import com.annimon.ownlang.lib.NumberValue;
 import com.annimon.ownlang.modules.canvas.canvas;
+import com.barley.units.Unit;
+import com.barley.units.UnitBase;
+import com.barley.units.Units;
 import com.barley.utils.*;
 import org.fusesource.jansi.AnsiConsole;
 import org.jline.terminal.TerminalBuilder;
@@ -76,7 +79,9 @@ public class Modules {
             final String format = args[0].toString();
             final Object[] values = new Object[args.length - 1];
             for (int i = 1; i < args.length; i++) {
-                values[i - 1] = args[i].toString();
+                if (args[i] instanceof BarleyNumber) {
+                    values[i - 1] = args[i].asFloat().intValue();
+                } else values[i - 1] = args[i].toString();
             }
             return new BarleyString(String.format(format, values));
         });
@@ -86,7 +91,9 @@ public class Modules {
             final String format = args[0].toString();
             final Object[] values = new Object[args.length - 1];
             for (int i = 1; i < args.length; i++) {
-                values[i - 1] = args[i].toString();
+                if (args[i] instanceof BarleyNumber) {
+                    values[i - 1] = args[i].asFloat().intValue();
+                } else values[i - 1] = args[i].toString();
             }
             System.out.print(String.format(format, values));
             return new BarleyAtom(AtomTable.put("ok"));
@@ -97,7 +104,9 @@ public class Modules {
             final String format = args[0].toString();
             final Object[] values = new Object[args.length - 1];
             for (int i = 1; i < args.length; i++) {
-                values[i - 1] = args[i].toString();
+                if (args[i] instanceof BarleyNumber) {
+                    values[i - 1] = args[i].asFloat().doubleValue();
+                } else values[i - 1] = args[i].toString();
             }
             System.out.printf((format) + "%n", values);
             return new BarleyAtom(AtomTable.put("ok"));
@@ -139,6 +148,8 @@ public class Modules {
             }
             return new BarleyList(result);
         });
+
+        bts.put("tab_to_list", bts.get("tabtolist"));
 
         bts.put("member", args -> {
             Arguments.check(2, args.length);
@@ -1435,6 +1446,32 @@ public class Modules {
         initAmethyst();
         initInterface();
         initAnsi();
+        initUnit();
+    }
+
+    private static void initUnit() {
+        HashMap<String, Function> unit = new HashMap<>();
+
+        unit.put("new", args -> {
+            Arguments.check(1, args.length);
+           UnitBase base = Units.get(args[0].toString());
+           HashMap<String, BarleyValue> fields = new HashMap<>();
+           for (String f : base.getFields()) {
+               fields.put(f, new BarleyAtom("not_assigned"));
+           }
+           return new BarleyReference(new Unit(fields));
+        });
+
+        unit.put("unit_to_string", args -> {
+            Arguments.check(1, args.length);
+            BarleyReference un = (BarleyReference) args[0];
+            Unit u = (Unit) un.getRef();
+            return new BarleyString(u.toString());
+        });
+
+
+
+        put("unit", unit);
     }
 
     private static void initAnsi() {
