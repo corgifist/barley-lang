@@ -76,6 +76,8 @@ public class UserFunction implements Function, Serializable {
                 }
 
                 if (br) {
+                    Table.pop(); // Pop last args
+                    Table.push(); // Push new scope
                     br = false;
                     continue;
                 }

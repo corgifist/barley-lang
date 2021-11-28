@@ -16,7 +16,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         AnsiConsole.out().print("");
         Modules.init();
-        Handler.amethyst();
         int argsLength = 0;
         if (args.length == 0) {
             Table.set("ARGS", new BarleyList());
