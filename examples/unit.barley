@@ -1,0 +1,14 @@
+-module(test).
+
+-unitbase(test) -> A = 4, B, C.
+
+main() ->
+    MyUnit = unit:new(test),
+    io:fwriteln(unit:unit_to_string(MyUnit)),
+    unit:set(MyUnit, "B", 145 + " " + "BOO"),
+    io:fwriteln(unit:unit_to_string(MyUnit)),
+    SecondUnit = unit:new(test),
+    unit:set(SecondUnit, "C", 478),
+    io:fwriteln(unit:unit_to_string(SecondUnit)),
+    io:fwriteln(unit:get(MyUnit, "B")),
+    io:fwriteln(unit:get(SecondUnit, "C")).

@@ -1,0 +1,14 @@
+-module(test).
+
+main() ->
+    Lexer = reflection:class("com.barley.parser.Lexer"), %% Get the class of object
+    Instance = reflection:instance(Lexer, "A = 4. 2 + A * 4 + (B = 1)."), %% Instantiate class
+    Tokens = reflection:call(Instance, "tokenize"),
+    io:fwriteln(reflection:object_to_string(Tokens)),
+    %% Parsing tokens
+    Parser = reflection:class("com.barley.parser.Parser"),
+    Instance = reflection:instance(Parser, Tokens, "reflection.barley"),
+    AST = reflection:call(Instance, "parseExpr"),
+    io:fwriteln(reflection:object_to_string(AST)),
+    io:fwriteln(reflection:call(Node, "execute") || Node -> AST)
+    .

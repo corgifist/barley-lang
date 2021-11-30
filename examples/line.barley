@@ -1,0 +1,57 @@
+-module(test).
+
+
+global W = 800.
+global H = 600.
+
+global X = math:range(0, W).
+global Y = math:range(0, H).
+global XS = math:range(0, H).
+global YS = math:range(0, H).
+
+global DX = math:random().
+global DXS = math:random().
+global DY = -math:random().
+global DYS = math:random().
+
+global Hue = 0.
+
+gort(A, B) -> A > B  or A == B.
+
+checkhoriz(C) -> gort(C, W) or C < 0.
+checkvert(C) -> gort(C, H) or C < 0.
+
+sethsbcolor(H) ->
+  QR = H * 6,
+  F = QR - math:floor(QR),
+  case math:rem(math:floor(F), 6) ->
+    of 0: interface:color(255, F*255, 0).
+    of 1: interface:color(225 - F*255, 255, 0).
+    of 2: interface:color(0, 255, F*255).
+    of 3: interface:color(0, 255-F*255, 255).
+    of 4: interface:color(F*255, 0, 255).
+    of 5: interface:color(255, 0, 255-F*255).
+  end. 
+
+react() ->
+   interface:repaint(),
+   checkhoriz(X) ? DX = -DX :: empty,
+   checkhoriz(XS) ? DXS = -DXS :: empty,
+   checkvert(Y) ? DY = -DY :: empty,
+   checkvert(YS) ? DYS = -DYS :: empty,
+   X = X + DX,
+   Y = Y + DY,
+   XS = XS + DXS,
+   YS = YS + DYS,
+   Hue = Hue + 0.0001,
+   gort(Hue, 1) ? Hue = 0 :: empty,
+   sethsbcolor(Hue),
+   interface:line(X, Y, XS, YS),
+   barley:sleep(10).
+
+
+main() ->
+  interface:window("Animated line", W, H),
+  interface:color(127, 209, 94),
+  interface:frect(0,0,W,H),
+  barley:loop(test:react).

@@ -1,0 +1,12 @@
+-module(test).
+-strict().
+
+cb() -> N = 10.
+
+gl() ->
+    A = 14,
+    BC = 5, cb().
+
+main() ->
+    gl(),
+    barley:b().
