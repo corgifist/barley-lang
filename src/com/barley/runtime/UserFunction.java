@@ -7,6 +7,7 @@ import com.barley.utils.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,7 +21,6 @@ public class UserFunction implements Function, Serializable {
 
     @Override
     public BarleyValue execute(BarleyValue... args) {
-        // System.out.println(List.of(args));
         Table.push();
         try {
             boolean br = false;
@@ -37,10 +37,14 @@ public class UserFunction implements Function, Serializable {
                     toExecute = clause.getResult();
                     break;
                 }
-                if (patterns.size() != args.length) continue;
                 for (int k = 0; k < patterns.size(); k++) {
                     Pattern pattern = patterns.get(k);
-                    BarleyValue arg = args[k];
+                    BarleyValue arg = null;
+                    try {
+                        arg = args[k];
+                    } catch (ArrayIndexOutOfBoundsException ex) {
+                        break;
+                    }
                     if (pattern instanceof VariablePattern) {
                         VariablePattern p = (VariablePattern) pattern;
                         Table.define(p.getVariable(), arg);
@@ -60,6 +64,7 @@ public class UserFunction implements Function, Serializable {
                         }
                         ListPattern p = (ListPattern) pattern;
                         br = !(processList(p, arg, toDelete));
+                        if (br) break;
                     } else if (pattern instanceof ConsPattern) {
                         ConsPattern p = (ConsPattern) pattern;
                         if (!(arg instanceof BarleyList)) {
@@ -68,6 +73,23 @@ public class UserFunction implements Function, Serializable {
                         }
                         Table.set(p.getLeft(), head((BarleyList) arg));
                         Table.set(p.getRight(), tail((BarleyList) arg));
+                    } else if (pattern instanceof PackPattern p) {
+                        List<BarleyValue> rest = null;
+                        System.out.println("i: " + i);
+                        try {
+                            rest = List.of(args).subList(i, args.length);
+                        } catch (IndexOutOfBoundsException ex) {
+                            rest = new ArrayList<>();
+                        }
+                        LinkedList<BarleyValue> arr = new LinkedList<>();
+                        for (BarleyValue val : rest) {
+                            i += 1;
+                            arr.add(val);
+                        }
+                        System.out.println("Rest :" + rest);
+                        Table.define(p.toString(), new BarleyList(arr));
+                        System.out.println(Table.variables());
+                        break;
                     }
                 }
                 if (clause.getGuard() != null) {
@@ -150,7 +172,9 @@ public class UserFunction implements Function, Serializable {
         } else if (ast instanceof ConsAST) {
             ConsAST cons = (ConsAST) ast;
             return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
-        } else throw new BarleyException("BadMatch", "invalid pattern in function clause");
+        } else if (ast instanceof PackAST p) {
+            return new PackPattern(p.name);
+        } throw new BarleyException("BadMatch", "invalid pattern in function clause");
     }
 
     private LinkedList<Pattern> pattern(ListPattern pattern) {

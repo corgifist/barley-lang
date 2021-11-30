@@ -26,6 +26,11 @@ public class BarleyPID implements BarleyValue, Serializable {
         throw new BarleyException("BadArithmetic", "Cannot cast STRING to a NUMBER");
     }
 
+    @Override
+    public Object raw() {
+        return id;
+    }
+
     public PidValues getId() {
         return id;
     }

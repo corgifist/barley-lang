@@ -9,4 +9,5 @@ public interface BarleyValue extends Serializable {
 
     BigDecimal asFloat();
 
+    Object raw();
 }

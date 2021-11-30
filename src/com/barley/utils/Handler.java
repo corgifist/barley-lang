@@ -45,6 +45,7 @@ public class Handler {
             }
             measurement.stop("Optimization time");
             measurement.start("Execute time");
+            final boolean[] brk = new boolean[1];
             for (AST node : nodes) {
                 node.execute();
             }

@@ -353,6 +353,14 @@ public final class Parser implements Serializable {
         {
             return buildCall("barley", "from_binary", new ArrayList<>(List.of(primary())));
         }
+
+        if (match(TokenType.PACK)) {
+            return new PackAST(consume(TokenType.VAR, "expected var name after 'pack'").getText());
+        }
+
+        if (match(TokenType.UNPACK)) {
+            return new UnPackAST(expression());
+        }
         return call();
     }
 

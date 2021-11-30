@@ -109,5 +109,4 @@ public class BinaryAST implements AST, Serializable {
     private int addAtom(String atom) {
         return AtomTable.put(atom);
     }
-
 }

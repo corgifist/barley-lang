@@ -7,7 +7,19 @@ import java.util.Objects;
 
 public class BarleyNumber implements BarleyValue, Serializable {
 
-    BigDecimal number;
+    private BigDecimal number;
+
+    public static BarleyNumber fromBoolean(boolean bool) {
+        return new BarleyNumber(bool ? 1 : 0);
+    }
+
+    public static BarleyNumber of (Number val) {
+        return of(val.doubleValue());
+    }
+
+    public static BarleyNumber of (double val) {
+        return new BarleyNumber(val);
+    }
 
     public BarleyNumber(BigDecimal number) {
         this.number = number;
@@ -25,6 +37,11 @@ public class BarleyNumber implements BarleyValue, Serializable {
     @Override
     public BigDecimal asFloat() {
         return number;
+    }
+
+    @Override
+    public Object raw() {
+        return number.doubleValue();
     }
 
     @Override

@@ -52,6 +52,11 @@ public class BarleyList implements BarleyValue, Serializable {
     }
 
     @Override
+    public Object raw() {
+        return list.toArray();
+    }
+
+    @Override
     public String toString() {
         return list.toString();
     }

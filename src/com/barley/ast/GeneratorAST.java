@@ -1,6 +1,7 @@
 package com.barley.ast;
 
 import com.barley.optimizations.Optimization;
+import com.barley.reflection.Reflection;
 import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyNumber;
 import com.barley.runtime.BarleyValue;
@@ -9,6 +10,7 @@ import com.barley.utils.AST;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.LinkedList;
 
 public class GeneratorAST implements AST, Serializable {
@@ -26,8 +28,21 @@ public class GeneratorAST implements AST, Serializable {
     @Override
     public BarleyValue execute() {
         BarleyValue value = iterable.execute();
-        if (!(value instanceof BarleyValue)) throw new BarleyException("BadGenerator", "expected list as enumerable");
-        BarleyList list = (BarleyList) value;
+        BarleyList list = null;
+        if (value instanceof Reflection.ObjectValue o) {
+            Object object = o.object;
+            if (object instanceof Collection<?> ob) {
+                Object[] objs = ob.toArray(new Object[0]);
+                LinkedList<BarleyValue> lst = new LinkedList<>();
+                for (Object v : objs) {
+                    lst.add(new Reflection.ObjectValue(v));
+                }
+                list = new BarleyList(lst);
+            } else {
+                if (!(value instanceof BarleyList)) throw new BarleyException("BadGenerator", "expected list as enumerable");
+                list = (BarleyList) value;
+            }
+        }
         LinkedList<BarleyValue> result = new LinkedList<>();
         int size = list.getList().size();
         Table.push();

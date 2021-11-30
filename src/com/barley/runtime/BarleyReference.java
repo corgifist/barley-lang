@@ -24,6 +24,11 @@ public class BarleyReference implements BarleyValue, Serializable {
         throw new BarleyException("BadArithmetic", "Cannot cast REFERENCE to a NUMBER");
     }
 
+    @Override
+    public Object raw() {
+        return ref;
+    }
+
     public Object getRef() {
         return ref;
     }

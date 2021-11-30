@@ -2,13 +2,17 @@ package com.barley.ast;
 
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyFunction;
+import com.barley.runtime.BarleyList;
 import com.barley.runtime.BarleyValue;
+import com.barley.runtime.Table;
 import com.barley.utils.AST;
 import com.barley.utils.CallStack;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CallAST implements AST, Serializable {
 
@@ -22,14 +26,19 @@ public class CallAST implements AST, Serializable {
 
     @Override
     public BarleyValue execute() {
-        BarleyValue[] arguments = new BarleyValue[args.size()];
+        List<BarleyValue> arg = new ArrayList<>();
         for (int i = 0; i < args.size(); i++) {
             AST node = args.get(i);
-            arguments[i] = node.execute();
+            if (node instanceof UnPackAST pack) {
+                LinkedList<BarleyValue> list = (((BarleyList) pack.getAst().execute()).getList());
+                arg.addAll(list);
+                break;
+            } else arg.add(node.execute());
         }
+        BarleyValue[] arguments = arg.toArray(new BarleyValue[] {});
         BarleyValue temporal = obj.execute();
         BarleyFunction function = (BarleyFunction) temporal;
-        BarleyValue result = null;
+        BarleyValue result;
         CallStack.enter(obj.toString() + Arrays.toString(arguments), function);
         result = function.execute(arguments);
         CallStack.exit();

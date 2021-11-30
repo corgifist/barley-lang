@@ -1,7 +1,6 @@
 package com.barley.runtime;
 
-import com.annimon.ownlang.lib.NumberValue;
-import com.annimon.ownlang.modules.canvas.canvas;
+import com.barley.reflection.Reflection;
 import com.barley.units.Unit;
 import com.barley.units.UnitBase;
 import com.barley.units.Units;
@@ -67,7 +66,7 @@ public class Modules {
         });
         io.put("writeln", args -> {
             Arguments.check(1, args.length);
-            System.out.println(args[0].toString());
+            System.out.println(args[0]);
             return new BarleyAtom(AtomTable.put("ok"));
         });
         io.put("format", args -> {
@@ -1451,6 +1450,186 @@ public class Modules {
         initInterface();
         initAnsi();
         initUnit();
+        initReflection();
+    }
+
+    private static void initReflection() {
+//        HashMap<String, Function> ref = new HashMap<>();
+//
+//        ref.put("int", args -> new BarleyReference(int.class));
+//        ref.put("byte", args -> new BarleyReference(byte.class));
+//        ref.put("float", args -> new BarleyReference(float.class));
+//        ref.put("short", args -> new BarleyReference(short.class));
+//        ref.put("long", args -> new BarleyReference(long.class));
+//        ref.put("double", args -> new BarleyReference(double.class));
+//        ref.put("int_arr", args -> new BarleyReference(int[].class));
+//        ref.put("byte_arr", args -> new BarleyReference(byte[].class));
+//        ref.put("float_arr", args -> new BarleyReference(float[].class));
+//        ref.put("short_arr", args -> new BarleyReference(short[].class));
+//        ref.put("long_arr", args -> new BarleyReference(long[].class));
+//        ref.put("double_arr", args -> new BarleyReference(double[].class));
+//
+//        ref.put("class", args -> {
+//            Arguments.check(1, args.length);
+//            try {
+//                return new BarleyReference(Class.forName(args[0].toString()));
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//            return new BarleyAtom("error");
+//        });
+//
+//        ref.put("declared_fields", args -> {
+//            Arguments.check(1, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Field[] fields = cl.getDeclaredFields();
+//            LinkedList<BarleyValue> result = new LinkedList<>();
+//            for (Field field : fields) {
+//                result.add(new BarleyReference(field));
+//            }
+//            return new BarleyList(result);
+//        });
+//
+//        ref.put("declared_field", args -> {
+//            Arguments.check(2, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            try {
+//                return new BarleyReference(cl.getDeclaredField(args[1].toString()));
+//            } catch (NoSuchFieldException e) {
+//                e.printStackTrace();
+//            }
+//            return new BarleyAtom("error");
+//        });
+//        ref.put("instance", args -> {
+//            Arguments.checkAtLeast(1, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Object[] const_args = List.of(args).subList(1, args.length).toArray();
+//            return instance(cl.getConstructors(), const_args);
+//        });
+//        ref.put("fields", args -> {
+//            Arguments.check(1, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Field[] fields = cl.getFields();
+//            LinkedList<BarleyValue> result = new LinkedList<>();
+//            for (Field field : fields) {
+//                result.add(new BarleyReference(field));
+//            }
+//            return new BarleyList(result);
+//        });
+//
+//        ref.put("field", args -> {
+//            Arguments.check(2, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            try {
+//                return new BarleyReference(cl.getField(args[1].toString()));
+//            } catch (NoSuchFieldException e) {
+//                e.printStackTrace();
+//            }
+//            return new BarleyAtom("error");
+//        });
+//
+//        ref.put("declared_methods", args -> {
+//            Arguments.check(1, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Method[] methods = cl.getDeclaredMethods();
+//            LinkedList<BarleyValue> result = new LinkedList<>();
+//            for (Method field : methods) {
+//                result.add(new BarleyReference(field));
+//            }
+//            return new BarleyList(result);
+//        });
+//
+//        ref.put("methods", args -> {
+//            Arguments.check(1, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Method[] methods = cl.getMethods();
+//            LinkedList<BarleyValue> result = new LinkedList<>();
+//            for (Method field : methods) {
+//                result.add(new BarleyReference(field));
+//            }
+//            return new BarleyList(result);
+//        });
+//
+//        ref.put("method", args -> {
+//            Arguments.check(2, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            try {
+//                return new BarleyReference(cl.getMethod(args[1].toString()));
+//            } catch (NoSuchMethodException e) {
+//                e.printStackTrace();
+//            }
+//            return new BarleyAtom("error");
+//        });
+//
+//        ref.put("enclosing_method", args -> {
+//            Arguments.check(1, args.length);
+//            Class<?> cl = (((BarleyReference) args[0]).getRef()).getClass();
+//            return new BarleyReference(cl.getEnclosingMethod());
+//        });
+//
+//        ref.put("modifiers", args -> {
+//            Arguments.check(1, args.length);
+//            Method method = (Method) ((BarleyReference) args[0]).getRef();
+//            return new BarleyNumber(method.getModifiers());
+//        });
+//        ref.put("is_public", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isFinal(args[0].asInteger().intValue())));
+//        });
+//        ref.put("is_private", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isPrivate(args[0].asInteger().intValue())));
+//        });
+//        ref.put("is_protected", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isProtected(args[0].asInteger().intValue())));
+//        });
+//        ref.put("is_transient", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isTransient(args[0].asInteger().intValue())));
+//        });
+//        ref.put("is_synchronized", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isSynchronized(args[0].asInteger().intValue())));
+//        });
+//        ref.put("is_native", args -> {
+//            Arguments.check(1, args.length);
+//            return new BarleyAtom(String.valueOf(Modifier.isNative(args[0].asInteger().intValue())));
+//        });
+//
+//        ref.put("return_type", args -> {
+//            Arguments.check(1, args.length);
+//            Method method = (Method) ((BarleyReference) args[0]).getRef();
+//            return new BarleyReference(method.getReturnType());
+//        });
+//
+//        ref.put("generic_return_type", args -> {
+//            Arguments.check(1, args.length);
+//            Method method = (Method) ((BarleyReference) args[0]).getRef();
+//            return new BarleyReference(method.getGenericReturnType());
+//        });
+//
+//        ref.put("accessible", args -> {
+//            Arguments.check(2, args.length);
+//            Method method = (Method) ((BarleyReference) args[0]).getRef();
+//            method.setAccessible(Boolean.parseBoolean(args[1].toString()));
+//            return args[1];
+//        });
+//
+//        ref.put("invoke", args -> {
+//            Arguments.checkAtLeast(2, args.length);
+//            Class<?> cl = (Class<?>) ((BarleyReference) args[0]).getRef();
+//            Method method = (Method) ((BarleyReference) args[1]).getRef();
+//            Object[] ar = List.of(args).subList(2, args.length).toArray();
+//            try {
+//                return new BarleyReference(method.invoke(cl, ar));
+//            } catch (IllegalAccessException | InvocationTargetException e) {
+//                e.printStackTrace();
+//            }
+//            return new BarleyAtom("error");
+//        });
+
+        new Reflection().inject();
     }
 
     private static void initUnit() {

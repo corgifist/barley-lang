@@ -30,6 +30,11 @@ public class BarleyString implements BarleyValue, Serializable {
     }
 
     @Override
+    public Object raw() {
+        return toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

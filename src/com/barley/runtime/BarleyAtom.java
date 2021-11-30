@@ -30,6 +30,11 @@ public class BarleyAtom implements BarleyValue, Serializable {
     }
 
     @Override
+    public Object raw() {
+        return atom;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

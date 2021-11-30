@@ -32,6 +32,11 @@ public class BarleyFunction implements BarleyValue, Function, FunctionState, Ser
     }
 
     @Override
+    public Object raw() {
+        return function;
+    }
+
+    @Override
     public BarleyValue execute(BarleyValue... args) {
         return function.execute(args);
     }
