@@ -144,7 +144,8 @@ public class Handler {
                 "examples/code.barley",
                 "examples/expanded_remote.barley",
                 "examples/unit.barley",
-                "examples/strict.barley"
+                "examples/strict.barley",
+                "examples/error_preview.barley"
         };
 
         measurement.start("Tests time");
