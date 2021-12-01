@@ -126,7 +126,7 @@ eval([attr, Attr, Body]) ->
         Result = "",
         Lines = string:split(OldResult, "\n"),
         Table = "\nContents.\n",
-        (Table = Table + ((Count = (Count + 1)) + ". | " + format_line(Section, lists:nth(SectionLines, ITERATION)) + " | " + Section + "\n") || Section -> Sections,
+        (Table = Table + ((Count = (Count + 1)) + ". | " + format_line(lists:nth(SectionLines, ITERATION), max_size(SectionLines)) + " | " + Section + "\n") || Section -> Sections,
         Result = string:join(barley:sublist(Lines, 0, Index), "\n"),
         Result = Result + Table,
         Result = Result + string:join(barley:sublist(Lines, Index, barley:length(Lines)), "\n").
@@ -176,13 +176,14 @@ get_biggest_length(Lines) ->
     Indexes = (S || S -> Lines),
     lists:max(Indexes).
 
+
+max_size(Lines) -> lists:max(Lines).
 max_length(Lines) ->
     Indexes = (barley:length(S) || S -> Lines),
     lists:max(Indexes).
 
-format_line(S, SS) ->
-    L = SS,
-    LStr = "" + L,
-    PreFormat = barley:length(LStr),
-    Format = "%0" + PreFormat + "d",
-    io:format(Format, string:as_number(SS)).
+format_line(Line, MaxSize) ->
+    MaxSizeStr = "" + MaxSize,
+    MaxLength = barley:length(MaxSizeStr),
+    Format = "%0" + MaxLength + "d",
+    io:format(Format, Line).
