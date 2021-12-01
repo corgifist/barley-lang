@@ -1,5 +1,5 @@
 @echo off
 
-java -jar Barley.jar %1
+java -jar -Xss4m Barley.jar %1
 
 pause
