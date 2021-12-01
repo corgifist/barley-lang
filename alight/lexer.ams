@@ -1,0 +1,67 @@
+
+IsWord = def (S) -> not (string:is_identifier(S) == false). end
+LBRACE = "{"
+RBRACE = "}"
+LPAREN = "("
+RPAREN = ")"
+SLASH = "/"
+NEWLINE = "\n"
+HEX = "#"
+PERCENT = "%"
+BAR = "|"
+IsNumber = def (S) -> not (string:as_number(S) == error). end
+SPACE = " "
+DOLLAR = "$"
+EQ = "="
+AMP = "&"
+DOG = "@"
+COMMA = ","
+
+Rules
+
+once LBRACE -> build_operator(lbrace, Line, Symbol)
+once RBRACE -> build_operator(rbrace, Line, Symbol)
+once LPAREN -> build_operator(lparen, Line, Symbol)
+once RPAREN -> build_operator(rparen, Line, Symbol)
+once BAR -> build_operator(bar, Line, Symbol)
+once COMMA -> build_operator(comma, Line, Symbol)
+once SPACE -> build_operator(space, Line, Symbol)
+once SLASH -> build_operator(slash, Line, Symbol)
+once NEWLINE -> Line = Line + 1, build_operator(newline, Line, Symbol)
+once HEX -> build_operator(hex, Line, Symbol)
+once PERCENT -> build_operator(percent, Line, "percent")
+once DOLLAR -> build_operator(dollar, Line, "$")
+once EQ -> build_operator(eq, Line, "=")
+once AMP -> build_operator(amp, Line, "&")
+once DOG -> build_operator(dog, Line, "@")
+no_advance_expr IsWord(Symbol) -> word()
+anyway -> strange(Symbol)
+
+Catches
+
+
+strange(Symbol) ->
+  Pos = Pos + 1,
+  [word, Line, Symbol].
+
+word() ->
+    Word = catch_while_id(Parts),
+    reserved(Word) ? [types:as_atom(Word), Line, Word] :: [word, Line, Word].
+        
+build_operator(Type, Line, S) -> [Type, Line, S].
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when IsWord(peek(Parts, 0)) or peek(Parts, 0) == "_" ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+
+reserved("let") -> true.
+reserved("def") -> true.
+reserved("for") -> true.
+reserved("if") -> true.
+reserved("else") -> true.
+reserved(X) -> false.

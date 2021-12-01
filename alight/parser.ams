@@ -1,0 +1,125 @@
+root expression
+
+
+consume(Type) -> consume(Type, get(0)).
+
+consume(Type, Current) when match(Type) ->
+  Current.
+
+consume(Type, Current) ->
+  barley:throw("Expected " + Type + ", got " + Current + ". Next is " + get(1)).
+  
+body() -> consume(lbrace), body([]).
+body(Acc) when not match(rbrace) ->
+   body(Acc + [expression()]).
+body(Acc) -> Acc.
+
+args_expr() -> match(lparen), args_expr([]).
+args_expr(Acc) when match(rparen) -> Acc.
+args_expr(Acc) ->
+    NewAcc = Acc + [body()],
+    match(comma),
+    match(space),
+    args_expr(NewAcc).
+
+args_names() -> match(lparen), args_names([]).
+args_names(Acc) when match(rparen) -> Acc.
+args_names(Acc) ->
+    NewAcc = Acc + [text(consume(word))],
+    match(comma),
+    match(space),
+    args_names(NewAcc).
+
+expression() -> if_else().
+
+if_else() when match(if) ->
+    match(space),
+    IfExpr = body(),
+    match(space),
+    match(newline),
+    IfBody = body(),
+    match(space),
+    match(newline),
+    [if, IfExpr, IfBody, match(else) ? parse_else() :: empty].
+
+parse_else() ->
+    match(space),
+    match(newline),
+    body().
+
+if_else() -> for().
+
+for() when match(for) ->
+    match(space),
+    Expr = body(),
+    match(space),
+    match(newline),
+    Body = body(),
+    [for, Expr, Body].
+
+for() -> fun_def().
+
+fun_def() when match(types:as_atom("def")) ->
+    match(space),
+    FunctionName = text(consume(type(get(0)))),
+    match(space),
+    ArgsNames = args_names(),
+    match(space),
+    Body = body(),
+    [fun, FunctionName, Body, ArgsNames].
+
+fun_def() -> assignment().
+
+assignment() when match(let) ->
+   match(space),
+   Name = text(consume(word)),
+   match(space),
+   consume(eq),
+   match(space),
+   Value = body(),
+   [let, Name, Value].
+
+assignment() -> replacement_decl().
+
+replacement_decl() when match(slash) ->
+   Name = text(consume(word)),
+   String = body(),
+   match(space),
+   [repl_decl, Name, String].
+
+replacement_decl() -> fraction().
+
+fraction() when match(dog) ->
+    Left = body(),
+    match(space),
+    consume(bar),
+    match(space),
+    Right = body(),
+    [fract, Left, Right].
+fraction() -> call(attr()).
+
+call(Fun) when match(lparen) ->
+    CallArgs = args_expr(),
+    [call, Fun, CallArgs].
+call(Fun) -> Fun.
+
+attr() when match(percent) ->
+   AttrName = text(consume(word)),
+   String = body(),
+   [attr, AttrName, String].
+
+attr() -> primary().
+
+primary() when match(hex) ->
+    [repl_access, text(consume(word))].
+primary() when match(space) ->
+    [space].
+primary() when type(get(0)) == word ->
+     [word, text(consume(word))].
+primary() when match(newline) ->
+     [newline].
+primary() when match(dollar) ->
+     [var, text(consume(type(get(0))))].
+primary() when match(amp) ->
+     match(amp) ? [word, "&"] :: [word, text(consume(type(get(0))))].
+primary() -> [word, text(consume(type(get(0))))].

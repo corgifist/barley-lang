@@ -1,0 +1,207 @@
+-module(alightlexer).
+
+global IsWord
+ = def (S) -> not (string:is_identifier(S) == false). end
+.
+global LBRACE
+ = "{"
+.
+global RBRACE
+ = "}"
+.
+global LPAREN
+ = "("
+.
+global RPAREN
+ = ")"
+.
+global SLASH
+ = "/"
+.
+global NEWLINE
+ = "\n"
+.
+global HEX
+ = "#"
+.
+global PERCENT
+ = "%"
+.
+global BAR
+ = "|"
+.
+global IsNumber
+ = def (S) -> not (string:as_number(S) == error). end
+.
+global SPACE
+ = " "
+.
+global DOLLAR
+ = "$"
+.
+global EQ
+ = "="
+.
+global AMP
+ = "&"
+.
+global DOG
+ = "@"
+.
+global COMMA
+ = ","
+.
+
+
+
+strange(Symbol) ->
+  Pos = Pos + 1,
+  [word, Line, Symbol].
+
+word() ->
+    Word = catch_while_id(Parts),
+    reserved(Word) ? [types:as_atom(Word), Line, Word] :: [word, Line, Word].
+        
+build_operator(Type, Line, S) -> [Type, Line, S].
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when IsWord(peek(Parts, 0)) or peek(Parts, 0) == "_" ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+
+reserved("let") -> true.
+reserved("def") -> true.
+reserved("for") -> true.
+reserved("if") -> true.
+reserved("else") -> true.
+reserved(X) -> false.
+
+global Pos = 0.
+global Line = 1.
+global EOFToken = [eof, -1, ""].
+
+peek(Parts, RelativePos) ->
+    FinalPosition = RelativePos + Pos,
+    lists:nth(Parts, FinalPosition).
+
+next(Parts) ->
+    barley:define("Pos", Pos + 1),
+    peek(Parts, 0).
+illegal_character(S, L) -> barley:throw("illegal char '" + S + "'").
+
+lex(String) -> lex(String, 1).
+
+lex(String, Line) ->
+    Pos = 0,
+    Line = 1,
+    process_parts(string:split(String, "")).
+
+process_part(Parts, Symbol) when Symbol == 
+ LBRACE 
+ -> 
+  next(Parts),
+  build_operator(lbrace, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ RBRACE 
+ -> 
+  next(Parts),
+  build_operator(rbrace, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ LPAREN 
+ -> 
+  next(Parts),
+  build_operator(lparen, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ RPAREN 
+ -> 
+  next(Parts),
+  build_operator(rparen, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ BAR 
+ -> 
+  next(Parts),
+  build_operator(bar, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ COMMA 
+ -> 
+  next(Parts),
+  build_operator(comma, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ SPACE 
+ -> 
+  next(Parts),
+  build_operator(space, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ SLASH 
+ -> 
+  next(Parts),
+  build_operator(slash, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ NEWLINE 
+ -> 
+  next(Parts),
+  Line = Line + 1, build_operator(newline, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ HEX 
+ -> 
+  next(Parts),
+  build_operator(hex, Line, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ PERCENT 
+ -> 
+  next(Parts),
+  build_operator(percent, Line, "percent")
+.
+process_part(Parts, Symbol) when Symbol == 
+ DOLLAR 
+ -> 
+  next(Parts),
+  build_operator(dollar, Line, "$")
+.
+process_part(Parts, Symbol) when Symbol == 
+ EQ 
+ -> 
+  next(Parts),
+  build_operator(eq, Line, "=")
+.
+process_part(Parts, Symbol) when Symbol == 
+ AMP 
+ -> 
+  next(Parts),
+  build_operator(amp, Line, "&")
+.
+process_part(Parts, Symbol) when Symbol == 
+ DOG 
+ -> 
+  next(Parts),
+  build_operator(dog, Line, "@")
+.
+process_part(Parts, Symbol) when 
+IsWord(Symbol) 
+ -> 
+  word()
+.
+process_part(Parts, Symbol) ->
+    strange(Symbol)
+.
+process_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.
+
+process_parts(Parts) ->
+    Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_part(Parts, First)]. end, Parts, []),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),
+    WithoutEOF = WithoutEOF + [EOFToken].

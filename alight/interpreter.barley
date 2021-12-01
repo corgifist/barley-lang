@@ -1,0 +1,188 @@
+-module(alightinterpreter).
+-opt().
+
+global Result = "".
+global Table = bts:new().
+global Binding = bts:new().
+global Segments = 0.
+global SegmentIndents = 0.
+global Sections = [].
+global SectionLines = [].
+
+prepare() ->
+   Result = "",
+   Sections = [],
+   SectionLines = [],
+   Segments = 0,
+   SegmentIndents = 0,
+   Binding = bts:new(),
+   Table = bts:new().
+
+
+eval([if, IfExpr, IfBody, empty]) ->
+    OldResult = Result,
+    Result = "",
+    IfExprStr = barley:expr_eval(reval(IfExpr) + "."),
+    Result = "",
+    Result = OldResult,
+    IfExprStr == "true" ? reval(IfBody) :: empty.
+eval([if, IfExpr, IfBody, ElseBody]) ->
+    OldResult = Result,
+    Result = "",
+    IfExprStr = barley:expr_eval(reval(IfExpr) + "."),
+    Result = "",
+    Result = OldResult,
+    IfExprStr == "true" ? reval(IfBody) :: reval(ElseBody).
+eval([for, Expr, Body]) ->
+    OldResult = Result,
+    Result = "",
+    ExprStr = reval(Expr) + ".",
+    Result = "",
+    Result = OldResult,
+    Times = lists:duplicate(time, barley:expr_eval(ExprStr)),
+    reval(Body) || Time -> Times.
+eval([fun, FunctionName, Body, Args]) ->
+    Function = [fun_expr, Body, Args],
+    bts:insert(Binding, FunctionName, Function).
+eval([call, Fun, Args]) ->
+    Function = bts:lookup(Binding, lists:nth(Fun, 1)),
+    [fun_expr, B, A] = Function,
+    OldBinding = bts:copy(Binding),
+    bts:insert(Binding, lists:nth(lists:nth(Function, 2), ITERATION), lists:nth(Args, ITERATION)) || Arg -> Args,
+    reval(lists:nth(Function, 1)),
+    Binding = bts:copy(OldBinding).
+
+eval([fract, Left, Right]) ->
+    OldResult = Result,
+    CurrentLine = lists:last(lines()),
+    TabCount = string:tab_count(CurrentLine),
+    SPS = lists:concat(lists:duplicate("    ", TabCount)),
+    io:fwriteln(TabCount),
+    Result = "",
+    LeftStr = reval(Left),
+    Result = "",
+    RightStr = reval(Right),
+    Result =
+        OldResult + SPS + LeftStr + "\n" + SPS + lists:concat(lists:duplicate("-", line_length(LeftStr, RightStr))) + "\n" +
+            SPS + RightStr.
+eval([let, Naming, Body]) -> bts:insert(Binding, Naming, Body).
+eval([var, Naming]) -> reval(bts:lookup(Binding, Naming)).
+eval([word, Text]) -> Result = Result + Text.
+eval([space]) -> Result = Result + " ".
+eval([newline]) -> Result = Result + "\n".
+eval([repl_decl, N, String]) ->
+   bts:insert(Table, N, String).
+eval([attr, Attr, Body]) ->
+   Height = barley:width(),
+   Half = lists:concat(lists:duplicate(" ", Height / 3)),
+   AuthorHalf = lists:concat(lists:duplicate(" ", Height / 3 + 5)),
+   ABSHalf = lists:concat(lists:duplicate(" ", Height / 3 + 12)),
+   ABSCHalf = lists:concat(lists:duplicate(" ", Height / 3 - 8)),
+   HexSeparator = lists:concat(lists:duplicate("#", Height)),
+   OldResult = Result,
+   Result = "",
+   case Attr ->
+      of "tittle": Result = OldResult + Half + reval(Body).
+      of "author": Result = OldResult + AuthorHalf + reval(Body).
+      of "hex_separator": Result = OldResult + HexSeparator.
+      of "date": Result = OldResult + Half + barley:date().
+      of "segment":
+                S = reval(Body),
+                Segments = Segments + 1,
+                Sections = Sections + [S],
+                SectionLines = SectionLines + [barley:length(string:split(OldResult, "\n"))],
+                Result = OldResult + io:format("%s.%s %s", Segments, SegmentIndents, S).
+      of "end_segment": Result = OldResult, SegmentIndents = 0.
+      of "sub_segment": SegmentIndents = SegmentIndents + 1,
+                    Result = OldResult + io:format("%s.%s %s", Segments, SegmentIndents, reval(Body)).
+      of "end_sub_segment": Result = OldResult.
+      of "white_bg": Result = OldResult + ansi:white_bg() + reval(Body) + ansi:reset().
+      of "red_bg": Result = OldResult + ansi:red_bg() + reval(Body) + ansi:reset().
+      of "blue_bg": Result = OldResult + ansi:blue_bg() + reval(Body) + ansi:reset().
+      of "purple_bg": Result = OldResult + ansi:purple_bg() + reval(Body) + ansi:reset().
+      of "yellow_bg": Result = OldResult + ansi:yellow_bg() + reval(Body) + ansi:reset().
+      of "red": Result = OldResult + ansi:red() + reval(Body) + ansi:reset().
+      of "blue": Result = OldResult + ansi:blue() + reval(Body) + ansi:reset().
+      of "purple": Result = OldResult + ansi:purple() + reval(Body) + ansi:reset().
+      of "black": Result = OldResult + ansi:black() + reval(Body) + ansi:reset().
+      of "yellow": Result = OldResult + ansi:yellow() + reval(Body) + ansi:reset().
+      of "white": Result = OldResult + ansi:white() + reval(Body) + ansi:reset().
+      of "item": Result = OldResult + "  * " + reval(Body).
+      of "centering": Result = OldResult + Half + reval(Body).
+      of "dots": Result = OldResult + " ... ".
+      of "expr": Result = OldResult + barley:expr_eval(reval(Body)).
+      of "math": Result = OldResult + ansi:yellow() + reval(Body) + ansi:reset().
+      of "abstract":
+            AbstractContent = reval(Body),
+            AbstractLines = string:split(AbstractContent, "\n"),
+            Result = OldResult + "\n" + ABSHalf + ansi:yellow() + "Abstract" + "\n",
+            Result = Result + ABSCHalf + Line + "\n" || Line -> AbstractLines,
+            Result = Result + ansi:reset().
+      of "binding": Result = OldResult, io:fwriteln(bts:tabtolist(Binding)), io:fwriteln(bts:tabtolist(Table)).
+      of "table_gen":
+        Index = barley:expr_eval(reval(Body) + "."),
+        Tabs = 10,
+        Count = 0,
+        Result = "",
+        Lines = string:split(OldResult, "\n"),
+        Table = "\nContents.\n",
+        (Table = Table + ((Count = (Count + 1)) + ". | " + format_line(Section, lists:nth(SectionLines, ITERATION)) + " | " + Section + "\n") || Section -> Sections,
+        Result = string:join(barley:sublist(Lines, 0, Index), "\n"),
+        Result = Result + Table,
+        Result = Result + string:join(barley:sublist(Lines, Index, barley:length(Lines)), "\n").
+      of "pow": Result = OldResult + process_power(reval(Body)).
+      of "static_table":
+            Size = barley:expr_eval(reval(Body) + "."),
+            Result = OldResult,
+            Result = Result + "-" || Time -> lists:duplicate(t, Size).
+      of "table_element":
+            Result = OldResult + io:format("|%s|", reval(Body)).
+      of "end_static_table":
+            Size = barley:expr_eval(reval(Body) + "."),
+            Result = OldResult,
+            Result = Result + "-" || Time -> lists:duplicate(t, Size).
+   end.
+eval([repl_access, N]) ->
+   Tree = bts:lookup(Table, N),
+   reval(Tree).
+eval([]) -> "".
+eval(Expr) -> Expr.
+
+reval(Tree) ->
+  lists:map(def (Node) -> eval(Node). end, Tree),
+  Result.
+
+process_power(X) ->
+    XS = string:replace(X, "0", "⁰"),
+    XS = string:replace(XS, "1", "¹"),
+    XS = string:replace(XS, "2", "²"),
+    XS = string:replace(XS, "3", "³"),
+    XS = string:replace(XS, "4", "⁴"),
+    XS = string:replace(XS, "5", "⁵"),
+    XS = string:replace(XS, "6", "⁶"),
+    XS = string:replace(XS, "7", "⁷"),
+    XS = string:replace(XS, "8", "⁸"),
+    XS = string:replace(XS, "9", "⁹"),
+    XS = string:replace(XS, "\+", "⁺"),
+    XS = string:replace(XS, "-", "⁻"),
+    XS = string:replace(XS, "\(", "⁽"),
+    XS = string:replace(XS, "\)", "⁾"),
+    XS.
+
+line_length(Left, Right) -> math:max(barley:length(Left), barley:length(Right)).
+lines() -> string:split(Result, "\n").
+
+get_biggest_length(Lines) ->
+    Indexes = (S || S -> Lines),
+    lists:max(Indexes).
+
+max_length(Lines) ->
+    Indexes = (barley:length(S) || S -> Lines),
+    lists:max(Indexes).
+
+format_line(S, SS) ->
+    L = SS,
+    LStr = "" + L,
+    PreFormat = barley:length(LStr),
+    Format = "%0" + PreFormat + "d",
+    io:format(Format, string:as_number(SS)).

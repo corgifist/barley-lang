@@ -1,0 +1,50 @@
+-module(alight).
+-opt().
+
+prepare() ->
+    barley:ansi(),
+    amethyst:lexer("alight/lexer.ams", "alightlexer"),
+    amethyst:parser("alight/parser.ams", "alightparser").
+
+eval(Text) ->
+   M = measurement:new(),
+   measurement:start(M, "Lexer time"),
+   Toks = alightlexer:lex(Text),
+   measurement:stop(M, "Lexer time"),
+   Toks = filter(Toks),
+   measurement:start(M, "Parse time"),
+   Tree = alightparser:parse(Toks),
+   measurement:stop(M, "Parse time"),
+   alightinterpreter:prepare(),
+   measurement:start(M, "Interpreter time"),
+   R = alightinterpreter:reval(Tree),
+   measurement:stop(M, "Interpreter time"),
+   measurement:summary(M),
+   R.
+
+filter(T) ->
+    T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == word) and lists:nth(X, 2) == "")). end, T),
+    T.
+
+readline() ->
+   io:fwrite(">>> "),
+   io:readline().
+
+prompt() ->
+   Text = alight:readline(),
+   io:fwriteln(eval(Text)),
+   prompt().
+
+load_file(F) ->
+   File = file:read(F),
+   io:fwriteln(eval(File)).
+
+format_file(F) ->  eval(file:read(F)).
+
+main() ->
+   prepare(),
+   barley:reparse("alight/lexer.barley"),
+   barley:reparse("alight/parser.barley"),
+   barley:reparse("alight/interpreter.barley"),
+   barley:length(ARGS) == 0 ? prompt() :: skip,
+   lists:nth(ARGS, 0) == "-file" ? load_file(lists:nth(ARGS, 1)) :: skip.
