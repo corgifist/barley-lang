@@ -48,7 +48,7 @@ Barley have simplified syntax and other cool things that normal erlang don't hav
 
 Simplified syntax and global variables:
 
-```
+```erlang
 global ST = stack:new().
 
 eval(S) ->
@@ -122,7 +122,7 @@ Unlike Erlang, variables in Barely can be reassigned!
 Pattern matching is also supported for functions.
 
 This could be seen in example 1, but now it will be better revealed.
-```
+```erlang
 -module(test).`
 
 -doc("Calculator").`
@@ -190,7 +190,7 @@ The recommended function to spawn a process is a:
  
  ### Simple process-based program
  
- ```
+ ```erlang
  start() ->
     receive barley:spawn(0) -> Rest + Message.
 
@@ -284,7 +284,7 @@ For example I'll name my files "m_ball_client" and "m_ball_server".
 
 m_ball_server:
 
-```
+```erlang
 -module(ball_server).
 -doc("Magic ball server").
 
@@ -307,7 +307,7 @@ ask(Question) ->
 
 
 m_ball_client:
-```
+```erlang
 -module(ball_client).
 -doc("Ask vital questions!").
 
@@ -469,7 +469,7 @@ Each rule has its own type. The type defines the shape and behavior of a pointer
 The types can be:
 
 `once expr -> final_expr` at the moment of generation, this rule turns into:
-```
+```erlang
 process_part(Parts, Symbol) when Symbol == EXPR -> 
   next(Parts),
   FINAL_EXPR.
@@ -480,7 +480,7 @@ Example:
 
 Turns into:
 
-```
+```erlang
 process_part(Parts, Symbol) when Symbol == "+" -> 
   next(Parts),
   [plus, Line, "+"].
@@ -488,7 +488,7 @@ process_part(Parts, Symbol) when Symbol == "+" ->
 
 `once_expr expr -> final_expr` at the moment of generation, this rule turns into:
 
-```
+```erlang
 process_part(Parts, Symbol) when EXPR -> 
   next(Parts),
   FINAL_EXPR.
@@ -496,7 +496,7 @@ process_part(Parts, Symbol) when EXPR ->
 
 `skip -> expr` at the moment of generation turns into:
 
-```
+```erlang
 process_part(Parts, Symbol) when Symbol == expr ->
   next(Parts), 
   [skip, Line, ""].
@@ -522,7 +522,7 @@ So, let's write a simple lexer!
 
 It is will support +-*/, digits and words
 
-```
+```erlang
 MINUS = "-"
 PLUS = "+"
 STAR = "*"
@@ -577,7 +577,7 @@ But with incorrect catch functions, extra tokens can be generated.
 You can get rid of them with `lists:filter`
 
 Example of cleaning output of empty VAR tokens: 
-```
+```erlang
 filter(String) ->
     T = lexer:lex(String),
     T = lists:filter(def (X) -> (not ((lists:nth(X, 0) == var) and lists:nth(X, 2) == "")). end, T),.
@@ -597,7 +597,7 @@ States is the largest section of the grammar. It contains all the expressions fo
 
 Example of grammar that returns math tree:
  
-```
+```erlang
 Root expression
 
 -opt().
@@ -638,7 +638,7 @@ The `%% ...` is a comment
 
 This grammar generates this:
 
-```
+```erlang
 -module(parser).
 
 global Pos = 0.
@@ -783,7 +783,7 @@ Let's test:
 Ok, lexer is done.
 
 Grouping state:
-```
+```erlang
 primary(Text) when match(lparen) ->
     Expr = expr(),
     match(rparen),
