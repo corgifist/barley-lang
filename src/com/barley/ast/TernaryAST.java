@@ -8,12 +8,16 @@ import java.io.Serializable;
 
 public class TernaryAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     public AST term, left, right;
 
-    public TernaryAST(AST term, AST left, AST right) {
+    public TernaryAST(AST term, AST left, AST right, int line, String current) {
         this.term = term;
         this.left = left;
         this.right = right;
+        this.line = line;
+        this.current = current;
     }
 
     @Override

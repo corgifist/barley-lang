@@ -11,7 +11,7 @@ public class UnPackAST implements AST, Serializable {
 
     public AST ast;
 
-    public UnPackAST(AST ast) {
+    public UnPackAST(AST ast, int line, String current) {
         this.ast = ast;
     }
 

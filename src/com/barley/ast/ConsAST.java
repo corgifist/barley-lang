@@ -12,7 +12,7 @@ public class ConsAST implements AST, Serializable {
 
     public AST left, right;
 
-    public ConsAST(AST left, AST right) {
+    public ConsAST(AST left, AST right, int line, String current) {
         this.left = left;
         this.right = right;
     }

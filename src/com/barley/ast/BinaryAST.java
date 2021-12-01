@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.Main;
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
@@ -15,11 +16,15 @@ public class BinaryAST implements AST, Serializable {
     public AST expr1;
     public AST expr2;
     public char op;
+    private String current;
+    private int line;
 
-    public BinaryAST(AST expr1, AST expr2, char op) {
+    public BinaryAST(AST expr1, AST expr2, char op, int line, String current) {
         this.expr1 = expr1;
         this.expr2 = expr2;
         this.op = op;
+        this.current = current;
+        this.line = line;
     }
 
     @Override
@@ -98,7 +103,7 @@ public class BinaryAST implements AST, Serializable {
     }
 
     public void badArith(BarleyValue val1, BarleyValue val2) {
-        throw new BarleyException("BadArithmetic", "an error occurred when evaluating an arithmetic expression\n  called as: \n    " + String.format("%s %s %s", val1, op, val2));
+        Main.error("BadArith", "an error has occurred when evaluating an arithmetic expression", line, current);
     }
 
     @Override

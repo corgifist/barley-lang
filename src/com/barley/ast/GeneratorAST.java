@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.Main;
 import com.barley.optimizations.Optimization;
 import com.barley.reflection.Reflection;
 import com.barley.runtime.BarleyList;
@@ -15,14 +16,18 @@ import java.util.LinkedList;
 
 public class GeneratorAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     public AST iterable;
     private AST gen;
     private String var;
 
-    public GeneratorAST(AST gen, String var, AST iterable) {
+    public GeneratorAST(AST gen, String var, AST iterable, int line, String current) {
         this.gen = gen;
         this.var = var;
         this.iterable = iterable;
+        this.line = line;
+        this.current = current;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class GeneratorAST implements AST, Serializable {
                 list = new BarleyList(lst);
             }
         } else {
-            if (!(value instanceof BarleyList)) throw new BarleyException("BadGenerator", "expected list as enumerable");
+            if (!(value instanceof BarleyList)) Main.error("BadGenerator", "expeted list as enumerable", line, current);
             list = (BarleyList) value;
         }
         LinkedList<BarleyValue> result = new LinkedList<>();

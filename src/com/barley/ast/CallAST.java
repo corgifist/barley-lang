@@ -16,12 +16,16 @@ import java.util.List;
 
 public class CallAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     private AST obj;
     private ArrayList<AST> args;
 
-    public CallAST(AST obj, ArrayList<AST> args) {
+    public CallAST(AST obj, ArrayList<AST> args, int line, String current) {
         this.obj = obj;
         this.args = args;
+        this.line = line;
+        this.current = current;
     }
 
     @Override

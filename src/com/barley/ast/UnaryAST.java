@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.Main;
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.*;
 import com.barley.utils.AST;
@@ -9,12 +10,16 @@ import java.io.Serializable;
 
 public class UnaryAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     public AST expr1;
     private char op;
 
-    public UnaryAST(AST expr1, char op) {
+    public UnaryAST(AST expr1, char op, int line, String current) {
         this.expr1 = expr1;
         this.op = op;
+        this.line = line;
+        this.current = current;
     }
 
     @Override
@@ -27,7 +32,7 @@ public class UnaryAST implements AST, Serializable {
             case 'n':
                 return not(val1);
             default:
-                badArith();
+                badArith(val1);
         }
         return null;
     }
@@ -46,12 +51,12 @@ public class UnaryAST implements AST, Serializable {
             return new BarleyAtom(AtomTable.put(String.valueOf(value.toString().equals("[]"))));
         } else if (value instanceof BarleyAtom) {
             return new BarleyAtom(String.valueOf(value.toString().equals("false")));
-        } else badArith();
+        } else badArith(value);
         return null;
     }
 
-    public void badArith() {
-        throw new BarleyException("BadArithmetic", "an error occurred when evaluation an arithmetic expression\n  called as: \n    " + this);
+    public void badArith(BarleyValue value) {
+        Main.error("BadArith", "an error occurred when evaluation an arithmetic expression\n  called as: \n    " + op + value, line, current);
     }
 
     @Override

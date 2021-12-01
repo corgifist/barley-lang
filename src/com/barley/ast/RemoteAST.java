@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.Main;
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyFunction;
 import com.barley.runtime.BarleyValue;
@@ -12,11 +13,15 @@ import java.io.Serializable;
 
 public class RemoteAST implements AST, Serializable {
 
+    private final String current;
+    private final int line;
     private AST module, target;
 
-    public RemoteAST(AST module, AST target) {
+    public RemoteAST(AST module, AST target, int line, String current) {
         this.module = module;
         this.target = target;
+        this.line = line;
+        this.current = current;
     }
 
     @Override
@@ -24,10 +29,10 @@ public class RemoteAST implements AST, Serializable {
         String m = module.execute().toString();
         String t = target.execute().toString();
         if (!(Modules.isExists(m)))
-            throw new BarleyException("BadArg", "module '" + m + "' is not compiled or doesn't exists");
+            Main.error("BadArg", "module '" + m + "'  is not compiled or doesn't exists", line, current);
         Function a = Modules.get(module.execute().toString()).get(t);
         if (a == null)
-            throw new BarleyException("Undef", "module '" + m + "' exists but function '" + t + "' doesn't");
+            Main.error("BadArg", "module '" + m + "' exists but function '" + t + "' is not", line, current);
         return new BarleyFunction(a);
     }
 

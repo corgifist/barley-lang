@@ -10,7 +10,7 @@ public class PackAST implements AST {
 
     public String name;
 
-    public PackAST(String name) {
+    public PackAST(String name, int line, String current) {
         this.name = name;
     }
 

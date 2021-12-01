@@ -1,5 +1,6 @@
 package com.barley.ast;
 
+import com.barley.Main;
 import com.barley.optimizations.Optimization;
 import com.barley.optimizations.VariableInfo;
 import com.barley.patterns.*;
@@ -17,12 +18,16 @@ import java.util.Map;
 
 public class BindAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     public AST left, right;
 
-    public BindAST(AST left, AST right) {
+    public BindAST(AST left, AST right, int line, String current) {
         this.left = left;
         this.right = right;
         //System.out.println(emulate(new HashMap<String, VariableInfo>(), new HashMap<String, Integer>()));
+        this.line = line;
+        this.current = current;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class BindAST implements AST, Serializable {
         BarleyValue ast = r.execute();
         if (pattern instanceof ListPattern) {
             if (!(ast instanceof BarleyList))
-                throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
             ListPattern p = (ListPattern) pattern;
             LinkedList<BarleyValue> list = ((BarleyList) ast).getList();
             LinkedList<Pattern> patterns = pattern(p);
@@ -53,15 +58,15 @@ public class BindAST implements AST, Serializable {
                 } else if (pattern1 instanceof ConstantPattern) {
                     BarleyValue l = ((ConstantPattern) pattern1).getConstant();
                     if (right.equals(l)) ;
-                    else throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                    else Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
                 } else if (pattern1 instanceof ListPattern) {
                     if (!((right instanceof BarleyList)))
-                        throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                        Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
                     processPattern(pattern1, new ConstantAST(right));
                 } else if (pattern1 instanceof ConsPattern) {
                     ConsPattern p1 = (ConsPattern) pattern1;
                     if (!(right instanceof BarleyList))
-                        throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                        Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
                     Table.set(p1.getLeft(), head((BarleyList) right));
                     Table.set(p1.getRight(), tail((BarleyList) right));
                 }
@@ -74,11 +79,11 @@ public class BindAST implements AST, Serializable {
         } else if (pattern instanceof ConstantPattern) {
             BarleyValue l = ((ConstantPattern) pattern).getConstant();
             if (ast.equals(l)) ;
-            else throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+            else Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
         } else if (pattern instanceof ConsPattern) {
             ConsPattern p = (ConsPattern) pattern;
             if (!(ast instanceof BarleyList))
-                throw new BarleyException("BadMatch", "no match of right-hand value: " + ast);
+                Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
             Table.set(p.getLeft(), head((BarleyList) ast));
             Table.set(p.getRight(), tail((BarleyList) ast));
         }
@@ -97,7 +102,8 @@ public class BindAST implements AST, Serializable {
         } else if (ast instanceof ConsAST) {
             ConsAST cons = (ConsAST) ast;
             return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
-        } else throw new BarleyException("BadMatch", "invalid pattern in bind ast");
+        } else Main.error("BadMatch", "invalid pattern in match ast", line, current);
+        return null;
     }
 
     private LinkedList<Pattern> pattern(ListPattern pattern) {

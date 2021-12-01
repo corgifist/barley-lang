@@ -41,7 +41,7 @@ public class ExpressionSimplification implements Optimization {
                 case '-':
                     count++;
                     if (expr1Zero)
-                        return new UnaryAST(ast.expr2, '-');
+                        return new UnaryAST(ast.expr2, '-', 0, "test");
                     return ast.expr1;
                 case '*':
                     count++;

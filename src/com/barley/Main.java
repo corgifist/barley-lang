@@ -2,6 +2,7 @@ package com.barley;
 
 import com.barley.runtime.*;
 import com.barley.editor.Editor;
+import com.barley.utils.BarleyException;
 import com.barley.utils.Handler;
 import com.barley.utils.SourceLoader;
 import io.github.devlinuxuser.JKey;
@@ -70,5 +71,9 @@ public class Main {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void error(String type, String text, int line, String current) {
+        throw new BarleyException(type, text + "\n    at line " + line + "\n      when current line:\n            " + current);
     }
 }

@@ -11,11 +11,15 @@ import java.io.Serializable;
 
 public class ProcessCallAST implements AST, Serializable {
 
+    private final int line;
+    private final String current;
     public AST pid, expr;
 
-    public ProcessCallAST(AST pid, AST expr) {
+    public ProcessCallAST(AST pid, AST expr, int line, String current) {
         this.pid = pid;
         this.expr = expr;
+        this.line = line;
+        this.current = current;
     }
 
     @Override

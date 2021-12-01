@@ -139,6 +139,7 @@ public final class Parser implements Serializable {
         Clause clause = clause();
         consume(TokenType.STABBER, "error at '" + name + "' declaration");
         if (name.equals("main")) {
+            clause.result = new BlockAST(new ArrayList<>());
             BlockAST as = ((BlockAST) clause.getResult());
             as.block.add(new StrictAST());
             clause.result = as;
@@ -170,7 +171,7 @@ public final class Parser implements Serializable {
                 AST left = or();
                 consume(TokenType.CC, "expected '::' after term in ternary expr at line " + line());
                 AST right = or();
-                term = new TernaryAST(term, left, right);
+                term = new TernaryAST(term, left, right, line(), currentLine());
             }
             break;
         }
@@ -183,7 +184,7 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.OR)) {
-                result = new BinaryAST(result, and(), 'o');
+                result = new BinaryAST(result, and(), 'o', line(), currentLine());
                 continue;
             }
             break;
@@ -197,7 +198,7 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.AND)) {
-                result = new BinaryAST(result, generator(), 'a');
+                result = new BinaryAST(result, generator(), 'a', line(), currentLine());
                 continue;
             }
             break;
@@ -213,7 +214,7 @@ public final class Parser implements Serializable {
             String var = consume(TokenType.VAR, "expected var name after '||' at line " + line()).getText();
             consume(TokenType.STABBER, "expected '->' after var name at line " + line());
             AST iterable = assignment();
-            return new GeneratorAST(generator, var, iterable);
+            return new GeneratorAST(generator, var, iterable, line(), currentLine());
         }
 
         return generator;
@@ -224,7 +225,7 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.EQ)) {
-                result = new BindAST(result, conditional());
+                result = new BindAST(result, conditional(), line(), currentLine());
                 continue;
             }
             break;
@@ -237,23 +238,23 @@ public final class Parser implements Serializable {
         AST result = additive();
 
         if (match(TokenType.LT)) {
-            return new BinaryAST(result, additive(), '<');
+            return new BinaryAST(result, additive(), '<', line(), currentLine());
         }
 
         if (match(TokenType.GT)) {
-            return new BinaryAST(result, additive(), '>');
+            return new BinaryAST(result, additive(), '>', line(), currentLine());
         }
 
         if (match(TokenType.LTEQ)) {
-            return new BinaryAST(result, additive(), 't');
+            return new BinaryAST(result, additive(), 't', line(), currentLine());
         }
 
         if (match(TokenType.GTEQ)) {
-            return new BinaryAST(result, additive(), 'g');
+            return new BinaryAST(result, additive(), 'g', line(), currentLine());
         }
 
         if (match(TokenType.EQEQ)) {
-            return new BinaryAST(result, additive(), '=');
+            return new BinaryAST(result, additive(), '=', line(), currentLine());
         }
         return result;
     }
@@ -263,11 +264,11 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.PLUS)) {
-                result = new BinaryAST(result, multiplicative(), '+');
+                result = new BinaryAST(result, multiplicative(), '+', line(), currentLine());
                 continue;
             }
             if (match(TokenType.MINUS)) {
-                result = new BinaryAST(result, multiplicative(), '-');
+                result = new BinaryAST(result, multiplicative(), '-', line(), currentLine());
                 continue;
             }
             break;
@@ -282,20 +283,20 @@ public final class Parser implements Serializable {
         while (true) {
             // 2 * 6 / 3
             if (match(TokenType.STAR)) {
-                result = new BinaryAST(result, unary(), '*');
+                result = new BinaryAST(result, unary(), '*', line(), currentLine());
                 continue;
             }
             if (match(TokenType.SLASH)) {
-                result = new BinaryAST(result, unary(), '/');
+                result = new BinaryAST(result, unary(), '/', line(), currentLine());
                 continue;
             }
 
             if (match(TokenType.BANG)) {
-                result = new ProcessCallAST(result, unary());
+                result = new ProcessCallAST(result, unary(), line(), currentLine());
             }
 
             if (match(TokenType.BAR)) {
-                result = new ConsAST(result, unary());
+                result = new ConsAST(result, unary(), line(), currentLine());
             }
             break;
         }
@@ -347,11 +348,11 @@ public final class Parser implements Serializable {
                 consume(TokenType.RPAREN, "expected ')' after strict");
                 return new ConstantAST(new BarleyNumber(0));
             }
-            return new UnaryAST(call(), '-');
+            return new UnaryAST(call(), '-', line(), currentLine());
         }
 
         if (match(TokenType.NOT)) {
-            return new UnaryAST(call(), 'n');
+            return new UnaryAST(call(), 'n', line(), currentLine());
         }
 
         if (match(TokenType.UNBIN))
@@ -360,11 +361,11 @@ public final class Parser implements Serializable {
         }
 
         if (match(TokenType.PACK)) {
-            return new PackAST(consume(TokenType.VAR, "expected var name after 'pack'").getText());
+            return new PackAST(consume(TokenType.VAR, "expected var name after 'pack'").getText(), line(), currentLine());
         }
 
         if (match(TokenType.UNPACK)) {
-            return new UnPackAST(expression());
+            return new UnPackAST(expression(), line(), currentLine());
         }
         return call();
     }
@@ -376,7 +377,7 @@ public final class Parser implements Serializable {
         while (true) {
             if (lookMatch(0, TokenType.LPAREN)) {
                 ArrayList<AST> args = arguments();
-                result = new CallAST(result, args);
+                result = new CallAST(result, args, line(), currentLine());
             }
             break;
         }
@@ -389,7 +390,7 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.COLON)) {
-                result = new RemoteAST(result, primary());
+                result = new RemoteAST(result, primary(), line(), currentLine());
                 continue;
             }
             break;
@@ -421,7 +422,7 @@ public final class Parser implements Serializable {
             return result;
         }
         if (match(TokenType.VAR)) {
-            return new ExtractBindAST(current.getText());
+            return new ExtractBindAST(current.getText(), line(), currentLine());
         }
         if (match(TokenType.ATOM)) {
             return new ConstantAST(new BarleyAtom(current.getText()));
@@ -532,7 +533,7 @@ public final class Parser implements Serializable {
 
     private AST expandCall() {
         AST target = remote();
-        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), target), arguments());
+        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), target, line(), currentLine()), arguments(), line(), currentLine());
     }
 
     private Clause clause() {
@@ -582,6 +583,6 @@ public final class Parser implements Serializable {
     }
 
     private AST buildCall(String module, String method, ArrayList<AST> args) {
-        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), new ConstantAST(new BarleyAtom(method))), args);
+        return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), new ConstantAST(new BarleyAtom(method)), line(), currentLine()), args, line(), currentLine());
     }
 }
