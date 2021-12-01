@@ -178,7 +178,7 @@ public class Reflection {
         }
 
         public BarleyValue newInstance(BarleyValue[] args) {
-            return findConstructorAndInstantiate(args, clazz.getConstructors());
+            return findConstructorAndInstantiate(args, clazz.getDeclaredConstructors());
         }
 
         private BarleyValue cast(BarleyValue[] args) {
@@ -333,10 +333,11 @@ public class Reflection {
             if (ctor.getParameterCount() != args.length) continue;
             if (!isMatch(args, ctor.getParameterTypes())) continue;
             try {
+                ctor.setAccessible(true);
                 final Object result = ctor.newInstance(valuesToObjects(args));
                 return new ObjectValue(result);
             } catch (InstantiationException | IllegalAccessException
-                    | IllegalArgumentException | InvocationTargetException ex) {
+                    | IllegalArgumentException | InaccessibleObjectException | InvocationTargetException ex) {
                 // skip
             }
         }

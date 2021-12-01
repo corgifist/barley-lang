@@ -38,10 +38,10 @@ public class GeneratorAST implements AST, Serializable {
                     lst.add(new Reflection.ObjectValue(v));
                 }
                 list = new BarleyList(lst);
-            } else {
-                if (!(value instanceof BarleyList)) throw new BarleyException("BadGenerator", "expected list as enumerable");
-                list = (BarleyList) value;
             }
+        } else {
+            if (!(value instanceof BarleyList)) throw new BarleyException("BadGenerator", "expected list as enumerable");
+            list = (BarleyList) value;
         }
         LinkedList<BarleyValue> result = new LinkedList<>();
         int size = list.getList().size();

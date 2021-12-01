@@ -29,6 +29,7 @@ public class UserFunction implements Function, Serializable {
             for (int i = 0; i < clauses.size(); i++) {
                 Clause clause = clauses.get(i);
                 ArrayList<Pattern> patterns = patterns(clause.getArgs());
+                if (patterns.size() != args.length) continue;
                 if (patterns.isEmpty() && args.length == 0) {
                     if (clause.getGuard() != null) {
                         if ((clause.getGuard().execute()).toString().equals("true")) ;
@@ -86,9 +87,7 @@ public class UserFunction implements Function, Serializable {
                             i += 1;
                             arr.add(val);
                         }
-                        System.out.println("Rest :" + rest);
                         Table.define(p.toString(), new BarleyList(arr));
-                        System.out.println(Table.variables());
                         break;
                     }
                 }

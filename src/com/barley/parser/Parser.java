@@ -138,6 +138,11 @@ public final class Parser implements Serializable {
     private AST method(String name) {
         Clause clause = clause();
         consume(TokenType.STABBER, "error at '" + name + "' declaration");
+        if (name.equals("main")) {
+            BlockAST as = ((BlockAST) clause.getResult());
+            as.block.add(new StrictAST());
+            clause.result = as;
+        }
         clause.setResult(block());
         if (name.equals("main")) {
             BlockAST as = ((BlockAST) clause.getResult());
@@ -340,7 +345,7 @@ public final class Parser implements Serializable {
                 consume(TokenType.LPAREN, "expected '(' before strict");
                 Table.strict = true;
                 consume(TokenType.RPAREN, "expected ')' after strict");
-                return new UnStrictAST();
+                return new ConstantAST(new BarleyNumber(0));
             }
             return new UnaryAST(call(), '-');
         }
