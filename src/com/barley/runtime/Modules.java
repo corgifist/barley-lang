@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.annimon.ownlang.lib.ValueUtils;
 import com.barley.reflection.Reflection;
 import com.barley.units.Unit;
 import com.barley.units.UnitBase;
@@ -1451,6 +1452,17 @@ public class Modules {
         initAnsi();
         initUnit();
         initReflection();
+        initBase();
+    }
+
+    private static void initBase() {
+        HashMap<String, Function> base = new HashMap<>();
+
+        base.put("encode", Modules::base64encode);
+        base.put("decode", Modules::base64decode);
+        base.put("decode_to_string", Modules::base64encodeToString);
+
+        put("base", base);
     }
 
     private static void initReflection() {
@@ -2200,6 +2212,76 @@ public class Modules {
 
             return sb.toString();
         }
+    }
+
+    private static int TYPE_URL_SAFE = 8;
+
+    private static BarleyValue base64encode(BarleyValue... args) {
+        Arguments.checkOrOr(1, 2, args.length);
+        byte[] bytes = getEncoder(args).encode(getInputToEncode(args));
+        LinkedList<BarleyValue> result = new LinkedList<>();
+        for (byte b : bytes) {
+            result.add(new BarleyNumber(b));
+        }
+        return new BarleyList(result);
+    }
+
+    private static BarleyValue base64encodeToString(BarleyValue... args) {
+        Arguments.checkOrOr(1, 2, args.length);
+        return new BarleyString(getEncoder(args).encodeToString(getInputToEncode(args)));
+    }
+
+    private static BarleyValue base64decode(BarleyValue... args) {
+        Arguments.checkOrOr(1, 2, args.length);
+        final Base64.Decoder decoder = getDecoder(args);
+        final byte[] result;
+        if (args[0] instanceof BarleyList s) {
+            byte[] ar = new byte[s.getList().size()];
+            for (int i = 0; i < ar.length; i++) {
+                ar[i] = s.getList().get(i).asInteger().byteValue();
+            }
+            result = decoder.decode(ar);
+        } else {
+            result = decoder.decode(args[0].toString());
+            BarleyValue[] ints = new BarleyValue[result.length];
+            for (int i = 0; i < result.length; i++) {
+                ints[i] = new BarleyNumber(result[i]);
+            }
+            return new BarleyList(ints);
+        }
+        return null;
+    }
+
+
+    private static byte[] getInputToEncode(BarleyValue[] args) {
+        byte[] input;
+        if (args[0] instanceof BarleyList a) {
+            input = new byte[a.getList().size()];
+            for (int i = 0; i < a.getList().size(); i++) {
+                input[i] = a.getList().get(i).asInteger().byteValue();
+            }
+        } else {
+            try {
+                input = args[0].toString().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                input = args[0].toString().getBytes();
+            }
+        }
+        return input;
+    }
+
+    private static Base64.Encoder getEncoder(BarleyValue[] args) {
+        if (args.length == 2 && args[1].asInteger().intValue() == TYPE_URL_SAFE) {
+            return Base64.getUrlEncoder();
+        }
+        return Base64.getEncoder();
+    }
+
+    private static Base64.Decoder getDecoder(BarleyValue[] args) {
+        if (args.length == 2 && args[1].asInteger().intValue() == TYPE_URL_SAFE) {
+            return Base64.getUrlDecoder();
+        }
+        return Base64.getDecoder();
     }
 
 

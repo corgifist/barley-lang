@@ -43,6 +43,10 @@ public class Handler {
                     }
                 }
             }
+
+            if (parser.ast) {
+                System.out.println(nodes);
+            }
             measurement.stop("Optimization time");
             measurement.start("Execute time");
             final boolean[] brk = new boolean[1];

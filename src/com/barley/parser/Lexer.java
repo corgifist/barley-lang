@@ -36,7 +36,6 @@ public final class Lexer {
         OPERATORS.put("}", TokenType.RBRACE);
         OPERATORS.put(":", TokenType.COLON);
         OPERATORS.put("|", TokenType.BAR);
-        OPERATORS.put("#", TokenType.SHARP);
         OPERATORS.put("[", TokenType.LBRACKET);
         OPERATORS.put("]", TokenType.RBRACKET);
         OPERATORS.put(",", TokenType.COMMA);
@@ -48,6 +47,8 @@ public final class Lexer {
         OPERATORS.put(">>", TokenType.GTGT);
         OPERATORS.put("<<", TokenType.LTLT);
         OPERATORS.put("&", TokenType.UNBIN);
+        OPERATORS.put("#", TokenType.POINT);
+        OPERATORS.put("##", TokenType.UNPOINT);
     }
 
     static {
@@ -70,6 +71,7 @@ public final class Lexer {
         KEYWORDS.put("strict", TokenType.STRICT);
         KEYWORDS.put("pack", TokenType.PACK);
         KEYWORDS.put("unpack", TokenType.UNPACK);
+        KEYWORDS.put("ast", TokenType.AST);
     }
 
     private final String input;

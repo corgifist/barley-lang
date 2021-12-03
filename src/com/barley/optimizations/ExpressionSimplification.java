@@ -211,6 +211,7 @@ public class ExpressionSimplification implements Optimization {
         } else if (ast instanceof BlockAST) {
             return optimize((BlockAST) ast);
         }
+        ast.visit(this);
         return ast;
     }
 }

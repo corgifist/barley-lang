@@ -39,6 +39,7 @@ public enum TokenType implements Serializable {
     LBRACKET,
     RBRACKET,
     QUESTION,
+    POINT, UNPOINT,
 
     DOT,
 
@@ -48,7 +49,7 @@ public enum TokenType implements Serializable {
     RECIEVE,
     CASE, OF, END,
     AND, OR, GLOBAL,
-    NOT, DEF, OPT, DEFGUARD, UNIT, STRICT, PACK, UNPACK,
+    NOT, DEF, OPT, DEFGUARD, UNIT, STRICT, PACK, UNPACK, AST,
 
     VAR, ATOM, EOF
 }

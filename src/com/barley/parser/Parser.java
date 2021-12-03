@@ -23,6 +23,7 @@ public final class Parser implements Serializable {
     private String module, doc;
     private String source;
     private boolean parserStrict = false;
+    public boolean ast = false;
 
     public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -114,6 +115,11 @@ public final class Parser implements Serializable {
                 parserStrict = true;
                 consume(TokenType.RPAREN, "expected ')' after strict");
                 return new StrictAST();
+            }
+            if (match(TokenType.AST)) {
+                consume(TokenType.LPAREN, "expected '(' before ast");
+                ast = true;
+                consume(TokenType.RPAREN, "expected ')' after ast");
             }
             match(TokenType.COMMA);
             return new ConstantAST(new BarleyNumber(0));
@@ -298,6 +304,12 @@ public final class Parser implements Serializable {
             if (match(TokenType.BAR)) {
                 result = new ConsAST(result, unary(), line(), currentLine());
             }
+
+            if (match(TokenType.GTGT)) {
+                result = new PointShiftAST(result, expression());
+                continue;
+            }
+
             break;
         }
 
@@ -367,6 +379,15 @@ public final class Parser implements Serializable {
         if (match(TokenType.UNPACK)) {
             return new UnPackAST(expression(), line(), currentLine());
         }
+
+        if (match(TokenType.POINT)) {
+            return new PointerAST(call());
+        }
+
+        if (match(TokenType.UNPOINT)) {
+            return new UnPointAST(call(), line(), currentLine());
+        }
+
         return call();
     }
 
@@ -450,7 +471,7 @@ public final class Parser implements Serializable {
 
 
         if (match(TokenType.RECIEVE)) return receive();
-        throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current + "\n      when current line:\n      " + currentLine());
+        throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current + "\n    when current line:\n      " + currentLine());
     }
 
     private AST lambda() {
