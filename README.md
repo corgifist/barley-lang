@@ -52,7 +52,7 @@ Simplified syntax and global variables:
 global ST = stack:new().
 
 eval(S) ->
-    String = string:split(S),`
+    String = string:split(S),
     io:fwriteln(String),
     process(Part) || Part -> String,
     pop().
