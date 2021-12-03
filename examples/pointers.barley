@@ -1,0 +1,14 @@
+-module(test).
+
+modify(LST) -> LST = LST + [1].
+
+pointer_modify(LST) -> LST >> ##LST + [1].
+
+main() ->
+   List = [1, 2, 3],
+   modify(List),
+   io:fwriteln(List),
+   ListPointer = #List,
+   pointer_modify(ListPointer),
+   io:fwriteln(##ListPointer).
+  
