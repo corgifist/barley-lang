@@ -54,7 +54,6 @@ public class Handler {
             for (AST node : nodes) {
                 node.execute();
             }
-            System.out.println("memory left: " + Storage.left());
             Storage.reset();
             measurement.stop("Execute time");
             if (time) {
@@ -155,7 +154,8 @@ public class Handler {
                 "examples/error_preview.barley",
                 "examples/reflection.barley",
                 "examples/pointers.barley",
-                "examples/segmentation.barley"
+                "examples/segmentation.barley",
+                "examples/externals.barley"
         };
 
         measurement.start("Tests time");

@@ -59,6 +59,19 @@ public class BarleyList implements BarleyValue, Serializable {
 
     @Override
     public String toString() {
-        return list.toString();
+        if (list.size() >= 10) {
+            List<BarleyValue> rest = list.subList(1, 10);
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("[");
+            int i = 1;
+            for (BarleyValue val : rest) {
+                buffer.append(i == 10 ? val.toString() : val + ", ");
+                i++;
+            }
+            buffer.append("...");
+            buffer.append("]");
+            return buffer.toString();
+        }
+        else return list.toString();
     }
 }

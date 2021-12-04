@@ -5,6 +5,7 @@ import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyPointer;
 import com.barley.runtime.BarleyValue;
 import com.barley.utils.AST;
+import com.barley.utils.BarleyException;
 import com.barley.utils.Pointers;
 
 import java.io.Serializable;
@@ -26,7 +27,9 @@ public class UnPointAST implements AST, Serializable {
         BarleyValue execute = ast.execute();
         if (!(execute instanceof BarleyPointer))
             Main.error("BadPointer", "expected POINTER as pointer, got '" + execute.toString() + "'", line, current);
-        return Pointers.get(execute.toString());
+        BarleyValue res = Pointers.get(execute.toString());
+        if (res == null) throw new BarleyException("BadPointer", "segmentation fault");
+        return res;
     }
 
     @Override

@@ -75,7 +75,8 @@ public class GeneratorJamming implements Optimization {
     public AST optimize(GeneratorAST ast) {
         try {
             count++;
-            return new ConstantAST(ast.execute());
+            if (ast.gen instanceof CallAST) return ast;
+            else return new ConstantAST(ast.execute());
         } catch (BarleyException ex) {
             return ast;
         }

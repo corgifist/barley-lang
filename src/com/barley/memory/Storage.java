@@ -16,6 +16,10 @@ public class Storage {
         if (left <= 0) throw new BarleyException("SegmentationFault", "segmentation fault, last allocation: '#Allocation<" + obj + ":" + StorageUtils.size(obj) + ">'");
     }
 
+    public static void segment(int obj) {
+        left -= obj;
+    }
+
     public static void reset() { left = 749000; }
 
     public static int left() {

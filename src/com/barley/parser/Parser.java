@@ -125,9 +125,22 @@ public final class Parser implements Serializable {
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
             return receive();
+        } else if (match(TokenType.EXTERN)) {
+            return extern();
         } else if (match(TokenType.GLOBAL)) {
             return global();
         } else throw new BarleyException("BadCompiler", "bad declaration '" + current + "'");
+    }
+
+    private AST extern() {
+        String name = consume(TokenType.ATOM, "expected name after 'extern'").getText();
+        Clause cl = clause();
+        consume(TokenType.STABBER, "expected '->' after clause");
+        cl.setResult(block());
+        ArrayList<Clause> cls = new ArrayList<>();
+        cls.add(cl);
+        Externals.put(name, new UserFunction(cls));
+        return new ConstantAST(new BarleyNumber(0));
     }
 
     private AST global() {
@@ -469,9 +482,19 @@ public final class Parser implements Serializable {
             return buildCall("barley", "binary", list);
         }
 
+        if (match(TokenType.EXTERN)) {
+            return externCall();
+        }
+
 
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current + "\n    when current line:\n      " + currentLine());
+    }
+
+    private AST externCall() {
+        String name = consume(TokenType.ATOM, "expected extern function name after 'extern'").getText();
+        ArrayList<AST> args = arguments();
+        return new CallAST(new ConstantAST(new BarleyFunction(Externals.get(name))), args, line(), currentLine());
     }
 
     private AST lambda() {

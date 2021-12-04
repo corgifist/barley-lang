@@ -19,7 +19,7 @@ public class GeneratorAST implements AST, Serializable {
     private final int line;
     private final String current;
     public AST iterable;
-    private AST gen;
+    public AST gen;
     private String var;
 
     public GeneratorAST(AST gen, String var, AST iterable, int line, String current) {
@@ -50,6 +50,7 @@ public class GeneratorAST implements AST, Serializable {
         }
         LinkedList<BarleyValue> result = new LinkedList<>();
         int size = list.getList().size();
+        if (size >= 1000) throw new BarleyException("BadGenerator", "generator '" + (gen + " || " + var + " -> " + list) + "' will cause 'segmentation fault'");
         Table.push();
         for (int i = 0; i < size; i++) {
             BarleyValue obj = list.getList().get(i);

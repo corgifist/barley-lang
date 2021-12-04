@@ -72,6 +72,7 @@ public final class Lexer {
         KEYWORDS.put("pack", TokenType.PACK);
         KEYWORDS.put("unpack", TokenType.UNPACK);
         KEYWORDS.put("ast", TokenType.AST);
+        KEYWORDS.put("extern", TokenType.EXTERN);
     }
 
     private final String input;

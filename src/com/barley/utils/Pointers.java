@@ -8,7 +8,9 @@ public class Pointers {
     private static HashMap<String, BarleyValue> pointers = new HashMap<>();
 
     public static BarleyValue get(Object key) {
-        return pointers.get(key);
+        BarleyValue result = pointers.get(key);
+        if (result == null) throw new BarleyException("BadPointer", "segmentation fault");
+        return result;
     }
 
     public static BarleyValue put(String key, BarleyValue value) {
@@ -17,6 +19,10 @@ public class Pointers {
 
     public static void clear() {
         pointers.clear();
+    }
+
+    public static BarleyValue remove(Object key) {
+        return pointers.remove(key);
     }
 
     public static HashMap<String, BarleyValue> getPointers() {
