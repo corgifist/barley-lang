@@ -50,6 +50,6 @@ public class BarleyString implements BarleyValue, Serializable {
 
     @Override
     public String toString() {
-        return new String(string);
+        return new String(string).intern();
     }
 }

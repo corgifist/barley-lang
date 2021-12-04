@@ -152,7 +152,10 @@ public class Handler {
                 "examples/expanded_remote.barley",
                 "examples/unit.barley",
                 "examples/strict.barley",
-                "examples/error_preview.barley"
+                "examples/error_preview.barley",
+                "examples/reflection.barley",
+                "examples/pointers.barley",
+                "examples/segmentation.barley"
         };
 
         measurement.start("Tests time");

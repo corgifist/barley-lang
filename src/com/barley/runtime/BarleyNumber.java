@@ -43,7 +43,8 @@ public class BarleyNumber implements BarleyValue, Serializable {
 
     @Override
     public Object raw() {
-        return number.doubleValue();
+        if (this.toString().contains(".")) return number.doubleValue();
+        else return number.intValue();
     }
 
     @Override

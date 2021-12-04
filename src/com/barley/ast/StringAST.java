@@ -76,4 +76,9 @@ public class StringAST implements AST, Serializable {
     public void visit(Optimization optimization) {
 
     }
+
+    @Override
+    public String toString() {
+        return str;
+    }
 }

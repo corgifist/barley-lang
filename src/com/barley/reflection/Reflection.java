@@ -334,7 +334,6 @@ public class Reflection {
             if (ctor.getParameterCount() != args.length) continue;
             if (!isMatch(args, ctor.getParameterTypes())) continue;
             try {
-                ctor.setAccessible(true);
                 final Object result = ctor.newInstance(valuesToObjects(args));
                 return new ObjectValue(result);
             } catch (InstantiationException | IllegalAccessException
@@ -342,7 +341,14 @@ public class Reflection {
                 // skip
             }
         }
-        throw new BarleyException("BadReflection", "Can't find constructor for length " + args.length + " and for constructors " + Arrays.toString(ctors) + ". when args: " + Arrays.toString(args));
+
+        Object[] as =  valuesToObjects(args);
+        Class<?>[] types = new Class[as.length];
+        for (int i = 0; i < as.length; i++) {
+            types[i] = as[i].getClass();
+        }
+
+        throw new BarleyException("BadReflection", "Can't find constructor for length " + args.length + " and for constructors " + Arrays.toString(ctors) + ". when args: " + Arrays.toString(args) + "\n    when types of args is: " + Arrays.toString(types));
     }
 
     private static Function methodsToFunction(Object object, List<Method> methods) {
@@ -538,7 +544,7 @@ public class Reflection {
     private static Object valueToObject(BarleyValue value) {
         if (value == NULL) return null;
         if (value instanceof BarleyNumber n) {
-            return n.asFloat().doubleValue();
+            return n.raw();
         } else if (value instanceof BarleyList s) {
             return s.toString();
         } else if (value instanceof BarleyList l) {
