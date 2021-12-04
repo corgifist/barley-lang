@@ -4,7 +4,6 @@ import com.barley.runtime.*;
 import com.barley.editor.Editor;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Handler;
-import com.barley.utils.InstrmentationAgent;
 import com.barley.utils.SourceLoader;
 import io.github.devlinuxuser.JKey;
 import org.fusesource.jansi.AnsiConsole;
@@ -26,7 +25,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         AnsiConsole.out().print("");
         Modules.init();
-        System.out.println(InstrmentationAgent.getObjectSize(128));
         int argsLength = 0;
         if (args.length == 0) {
             Table.set("ARGS", new BarleyList());

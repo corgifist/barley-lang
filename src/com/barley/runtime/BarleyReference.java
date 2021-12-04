@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ public class BarleyReference implements BarleyValue, Serializable {
     private Object ref;
 
     public BarleyReference(Object ref) {
-        this.ref = ref;
+        this.ref = ref; Storage.segment(this);
     }
 
     @Override

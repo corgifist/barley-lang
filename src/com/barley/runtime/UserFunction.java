@@ -173,6 +173,8 @@ public class UserFunction implements Function, Serializable {
             return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
         } else if (ast instanceof PackAST p) {
             return new PackPattern(p.name);
+        } else if (ast instanceof StringAST) {
+            return new ConstantPattern(ast.execute());
         } throw new BarleyException("BadMatch", "invalid pattern in function clause");
     }
 

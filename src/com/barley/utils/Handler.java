@@ -1,8 +1,10 @@
 package com.barley.utils;
 
+import com.barley.memory.Storage;
 import com.barley.optimizations.*;
 import com.barley.parser.Lexer;
 import com.barley.parser.Parser;
+import com.barley.runtime.BarleyValue;
 import com.barley.runtime.ProcessTable;
 import com.barley.runtime.Table;
 
@@ -49,10 +51,11 @@ public class Handler {
             }
             measurement.stop("Optimization time");
             measurement.start("Execute time");
-            final boolean[] brk = new boolean[1];
             for (AST node : nodes) {
                 node.execute();
             }
+            System.out.println("memory left: " + Storage.left());
+            Storage.reset();
             measurement.stop("Execute time");
             if (time) {
                 System.out.println("======================");
@@ -194,5 +197,10 @@ public class Handler {
         List<Token> tokens = lexer.tokenize();
         Parser parser = new Parser(tokens, input);
         return parser.parseExpr();
+    }
+
+    public static BarleyValue evalAST(String input) {
+        List<AST> ast = parseASTExpr(input);
+        return ast.get(0).execute();
     }
 }

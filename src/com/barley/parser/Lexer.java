@@ -141,6 +141,10 @@ public final class Lexer {
                         current = next();
                         buffer.append('"');
                         continue;
+                    case '#':
+                        current = next();
+                        buffer.append("\\#");
+                        continue;
                     case '0':
                         current = next();
                         buffer.append('\0');

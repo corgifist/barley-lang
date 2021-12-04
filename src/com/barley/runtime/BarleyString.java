@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ public class BarleyString implements BarleyValue, Serializable {
     private byte[] string;
 
     public BarleyString(byte[] string) {
-        this.string = string;
+        this.string = string; Storage.segment(this);
     }
 
     public BarleyString(String s) {

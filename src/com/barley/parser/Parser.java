@@ -435,7 +435,7 @@ public final class Parser implements Serializable {
             return new ConstantAST(new BarleyNumber(Double.parseDouble(current.getText())));
         }
         if (match(TokenType.STRING)) {
-            return new ConstantAST(new BarleyString(current.getText()));
+            return new StringAST(current.getText(), line(), currentLine());
         }
         if (match(TokenType.LPAREN)) {
             AST result = expression();

@@ -1,5 +1,7 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -22,7 +24,7 @@ public class BarleyNumber implements BarleyValue, Serializable {
     }
 
     public BarleyNumber(BigDecimal number) {
-        this.number = number;
+        this.number = number; Storage.segment(this);
     }
 
     public BarleyNumber(double v) {

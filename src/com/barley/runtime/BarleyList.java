@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ public class BarleyList implements BarleyValue, Serializable {
     private LinkedList<BarleyValue> list;
 
     public BarleyList(LinkedList<BarleyValue> list) {
-        this.list = list;
+        this.list = list; Storage.segment(this);
     }
 
     public BarleyList(BarleyValue... values) {

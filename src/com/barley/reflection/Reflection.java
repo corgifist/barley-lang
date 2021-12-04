@@ -1,5 +1,6 @@
 package com.barley.reflection;
 
+import com.barley.memory.Storage;
 import com.barley.runtime.*;
 import com.barley.utils.Arguments;
 import com.barley.utils.BarleyException;
@@ -227,7 +228,7 @@ public class Reflection {
 
         public ObjectValue(Object object) {
             this.injection = new HashMap<>();
-            this.object = object;
+            this.object = object; Storage.segment(this);
         }
 
         public BarleyValue get(BarleyValue key) {

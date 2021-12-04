@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Function;
 import com.barley.utils.FunctionState;
@@ -14,7 +15,7 @@ public class BarleyFunction implements BarleyValue, Function, FunctionState, Ser
     private Function function;
 
     public BarleyFunction(Function function) {
-        this.function = function;
+        this.function = function; Storage.segment(this);
     }
 
     public Function getFunction() {

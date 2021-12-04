@@ -1,6 +1,7 @@
 package com.barley.runtime;
 
 import com.barley.Main;
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Pointers;
 
@@ -17,6 +18,7 @@ public class BarleyPointer implements BarleyValue {
         this.stored = execute;
         this.pointer = Integer.toHexString( Modules.getRandomNumber(0, 100000000));
         Pointers.put(this.toString(), stored);
+        Storage.segment(this);
     }
 
     @Override

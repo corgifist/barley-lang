@@ -1,5 +1,6 @@
 package com.barley.runtime;
 
+import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public class BarleyAtom implements BarleyValue, Serializable {
 
     public BarleyAtom(String atom) {
         this.atom = atom;
+        Storage.segment(this);
     }
 
     public BarleyAtom(int pos) {
