@@ -10,6 +10,7 @@
  ## Key features
     
  - Functional programming, manage data in functional style
+ - Hand memory management
  - Pattern matching 
  -  - Variables (see `Pattern matching` in `Examples`)
  -  - Functions (see `Pattern matching` in `Examples`)
