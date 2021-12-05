@@ -21,6 +21,10 @@ public class BarleyPointer implements BarleyValue {
         Storage.segment(this);
     }
 
+    public BarleyPointer() {
+        this(new BarleyNumber(0));
+    }
+
     @Override
     public BigInteger asInteger() {
         throw new BarleyException("BadArithmetic", "can't cast POINTER to a NUMBER");

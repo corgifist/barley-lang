@@ -493,6 +493,7 @@ public final class Parser implements Serializable {
 
     private AST externCall() {
         String name = consume(TokenType.ATOM, "expected extern function name after 'extern'").getText();
+        if (!Externals.containsKey(name)) throw new BarleyException("BadExtern", "unknown extern function '" + name + "' at line " + line());
         ArrayList<AST> args = arguments();
         return new CallAST(new ConstantAST(new BarleyFunction(Externals.get(name))), args, line(), currentLine());
     }
