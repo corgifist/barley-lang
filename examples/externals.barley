@@ -1,13 +1,14 @@
 -module(test).
-
-extern usf(
+-opt().
+-ast().
+extern usf() -> 5.
 
 main() ->
     Size = extern sizeof(2),
     io:fwriteln(Size),
     NullPtr = extern nullptr(),
     io:fwriteln(##NullPtr),
-    Allocation = extern alloc(Size * 5),
+    Allocation = extern alloc(Size * 7),
     io:fwriteln(Allocation),
     extern alinst(Allocation, 1),
     extern alinst(Allocation, 1),
@@ -23,4 +24,4 @@ main() ->
     extern alclr(NewAlloc),
     io:fwriteln("clean new alloc: " + extern altlst(NewAlloc)),
     extern free(NewAlloc),
-    io:fwriteln("memory left: " + .
+    io:fwriteln("memory left: " + extern alszs()).
