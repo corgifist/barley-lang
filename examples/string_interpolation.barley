@@ -1,0 +1,6 @@
+-module(test).
+
+double(B) -> io:fwriteln("#{B} + #{B + B} = #{B + (B + B)}").
+
+main() ->
+    double(ITERATION) || X -> lists:duplicate(xx, 10).

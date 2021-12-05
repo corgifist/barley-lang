@@ -1,7 +1,5 @@
 -module(test).
 -opt().
--ast().
-extern usf() -> 5.
 
 main() ->
     Size = extern sizeof(2),
