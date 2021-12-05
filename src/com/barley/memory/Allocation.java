@@ -21,12 +21,7 @@ public class Allocation implements BarleyValue {
     }
 
     public Allocation(int allocated, BarleyValue... values) {
-        List<BarleyValue> vals = List.of(values);
-        LinkedList<BarleyValue> res = new LinkedList<>();
-        for (BarleyValue val : vals) {
-            res.add(val);
-        }
-        this.list = res;
+        this.list = new LinkedList<>(List.of(values));
         this.allocated = allocated;
         this.defaultAlloc = allocated;
     }

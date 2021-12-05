@@ -45,7 +45,7 @@ public class GeneratorAST implements AST, Serializable {
                 list = new BarleyList(lst);
             }
         } else {
-            if (!(value instanceof BarleyList)) Main.error("BadGenerator", "expeted list as enumerable", line, current);
+            if (!(value instanceof BarleyList)) Main.error("BadGenerator", "expected list as enumerable", line, current);
             list = (BarleyList) value;
         }
         LinkedList<BarleyValue> result = new LinkedList<>();

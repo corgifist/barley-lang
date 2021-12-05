@@ -14,38 +14,38 @@ public class StringAST implements AST, Serializable {
     private final String current;
     private StringBuilder result;
     private final int line;
-    private final int length;
+    private int length;
     private int pos;
     private String str;
 
-    public StringAST(String str, int line, String current) {
+    public StringAST(String str, int line, String current, int pos) {
         this.str = str;
         this.line = line;
         this.current = current;
-        this.pos = 0;
-        this.length = str.length();
-        this.result = new StringBuilder();
+        this.pos = pos;
     }
 
     @Override
     public BarleyValue execute() {
+        this.pos = 0;
+        this.result = new StringBuilder();
+        this.length = str.length();
         lex();
-
         return new BarleyString(result.toString());
     }
 
     private void lex() {
         while (pos < length) {
             char c = peek(0);
-            switch (c) {
-                case '#':
-                    next();
-                    interpolate();
-                    break;
-
-                default:
-                    result.append(c);
-                    next();
+            if (c == '#') {
+                c = next();
+                interpolate();
+            } else if (c == '\\') {
+                c = next();
+                result.append(c);
+            } else {
+                result.append(c);
+                next();
             }
         }
     }

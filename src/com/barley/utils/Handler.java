@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class Handler {
@@ -53,7 +54,7 @@ public class Handler {
             measurement.start("Execute time");
             for (AST node : nodes) {
                 node.execute();
-            }
+            };
             Storage.reset();
             measurement.stop("Execute time");
             if (time) {
@@ -155,7 +156,8 @@ public class Handler {
                 "examples/reflection.barley",
                 "examples/pointers.barley",
                 "examples/segmentation.barley",
-                "examples/externals.barley"
+                "examples/externals.barley",
+                "examples/string_interpolation.barley"
         };
 
         measurement.start("Tests time");
