@@ -1,0 +1,26 @@
+-module(test).
+
+extern usf(
+
+main() ->
+    Size = extern sizeof(2),
+    io:fwriteln(Size),
+    NullPtr = extern nullptr(),
+    io:fwriteln(##NullPtr),
+    Allocation = extern alloc(Size * 5),
+    io:fwriteln(Allocation),
+    extern alinst(Allocation, 1),
+    extern alinst(Allocation, 1),
+    io:fwriteln(extern altlst(Allocation)),
+    NewAlloc = extern realloc(Allocation),
+    extern free(Allocation),
+    io:fwriteln(NewAlloc),
+    AllocCopy = extern alcpy(NewAlloc),
+    io:fwriteln("alloc copy: " + extern altlst(AllocCopy)),
+    io:fwriteln("new alloc: " + extern altlst(NewAlloc)),
+    io:fwriteln(AllocCopy),
+    io:fwriteln(extern alcmp(AllocCopy, NewAlloc)),
+    extern alclr(NewAlloc),
+    io:fwriteln("clean new alloc: " + extern altlst(NewAlloc)),
+    extern free(NewAlloc),
+    io:fwriteln("memory left: " + .

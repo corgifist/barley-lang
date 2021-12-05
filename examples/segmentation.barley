@@ -1,0 +1,5 @@
+-module(test).
+
+main() ->
+    Class = reflection:class("com.barley.utils.PidValues"),
+    reflection:instance(Class, 22, 44, 88) || X -> lists:duplicate(xx, 10000).
