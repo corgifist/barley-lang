@@ -1,0 +1,13 @@
+-module(test).
+
+make_closure(A, B) ->
+    def () -> io:fwriteln(A + B). end.
+
+
+main() ->
+    ClosureOne = make_closure(5, 1),
+    barley:b(),
+    ClosureOne(),
+    barley:b(),
+    ClosureTwo = make_closure(12, 4),
+    ClosureTwo().
