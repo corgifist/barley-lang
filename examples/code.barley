@@ -8,4 +8,11 @@ main() ->
     io:fwriteln(Binary),
     code:load_binary("loaded", Binary),
     io:fwriteln(loaded:sum(5, 1)),
-    io:fwriteln(code:modules()).
+    io:fwriteln(code:modules()),
+    code:append_module(def (A, B) -> A / B. end, loaded, divide),
+    io:fwriteln(loaded:divide(10, 2)),
+    Content = code:module_content(loaded),
+    io:fwriteln(bts:tab_to_list(Content)),
+    code:delete(loaded),
+    io:fwriteln("module 'loaded' was removed"),
+    io:fwriteln("'loaded' loaded : " + code:loaded(loaded)).
