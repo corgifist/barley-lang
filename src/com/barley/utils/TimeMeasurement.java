@@ -1,10 +1,11 @@
 package com.barley.utils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class TimeMeasurement {
+public class TimeMeasurement implements Serializable {
     private final Map<String, Long> finished, running;
 
     public TimeMeasurement() {

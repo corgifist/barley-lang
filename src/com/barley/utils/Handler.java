@@ -157,7 +157,8 @@ public class Handler {
                 "examples/pointers.barley",
                 "examples/segmentation.barley",
                 "examples/externals.barley",
-                "examples/string_interpolation.barley"
+                "examples/string_interpolation.barley",
+                "examples/closures.barley"
         };
 
         measurement.start("Tests time");

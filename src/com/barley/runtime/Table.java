@@ -2,6 +2,8 @@ package com.barley.runtime;
 
 import com.barley.utils.BarleyException;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,7 +102,7 @@ public final class Table {
         return result;
     }
 
-    public static class Scope {
+    public static class Scope implements Serializable {
         final Scope parent;
         final Map<String, BarleyValue> variables;
 
@@ -111,6 +113,15 @@ public final class Table {
         Scope(Scope parent) {
             this.parent = parent;
             variables = new ConcurrentHashMap<>();
+        }
+
+        public Map<String, BarleyValue> vars() {
+            Scope current = this;
+            Map<String, BarleyValue> result = new HashMap<>();
+            do {
+                result.putAll(current.variables);
+            } while ((current = current.parent) != null);
+            return result;
         }
     }
 

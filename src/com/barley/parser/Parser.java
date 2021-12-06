@@ -508,7 +508,7 @@ public final class Parser implements Serializable {
             match(TokenType.DOT);
             clauses.add(clause);
         }
-        return new ConstantAST(new BarleyFunction(new UserFunction(clauses)));
+        return new ClosureAST(new UserFunction(clauses));
     }
 
     private CaseAST match() {

@@ -989,6 +989,34 @@ public class Modules {
             return new BarleyAtom("ok");
         });
 
+        code.put("module_content", args -> {
+            Arguments.check(1, args.length);
+            HashMap<String, Function> module = get(args[0].toString());
+            if (module == null) throw new BarleyException("BadArg", "module is not compiled '" + args[0] + "'");
+            HashMap<BarleyValue, BarleyValue> m = new HashMap<>();
+            for (Map.Entry<String, Function> entry : module.entrySet()) {
+                m.put(new BarleyAtom(entry.getKey()), new BarleyFunction(entry.getValue()));
+            }
+            return new BarleyReference(m);
+        });
+
+        code.put("append_module", args -> {
+            Arguments.check(3, args.length);
+            Function fun = ((BarleyFunction) args[0]).getFunction();
+            String module = args[1].toString();
+            String method = args[2].toString();
+            get(module).put(method, fun);
+            return new BarleyAtom("ok");
+        });
+
+        code.put("delete", args -> {
+            Arguments.check(1, args.length);
+            modules.remove(args[0].toString());
+            return new BarleyAtom("ok");
+        });
+
+
+
         put("code", code);
     }
 
