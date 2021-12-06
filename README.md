@@ -811,3 +811,62 @@ Summary: 6 milliseconds
 Yay!!! We did it!
 
 That's all. Have a nice day!
+
+## Pointers
+
+Pointer is a address of given expression!
+
+To point expression use `#EXPR`
+
+To unpoint expression use `##PTR`
+
+To change var of pointer use `PTR >> EXPR`
+
+## Externals
+
+External functions are low-order functions, they are global and can be accessed with `extern` keyword!
+
+Let's see basic external functions and define own!
+
+### Allocations
+
+All basic `extern` functions are made for memory allocations control. They are can have only 1 clause, and compiles to externals table at the moment of parsing.
+
+#### EXTERN FUNCTIONS ARE GLOBAL
+
+`extern sizeof(OBJ)` - returns byte size of object
+
+`extern alloc(SIZE)` - returns a pointer to allocated memory with size SIZE
+
+`extern free(PTR)` - destroys PTR and its object from memory
+
+`extern altlst(ALLOC)` - returns ALLOC's list representation 
+
+`extern alinst(ALLOC, OBJ)` - inserts a OBJ in ALLOC, throws SEGMENTATION ERROR if not enough memory
+
+`extern realloc(ALLOC)` - returns a new pointer to a ALLOC
+
+`extern alcpy(ALLOC)` - returns a pointer to a copy of ALLOC
+
+`extern alcmp(ALLOC1, ALLOC2)` - return `true` if `ALLOC1` and `ALLOC2` are equals
+
+`alszs()` - returns a byte size of left memory
+
+See `examples/externals.barley` to learn more
+
+
+# Java interoperability
+
+Barley can instantiate java classes!
+
+To get class use `reflection:class("CLASSPATH")`
+
+To instantiate class use `reflection:instance(Class, ARG1, ARGS2, ...)`
+
+Instance args automatically transforms to a java objects
+
+To call methods from instance use `reflection:call(Instance, METHOD_NAME_STR, ARG1, ARG2, ...)`
+
+Calls always returns a `ObjectValue{}`, it is a new data type, that can't be generated from other code!
+
+See `examples/reflection.barley` to learn more
