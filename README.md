@@ -11,6 +11,7 @@
     
  - Functional programming, manage data in functional style
  - Hand memory management
+ - Supports Java interoperability
  - Pattern matching 
  -  - Variables (see `Pattern matching` in `Examples`)
  -  - Functions (see `Pattern matching` in `Examples`)
