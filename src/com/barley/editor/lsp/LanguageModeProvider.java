@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import com.barley.editor.Editor;
+import com.barley.editor.lsp.alight.AlightLSPClient;
 import com.barley.editor.lsp.barley.BarleyLSPClient;
 import org.eclipse.lsp4j.TextDocumentItem;
 import com.barley.editor.lsp.java.JavaLSPClient;
@@ -96,6 +97,9 @@ public class LanguageModeProvider {
         }
         if (endsIn(path, "barley") || endsIn(path, "ams")) {
             return new BarleyLSPClient();
+        }
+        if (endsIn(path, "alight")) {
+            return new AlightLSPClient();
         }
         return getPlainLanguageMode();
     }

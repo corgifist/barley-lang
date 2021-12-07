@@ -92,10 +92,8 @@ public class NormalMode extends Mode {
         _rootResponder.addEventResponder("P", () -> {
             if (Copy.getInstance().isLine()) {
                 cursor.goStartOfLine();
-                buffer.insert(Copy.getInstance().getText());
-            } else {
-                buffer.insert(Copy.getInstance().getText());
             }
+            buffer.insert(Copy.getInstance().getText());
         });
         _rootResponder.addEventResponder("y y", () -> {
             var text = buffer.getCurrentLineText();

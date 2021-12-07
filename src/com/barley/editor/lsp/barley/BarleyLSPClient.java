@@ -16,12 +16,12 @@ import java.util.regex.Pattern;
 public class BarleyLSPClient implements LanguageMode {
 
     private static final Logger _log = LogFactory.createLog();
-    private static Pattern attributes = Pattern.compile("(\\bmodule\\b)|(\\bopt\\b)|(\\bdoc\\b)", Pattern.MULTILINE);
+    private static Pattern attributes = Pattern.compile("(\\bmodule\\b)|(\\bopt\\b)|(\\bdoc\\b)|(\\bunitbase\\b)", Pattern.MULTILINE);
     private static Pattern keyword = Pattern.compile("(\\bwhen\\b)|(\\breceive\\b)|(\\bcase\\b)" +
             "|(\\bend\\b)" +
             "(\\band\\b)|(\\bor\\b)|(\\bglobal\\b)|" +
             "(\\bnot\\b)|(\\bdef\\b)|(\\bdefguard\\b)|" +
-            "(\\bcase\\b)|(\\bof\\b)");
+            "(\\bcase\\b)|(\\bof\\b)|(\\bpack\\b)|(\\bunpack\\b)|");
     private static Pattern comment = Pattern.compile("(//.*)");
     private static Pattern string = Pattern.compile("\\\"([^\\\\\\\"]|(\\\\.))*\\\"", Pattern.MULTILINE);
     private static Pattern operators = Pattern.compile("[+\\-*/()=;!<>:|\\[\\]]|&");
