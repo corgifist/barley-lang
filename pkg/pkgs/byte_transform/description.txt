@@ -1,5 +1,0 @@
-Easily secure your data by using two-pass transformator!
-
-byte_transform:transform(OBJ) - transform data
-byte_transform:detransform(BIN) - detransform bin
-byte_transform:main() - run test
