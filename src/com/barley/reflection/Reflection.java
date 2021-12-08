@@ -87,7 +87,6 @@ public class Reflection {
         reflection.put("static", args -> {
             Arguments.check(2,args.length);
             ClassValue val = ((ClassValue) args[0]);
-            System.out.println(val.injection);
             return val.injection.get(args[1].toString());
         });
         reflection.put("null", args -> new NullValue());
@@ -183,9 +182,6 @@ public class Reflection {
                 set(method.getName(), new BarleyFunction(args -> {
                     try {
                         Object[] vals = valuesToObjects(args);
-                        System.out.println(Arrays.toString(method.getParameterTypes()));
-                        Arrays.asList(vals).forEach(a -> System.out.println("type: " + a.getClass()));
-                        System.out.println(Arrays.toString(vals));
                         return objectToValue(method.invoke(clazz, vals));
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
@@ -386,6 +382,8 @@ public class Reflection {
                     method.setAccessible(true);
                 } catch (IllegalArgumentException ex) {
                     // skip
+                } catch (InaccessibleObjectException ex) {
+
                 }
                 if (method.getParameterCount() != args.length) continue;
                 if (!isMatch(args, method.getParameterTypes())) continue;
