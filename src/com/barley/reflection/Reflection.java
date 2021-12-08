@@ -84,6 +84,12 @@ public class Reflection {
             ObjectValue cl = ((ObjectValue) args[0]);
             return new BarleyString(cl.object.toString());
         });
+        reflection.put("static", args -> {
+            Arguments.check(2,args.length);
+            ClassValue val = ((ClassValue) args[0]);
+            System.out.println(val.injection);
+            return val.injection.get(args[1].toString());
+        });
         reflection.put("null", args -> new NullValue());
 
         Modules.put("reflection", reflection);
@@ -166,6 +172,27 @@ public class Reflection {
             set("isAssignableFrom", new BarleyFunction(this::isAssignableFrom));
             set("new", new BarleyFunction(this::newInstance));
             set("cast", new BarleyFunction(this::cast));
+
+            for (Method method : clazz.getDeclaredMethods()) {
+                try {
+                    method.setAccessible(true);
+                } catch (InaccessibleObjectException ignored) {
+
+                }
+                if (injection.containsKey(method.getName())) continue;
+                set(method.getName(), new BarleyFunction(args -> {
+                    try {
+                        Object[] vals = valuesToObjects(args);
+                        System.out.println(Arrays.toString(method.getParameterTypes()));
+                        Arrays.asList(vals).forEach(a -> System.out.println("type: " + a.getClass()));
+                        System.out.println(Arrays.toString(vals));
+                        return objectToValue(method.invoke(clazz, vals));
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                    return new BarleyAtom("error");
+                }));
+            }
         }
 
         private BarleyValue asSubclass(BarleyValue[] args) {
@@ -331,6 +358,7 @@ public class Reflection {
 
     private static BarleyValue findConstructorAndInstantiate(BarleyValue[] args, Constructor<?>[] ctors) {
         for (Constructor<?> ctor : ctors) {
+            ctor.setAccessible(true);
             if (ctor.getParameterCount() != args.length) continue;
             if (!isMatch(args, ctor.getParameterTypes())) continue;
             try {
@@ -545,7 +573,7 @@ public class Reflection {
         if (value == NULL) return null;
         if (value instanceof BarleyNumber n) {
             return n.raw();
-        } else if (value instanceof BarleyList s) {
+        } else if (value instanceof BarleyString s) {
             return s.toString();
         } else if (value instanceof BarleyList l) {
             return arrayToObject(l);
