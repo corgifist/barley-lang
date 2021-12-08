@@ -9,6 +9,8 @@ import com.barley.utils.BarleyException;
 import java.io.Serializable;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 
 public class BinaryAST implements AST, Serializable {
@@ -44,7 +46,7 @@ public class BinaryAST implements AST, Serializable {
                     result.addAll(list2.getList());
                     return new BarleyList(result);
                 case '=':
-                    return new BarleyAtom(addAtom(String.valueOf(list1.equals(val1))));
+                    return new BarleyAtom(addAtom(String.valueOf(list1.equals(val2))));
                 default:
                     badArith(val1, val2);
             }
