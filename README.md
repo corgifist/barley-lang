@@ -12,6 +12,7 @@
  - Functional programming, manage data in functional style
  - Hand memory management
  - Supports Java interoperability
+ - PKG Manager
  - Pattern matching 
  -  - Variables (see `Pattern matching` in `Examples`)
  -  - Functions (see `Pattern matching` in `Examples`)
@@ -159,6 +160,51 @@ Resulst are:
 `2`
 
 `15.00`
+
+## PKG Manager
+
+Barley have own package manager! It's name is PKG.
+
+### PKG Expressions
+
+Expressions are used in command!
+
+See all of them!
+
+`raw TEXT` - returns TEXT
+
+`file PATH` - returns content of file at PATH
+
+`fc GITHUB_PATH` - returns content of file at GITHUB_PATH (see barley-package-archive repo)
+
+`list ARG1 ARG2 ARG3 ...` - returns a list of ARGS
+
+`lst_loop` - starts a list loop (advanced list)
+
+`lst_loop` have own expressions!
+
+- `TEXT` - inserts a text (no prefixes // suffixes requires)
+- `LIST_INSERT` - requires INDEX, then ELEM
+- `LIST_SWAP` - swaps list
+- `LIST_BREAK` - breaks the loop and returns list
+
+`ban_list` - shows ban list
+
+`in_sudo` - returns `True` if in sudo (special mode), else `False`
+
+### PKG Statements
+
+`upload` - runs a uplaoder, then reqires NAME, DEPS, DESCRIPTION, LIST OF FILES
+
+`exit` - exit PKG
+
+`install PACKAGE` - install `PACKAGE` in `pkgs` folder
+
+`destroy` - destroys your account
+
+`packages` - prints available packages
+
+`sudo` - try to get in special mode!
 
 ### Saving data in processes
 
