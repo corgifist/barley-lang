@@ -388,7 +388,11 @@ public class Reflection {
                 if (method.getParameterCount() != args.length) continue;
                 if (!isMatch(args, method.getParameterTypes())) continue;
                 try {
-                    method.setAccessible(true);
+                    try {
+                        method.setAccessible(true);
+                    } catch (InaccessibleObjectException ex) {
+
+                    }
                     final Object result = method.invoke(object, valuesToObjects(args));
                     if (method.getReturnType() != void.class) {
                         return objectToValue(result);
@@ -499,6 +503,9 @@ public class Reflection {
         }
         if (CharSequence.class.isAssignableFrom(clazz)) {
             return new BarleyString( ((CharSequence) o).toString() );
+        }
+        if (Boolean.class.isAssignableFrom(clazz)) {
+            return new BarleyAtom(o.toString());
         }
         if (o instanceof BarleyNumber) {
             return (BarleyValue) o;
