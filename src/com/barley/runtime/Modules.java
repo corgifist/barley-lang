@@ -158,12 +158,11 @@ public class Modules {
         });
         bts.put("lookup", args -> {
             Arguments.check(2, args.length);
-            if (!(args[0] instanceof BarleyReference))
+            if (!(args[0] instanceof BarleyReference ref))
                 throw new BarleyException("BadArg", "expected REFERENCE as bts table");
-            BarleyReference ref = (BarleyReference) args[0];
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             if (!(map.containsKey(args[1])))
-                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[1] + "'");
+                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[1].toString() + "'");
             return map.get(args[1]);
         });
         bts.put("remove", args -> {
@@ -1014,8 +1013,6 @@ public class Modules {
             modules.remove(args[0].toString());
             return new BarleyAtom("ok");
         });
-
-
 
         put("code", code);
     }
