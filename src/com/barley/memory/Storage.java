@@ -5,7 +5,7 @@ import com.barley.utils.BarleyException;
 
 public class Storage {
 
-    private static int left = 749000;
+    private static long left = 2080000000;
 
     public static void free(BarleyValue obj) {
         left += StorageUtils.size(obj);
@@ -20,9 +20,9 @@ public class Storage {
         left -= obj;
     }
 
-    public static void reset() { left = 749000; }
+    public static void reset() { left = 2080000000; }
 
-    public static int left() {
+    public static long left() {
         return left;
     }
 

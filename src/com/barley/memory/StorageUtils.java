@@ -19,11 +19,7 @@ public class StorageUtils {
         } else if (value instanceof Allocation p) {
             return (short) p.getAllocated();
         } else if (value instanceof BarleyList l) {
-            short buffer = 0;
-            for (BarleyValue val : l.getList()) {
-                buffer += size(val);
-            }
-            return buffer;
+            return 24;
         } else if (value instanceof BarleyFunction) {
             return 48;
         }  else if (value instanceof BarleyAtom) {
