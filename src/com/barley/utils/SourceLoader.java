@@ -13,10 +13,10 @@ public final class SourceLoader {
     public static String readSource(String name) throws IOException {
         InputStream is = SourceLoader.class.getResourceAsStream("/" + name);
         if (is != null) return readAndCloseStream(is);
-
         is = new FileInputStream(name);
         return readAndCloseStream(is);
     }
+
 
     public static String readAndCloseStream(InputStream is) throws IOException {
         final ByteArrayOutputStream result = new ByteArrayOutputStream();

@@ -37,7 +37,11 @@ public final class Parser implements Serializable {
 
     private String currentLine() {
         List<String> lines = List.of(source.split("\n"));
-        return lines.get(line() - 1);
+        try {
+            return lines.get(line() - 1);
+        } catch (IndexOutOfBoundsException ex) {
+            return lines.get(lines.size() - 1);
+        }
     }
 
     public List<AST> parse() {

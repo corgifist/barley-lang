@@ -2,7 +2,9 @@ package com.barley.runtime;
 
 import com.barley.memory.Storage;
 import com.barley.utils.BarleyException;
+import org.apache.sshd.common.Factory;
 
+import java.io.Console;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,6 +35,10 @@ public class BarleyString implements BarleyValue, Serializable {
     @Override
     public Object raw() {
         return toString();
+    }
+
+    public byte[] getString() {
+        return string;
     }
 
     @Override

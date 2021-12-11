@@ -162,7 +162,7 @@ public class Modules {
                 throw new BarleyException("BadArg", "expected REFERENCE as bts table");
             HashMap<BarleyValue, BarleyValue> map = (HashMap<BarleyValue, BarleyValue>) ref.getRef();
             if (!(map.containsKey(args[1])))
-                throw new BarleyException("BadArg", "map is empty or doesn't contains key '" + args[1].toString() + "'");
+                throw new BarleyException("BadArg", "map is empty or doesn't contains key: \n" + args[1] + "");
             return map.get(args[1]);
         });
         bts.put("remove", args -> {
@@ -199,6 +199,15 @@ public class Modules {
         });
 
         put("bts", bts);
+    }
+
+    private static String fix(String toString) {
+        char[] chars = toString.toCharArray();
+        ArrayList<String> chrs = new ArrayList<>();
+        for (char c : chars) {
+            chrs.add(String.valueOf(c));
+        }
+        return String.join("", chrs);
     }
 
     private static void initBarley() {
@@ -645,6 +654,16 @@ public class Modules {
         string.put("replace", args -> {
             Arguments.check(3, args.length);
             return new BarleyString(args[0].toString().replaceAll(args[1].toString(), args[2].toString()));
+        });
+
+        string.put("from_bytes", args -> {
+            Arguments.check(1, args.length);
+            LinkedList<BarleyValue> bytes = ((BarleyList) args[0]).getList();
+            byte[] bts = new byte[bytes.size()];
+            for (int i = 0; i < bts.length; i++) {
+                bts[i] = bytes.get(i).asInteger().byteValue();
+            }
+            return new BarleyString(bts);
         });
 
         put("string", string);

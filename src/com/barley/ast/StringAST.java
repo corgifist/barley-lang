@@ -30,7 +30,11 @@ public class StringAST implements AST, Serializable {
         this.pos = 0;
         this.result = new StringBuilder();
         this.length = str.length();
-        lex();
+        try {
+            lex();
+        } catch (OutOfMemoryError ex) {
+            this.result = new StringBuilder(str);
+        }
         return new BarleyString(result.toString());
     }
 

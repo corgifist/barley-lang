@@ -178,7 +178,6 @@ public class Reflection {
                 } catch (InaccessibleObjectException ignored) {
 
                 }
-                if (injection.containsKey(method.getName())) continue;
                 set(method.getName(), new BarleyFunction(args -> {
                     try {
                         Object[] vals = valuesToObjects(args);
@@ -354,7 +353,6 @@ public class Reflection {
 
     private static BarleyValue findConstructorAndInstantiate(BarleyValue[] args, Constructor<?>[] ctors) {
         for (Constructor<?> ctor : ctors) {
-            ctor.setAccessible(true);
             if (ctor.getParameterCount() != args.length) continue;
             if (!isMatch(args, ctor.getParameterTypes())) continue;
             try {
@@ -398,18 +396,19 @@ public class Reflection {
                         return objectToValue(result);
                     }
                     return new BarleyNumber(1);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | BarleyException ex) {
                     System.err.println(ex.getCause());
-                    BarleyException x = (BarleyException) ex.getCause();
-                    System.out.printf("**  reflection error: %s\n", x.getText());
-                    int count = CallStack.getCalls().size();
-                    if (count == 0) System.exit(1);
-                    System.out.println(String.format("\nCall stack was:"));
-                    for (CallStack.CallInfo info : CallStack.getCalls()) {
-                        System.out.println("    " + count + ". " + info);
-                        count--;
+                    if (ex instanceof BarleyException x) {
+                        System.out.printf("**  reflection error: %s\n", x.getText());
+                        int count = CallStack.getCalls().size();
+                        if (count == 0) System.exit(1);
+                        System.out.println(String.format("\nCall stack was:"));
+                        for (CallStack.CallInfo info : CallStack.getCalls()) {
+                            System.out.println("    " + count + ". " + info);
+                            count--;
+                        }
+                        System.exit(1);
                     }
-                    System.exit(1);
                 }
             }
             final String className = (object == null ? "null" : object.getClass().getName());

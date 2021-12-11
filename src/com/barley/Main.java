@@ -23,6 +23,7 @@ import java.util.jar.JarFile;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
         AnsiConsole.out().print("");
         Modules.init();
         int argsLength = 0;
