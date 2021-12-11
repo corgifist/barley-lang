@@ -25,7 +25,9 @@ public final class CaseAST implements AST, Serializable {
 
     @Override
     public BarleyValue execute() {
-        return eval();
+        Table.push();
+        BarleyValue res = eval();
+        return res;
     }
 
     @Override

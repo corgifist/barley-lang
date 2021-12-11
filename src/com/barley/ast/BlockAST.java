@@ -2,6 +2,7 @@ package com.barley.ast;
 
 import com.barley.optimizations.Optimization;
 import com.barley.runtime.BarleyValue;
+import com.barley.runtime.Table;
 import com.barley.utils.AST;
 
 import java.io.Serializable;
@@ -19,9 +20,11 @@ public class BlockAST implements AST, Serializable {
     public BarleyValue execute() {
         int size = block.size();
         BarleyValue last = null;
-        for (int i = 0; i < size; i++) {
-            last = block.get(i).execute();
+        Table.push();
+        for (AST ast : block) {
+            last = ast.execute();
         }
+        Table.pop();
         return last;
     }
 

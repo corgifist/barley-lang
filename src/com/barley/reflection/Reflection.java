@@ -353,6 +353,7 @@ public class Reflection {
 
     private static BarleyValue findConstructorAndInstantiate(BarleyValue[] args, Constructor<?>[] ctors) {
         for (Constructor<?> ctor : ctors) {
+            ctor.setAccessible(true);
             if (ctor.getParameterCount() != args.length) continue;
             if (!isMatch(args, ctor.getParameterTypes())) continue;
             try {

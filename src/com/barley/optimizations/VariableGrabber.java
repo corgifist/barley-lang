@@ -53,6 +53,13 @@ public class VariableGrabber {
         return ast;
     }
 
+    private AST optimize(CaseAST ast) {
+        for (CaseAST.Pattern pattern : ast.patterns) {
+            cast(pattern.result);
+        }
+        return ast;
+    }
+
     private AST optimize(AST ast) {
         return ast;
     }

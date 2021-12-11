@@ -22,7 +22,7 @@ public final class Table {
     }
 
     public static Map<String, BarleyValue> variables() {
-        return scope.variables;
+        return scope.vars();
     }
 
     public static void clear() {

@@ -646,7 +646,7 @@ public class Modules {
             return new BarleyString(String.join(delimiter, strs));
         });
 
-        string.put("charAt", args -> {
+        string.put("charat", args -> {
             Arguments.check(2, args.length);
             return new BarleyString(String.valueOf(args[0].toString().charAt(args[1].asInteger().intValue())));
         });
