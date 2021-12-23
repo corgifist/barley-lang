@@ -424,11 +424,29 @@ public final class Parser implements Serializable {
     }
 
     private AST remote() {
-        AST result = primary();
+        AST result = index();
 
         while (true) {
             if (match(TokenType.COLON)) {
-                result = new RemoteAST(result, primary(), line(), currentLine());
+                result = new RemoteAST(result, index(), line(), currentLine());
+                continue;
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    private AST index() {
+        AST result = primary();
+
+        while (true) {
+            if (match(TokenType.LBRACKET)) {
+                ArrayList<AST> args = new ArrayList<>();
+                args.add(result);
+                args.add(expression());
+                consume(TokenType.RBRACKET, "expected ']' after expression in index expression");
+                result = buildCall("lists", "nth", args);
                 continue;
             }
             break;
