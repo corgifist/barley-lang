@@ -398,6 +398,9 @@ public final class Parser implements Serializable {
         }
 
         if (match(TokenType.POINT)) {
+            if (match(TokenType.LBRACKET)) {
+                return map();
+            }
             return new PointerAST(call());
         }
 
@@ -406,6 +409,18 @@ public final class Parser implements Serializable {
         }
 
         return call();
+    }
+
+    private AST map() {
+        HashMap<AST, AST> map = new HashMap<>();
+        while (!match(TokenType.RBRACKET)) {
+
+            AST key = expression();
+            consume(TokenType.STABBER, "expected '->' after key in map expression");
+            map.put(key, expression());
+            match(TokenType.COMMA);
+        }
+        return new MapAST(map);
     }
 
     private AST call() {
