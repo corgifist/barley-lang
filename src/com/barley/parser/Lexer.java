@@ -129,6 +129,22 @@ public final class Lexer {
         }
     }
 
+    private void tokenizeHexNumber(int skipped) {
+        StringBuilder buffer = new StringBuilder();
+        char current = peek(0);
+        while (isHexNumber(current) || (current == '_')) {
+            if (current != '_') {
+                // allow _ symbol
+                buffer.append(current);
+            }
+            current = next();
+        }
+        final int length = buffer.length();
+        if (length > 0) {
+            addToken(TokenType.NUMBER, buffer.toString());
+        }
+    }
+
     private void tokenizeString() {
         StringBuilder buffer = new StringBuilder();
 
@@ -229,6 +245,11 @@ public final class Lexer {
     private void tokenizeNumber() {
         final StringBuilder buffer = new StringBuilder();
         char current = peek(0);
+        if (current == '0' && (peek(1) == 'x' || peek(1) == 'X')) {
+            next(); next();
+            tokenizeHexNumber(2);
+            return;
+        }
         while (true) {
             if (current == '.' && Character.isDigit(peek(1)) || current == '_') {
                 if (buffer.indexOf(".") != -1) throw new BarleyException("BadCompiler", "Invalid float number");

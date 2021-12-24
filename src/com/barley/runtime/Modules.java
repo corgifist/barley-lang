@@ -578,6 +578,23 @@ public class Modules {
             return new BarleyNumber(args[0].asInteger().intValue() % args[1].asInteger().intValue());
         });
 
+        math.put("rsh", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(args[0].asFloat().intValue() >> args[1].asFloat().intValue());
+        });
+
+        math.put("lsh", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(args[0].asFloat().intValue() << args[1].asFloat().intValue());
+        });
+
+        math.put("shake", args -> {
+            Arguments.check(2, args.length);
+            return new BarleyNumber(args[0].asFloat().intValue() & args[1].asFloat().intValue());
+        });
+
+
+
         modules.put("math", math);
     }
 
@@ -1108,6 +1125,7 @@ public class Modules {
         HashMap<String, Function> socket = new HashMap<>();
 
         socket.put("server", args -> {
+            System.out.println("Use of package 'socket' is not recommended. Wait for it's deprecation && removing and use new version!");
             Arguments.check(1, args.length);
             try {
                 return new BarleyReference(new ServerSocket(args[0].asInteger().intValue()));
@@ -1118,6 +1136,7 @@ public class Modules {
         });
 
         socket.put("socket", args -> {
+            System.out.println("Use of package 'socket' is not recommended. Wait for it's deprecation && removing and use new version!");
             Arguments.check(2, args.length);
             String host_name = args[0].toString();
             int port = args[1].asInteger().intValue();
@@ -1130,6 +1149,7 @@ public class Modules {
         });
 
         socket.put("accept_server", args -> {
+            System.out.println("Use of package 'socket' is not recommended. Wait for it's deprecation && removing and use new version!");
             Arguments.check(1, args.length);
             ServerSocket s = (ServerSocket) ((BarleyReference) args[0]).getRef();
             try {

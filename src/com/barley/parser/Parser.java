@@ -467,7 +467,11 @@ public final class Parser implements Serializable {
     private AST primary() {
         final Token current = get(0);
         if (match(TokenType.NUMBER)) {
-            return new ConstantAST(new BarleyNumber(Double.parseDouble(current.getText())));
+            try {
+                return new ConstantAST(new BarleyNumber(Double.parseDouble(current.getText())));
+            } catch (NumberFormatException ex) {
+                return new ConstantAST(new BarleyNumber(Integer.parseInt(current.getText(), 32)));
+            }
         }
         if (match(TokenType.STRING)) {
             return new StringAST(current.getText(), line(), currentLine(), 0);

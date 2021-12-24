@@ -5,7 +5,6 @@ import com.barley.editor.Editor;
 import com.barley.utils.BarleyException;
 import com.barley.utils.Handler;
 import com.barley.utils.SourceLoader;
-import io.github.devlinuxuser.JKey;
 import org.fusesource.jansi.AnsiConsole;
 
 import java.beans.IntrospectionException;
