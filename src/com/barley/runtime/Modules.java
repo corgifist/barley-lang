@@ -2010,6 +2010,18 @@ public class Modules {
             return new BarleyList(result);
         });
 
+        lists.put("dimension", args -> {
+            int acc = 0;
+            for (int i = 0; i < args.length; i++) {
+                acc += args[i].asInteger().intValue();
+            }
+            LinkedList<BarleyValue> arr = new LinkedList<>();
+            for (int i = 0; acc > i; i++) {
+                arr.add(new BarleyAtom("null"));
+            }
+            return new BarleyList(arr);
+        });
+
         put("lists", lists);
     }
 
