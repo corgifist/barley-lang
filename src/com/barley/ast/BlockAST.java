@@ -37,6 +37,10 @@ public class BlockAST implements AST, Serializable {
         block = result;
     }
 
+    public boolean add(AST ast) {
+        return block.add(ast);
+    }
+
     @Override
     public String toString() {
         String result = "";

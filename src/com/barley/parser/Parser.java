@@ -1,16 +1,17 @@
 package com.barley.parser;
 
+import com.barley.Main;
 import com.barley.ast.*;
+import com.barley.optimizations.TableEmulator;
+import com.barley.optimizations.VariableInfo;
+import com.barley.patterns.*;
 import com.barley.runtime.*;
 import com.barley.units.UnitBase;
 import com.barley.units.Units;
 import com.barley.utils.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public final class Parser implements Serializable {
 
@@ -24,6 +25,9 @@ public final class Parser implements Serializable {
     private String source;
     private boolean parserStrict = false;
     public boolean ast = false;
+    private TableEmulator emulator;
+    private boolean inPatterns = false;
+    private ArrayList<String> badVars;
 
     public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -33,6 +37,8 @@ public final class Parser implements Serializable {
         module = null;
         doc = null;
         this.source = filename;
+        this.emulator = new TableEmulator();
+        this.badVars = new ArrayList<>();
     }
 
     private String currentLine() {
@@ -68,12 +74,12 @@ public final class Parser implements Serializable {
 
     private AST block() {
         ArrayList<AST> block = new ArrayList<>();
-        while (true) {
-            if (lookMatch(0, TokenType.DOT)) break;
+        emulator.push();
+        while (!lookMatch(0, TokenType.DOT)) {
             block.add(expression());
             match(TokenType.COMMA);
         }
-
+        emulator.pop();
         return new BlockAST(block);
     }
 
@@ -102,6 +108,9 @@ public final class Parser implements Serializable {
             if (match(TokenType.MODULE)) {
                 consume(TokenType.LPAREN, "expected '(' before module name");
                 module = expression().toString();
+                if (Modules.containsKey(module)) {
+                    warnParser("Module '" + module + "' overrides pre-compiled library//module");
+                }
                 consume(TokenType.RPAREN, "expected ')' after module name");
             }
             if (match(TokenType.MODULEDOC)) {
@@ -118,7 +127,7 @@ public final class Parser implements Serializable {
                 consume(TokenType.LPAREN, "expected '(' before strict");
                 parserStrict = true;
                 consume(TokenType.RPAREN, "expected ')' after strict");
-                return new StrictAST();
+                return new ConstantAST(new BarleyNumber(0));
             }
             if (match(TokenType.AST)) {
                 consume(TokenType.LPAREN, "expected '(' before ast");
@@ -160,6 +169,10 @@ public final class Parser implements Serializable {
 
     private AST method(String name) {
         Clause clause = clause();
+        clause.result = new BlockAST(new ArrayList<AST>());
+        if (parserStrict) {
+            ((BlockAST) clause.result).block.add(new StrictAST());
+        }
         consume(TokenType.STABBER, "error at '" + name + "' declaration");
         if (name.equals("main")) {
             clause.result = new BlockAST(new ArrayList<>());
@@ -235,6 +248,7 @@ public final class Parser implements Serializable {
 
         if (match(TokenType.BARBAR)) {
             String var = consume(TokenType.VAR, "expected var name after '||' at line " + line()).getText();
+            emitVariable(var);
             consume(TokenType.STABBER, "expected '->' after var name at line " + line());
             AST iterable = assignment();
             return new GeneratorAST(generator, var, iterable, line(), currentLine());
@@ -248,13 +262,39 @@ public final class Parser implements Serializable {
 
         while (true) {
             if (match(TokenType.EQ)) {
-                result = new BindAST(result, conditional(), line(), currentLine());
+                emitBind(result);
+                result = new BindAST(result, expression(), line(), currentLine());
                 continue;
             }
             break;
         }
 
+        if (result instanceof ExtractBindAST p && !emulator.isExists(p.toString())) {
+            warnParser("Variable '" + p.toString() + "' is not defined in this scope");
+        }
+
         return result;
+    }
+
+    private void emitBind(AST result) {
+        Pattern pattern = pattern(result);
+        processEmulation(pattern);
+    }
+
+    private void processEmulation(Pattern pattern) {
+        if (pattern instanceof VariablePattern ex) {
+            emitVariable(ex.toString());
+        } else if (pattern instanceof ListPattern ex) {
+            var patterns = ex.getArr();
+            for (AST ast : patterns) {
+                processEmulation(pattern(ast));
+            }
+        } else if (pattern instanceof ConsPattern cons) {
+            emitVariable(cons.getLeft());
+            emitVariable(cons.getRight());
+        } else if (pattern instanceof PackPattern pack) {
+            emitVariable(pack.toString());
+        }
     }
 
     private AST conditional() {
@@ -460,6 +500,9 @@ public final class Parser implements Serializable {
                 ArrayList<AST> args = new ArrayList<>();
                 args.add(result);
                 args.add(expression());
+                if (args.get(1) instanceof StringAST) {
+                    warnParser("Index expression can't process string indexes");
+                }
                 consume(TokenType.RBRACKET, "expected ']' after expression in index expression");
                 result = buildCall("lists", "nth", args);
                 continue;
@@ -497,6 +540,11 @@ public final class Parser implements Serializable {
             return result;
         }
         if (match(TokenType.VAR)) {
+            if (!emulator.isExists(current.getText())) {
+                if (inPatterns);
+                else
+                    warnBadVar("Variable '" + current.getText() + "' is not defined in this scope");
+            }
             return new ExtractBindAST(current.getText(), line(), currentLine());
         }
         if (match(TokenType.ATOM)) {
@@ -530,6 +578,14 @@ public final class Parser implements Serializable {
 
         if (match(TokenType.RECIEVE)) return receive();
         throw new BarleyException("BadCompiler", "Unknown term\n    where term:\n        " + current + "\n    when current line:\n      " + currentLine());
+    }
+
+    private void warnBadVar(String s) {
+        badVars.add(s);
+    }
+
+    private void warnParser(String s) {
+        System.out.println("WARNING: " + s + " at line " + line());
     }
 
     private AST externCall() {
@@ -640,9 +696,15 @@ public final class Parser implements Serializable {
             args.add(expression());
             match(TokenType.COMMA);
         }
+        emitArgs(args);
         return args;
     }
 
+    private void emitArgs(ArrayList<AST> args) {
+        for (AST ast : args) {
+            processEmulation(pattern(ast));
+        }
+    }
 
     private boolean lookMatch(int pos, TokenType type) {
         return get(pos).getType() == type;
@@ -670,5 +732,34 @@ public final class Parser implements Serializable {
 
     private AST buildCall(String module, String method, ArrayList<AST> args) {
         return new CallAST(new RemoteAST(new ConstantAST(new BarleyAtom(module)), new ConstantAST(new BarleyAtom(method)), line(), currentLine()), args, line(), currentLine());
+    }
+
+    private void emitVariable(String name) {
+        emulator.set(name, new VariableInfo(new BarleyNull(), 0));
+    }
+
+    private Pattern pattern(AST ast) {
+        if (ast instanceof ExtractBindAST) {
+            return new VariablePattern(ast.toString());
+        } else if (ast instanceof ConstantAST) {
+            return new ConstantPattern(ast.execute());
+        } else if (ast instanceof BindAST) {
+            return new ConstantPattern(ast.execute());
+        } else if (ast instanceof ListAST) {
+            return new ListPattern(((ListAST) ast).getArray());
+        } else if (ast instanceof ConsAST) {
+            ConsAST cons = (ConsAST) ast;
+            return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
+        } else Main.error("BadMatch", "invalid pattern in match ast", line(), currentLine());
+        return null;
+    }
+
+    private LinkedList<Pattern> pattern(ListPattern pattern) {
+        LinkedList<AST> asts = pattern.getArr();
+        LinkedList<Pattern> patterns = new LinkedList<>();
+        for (AST ast : asts) {
+            patterns.add(pattern(ast));
+        }
+        return patterns;
     }
 }

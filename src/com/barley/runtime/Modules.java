@@ -2398,4 +2398,8 @@ public class Modules {
 
         return res;
     }
+
+    public static boolean containsKey(Object key) {
+        return modules.containsKey(key);
+    }
 }

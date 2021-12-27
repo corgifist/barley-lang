@@ -10,7 +10,7 @@ public final class TableEmulator {
     private final Object lock = new Object();
     public volatile Scope scope = new Scope();
 
-    TableEmulator() {
+    public TableEmulator() {
     }
 
     public Map<String, VariableInfo> variables() {

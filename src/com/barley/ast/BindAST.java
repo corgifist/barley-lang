@@ -25,7 +25,6 @@ public class BindAST implements AST, Serializable {
     public BindAST(AST left, AST right, int line, String current) {
         this.left = left;
         this.right = right;
-        //System.out.println(emulate(new HashMap<String, VariableInfo>(), new HashMap<String, Integer>()));
         this.line = line;
         this.current = current;
     }
@@ -52,8 +51,7 @@ public class BindAST implements AST, Serializable {
             for (int i = 0; i < list.size(); i++) {
                 Pattern pattern1 = patterns.get(i);
                 BarleyValue right = list.get(i);
-                if (pattern1 instanceof VariablePattern) {
-                    VariablePattern c = (VariablePattern) pattern1;
+                if (pattern1 instanceof VariablePattern c) {
                     Table.set(c.getVariable(), right);
                 } else if (pattern1 instanceof ConstantPattern) {
                     BarleyValue l = ((ConstantPattern) pattern1).getConstant();
@@ -63,8 +61,7 @@ public class BindAST implements AST, Serializable {
                     if (!((right instanceof BarleyList)))
                         Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
                     processPattern(pattern1, new ConstantAST(right));
-                } else if (pattern1 instanceof ConsPattern) {
-                    ConsPattern p1 = (ConsPattern) pattern1;
+                } else if (pattern1 instanceof ConsPattern p1) {
                     if (!(right instanceof BarleyList))
                         Main.error("BadMatch", "no match of right-side value: " + ast, line, current);
                     Table.set(p1.getLeft(), head((BarleyList) right));

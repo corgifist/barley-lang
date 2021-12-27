@@ -5,6 +5,7 @@ import com.barley.runtime.BarleyString;
 import com.barley.runtime.BarleyValue;
 import com.barley.runtime.Table;
 import com.barley.utils.AST;
+import com.barley.utils.BarleyException;
 import com.barley.utils.Handler;
 
 import java.io.Serializable;
@@ -78,7 +79,12 @@ public class StringAST implements AST, Serializable {
 
     @Override
     public void visit(Optimization optimization) {
-
+        try {
+            lex();
+        } catch (BarleyException ex) {
+            // skip
+            ;
+        }
     }
 
     @Override
