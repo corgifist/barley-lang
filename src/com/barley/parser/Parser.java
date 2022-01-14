@@ -471,6 +471,7 @@ public final class Parser implements Serializable {
             if (lookMatch(0, TokenType.LPAREN)) {
                 ArrayList<AST> args = arguments();
                 result = new CallAST(result, args, line(), currentLine());
+                continue;
             }
             break;
         }
@@ -585,7 +586,7 @@ public final class Parser implements Serializable {
     }
 
     private void warnParser(String s) {
-        System.out.println("WARNING: " + s + " at line " + line());
+        
     }
 
     private AST externCall() {
@@ -750,7 +751,7 @@ public final class Parser implements Serializable {
         } else if (ast instanceof ConsAST) {
             ConsAST cons = (ConsAST) ast;
             return new ConsPattern(cons.getLeft().toString(), cons.getRight().toString());
-        } else Main.error("BadMatch", "invalid pattern in match ast", line(), currentLine());
+        };
         return null;
     }
 
