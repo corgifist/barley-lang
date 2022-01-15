@@ -13,6 +13,7 @@ import java.util.Objects;
 public class BarleyFunction implements BarleyValue, Function, FunctionState, Serializable {
 
     private Function function;
+    public static BarleyFunction EMPTY = new BarleyFunction((args) -> new BarleyNumber(0));
 
     public BarleyFunction(Function function) {
         this.function = function; Storage.segment(this);

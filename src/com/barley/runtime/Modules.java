@@ -6,6 +6,10 @@ import com.barley.units.Unit;
 import com.barley.units.UnitBase;
 import com.barley.units.Units;
 import com.barley.utils.*;
+import io.socket.engineio.client.transports.PollingXHR;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.fusesource.jansi.AnsiConsole;
 import org.jline.terminal.TerminalBuilder;
 
@@ -1018,7 +1022,7 @@ public class Modules {
                     funs.put(entry.getKey(), entry.getValue());
                 }
                 put(module, funs);
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException | ClassCastException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
             return new BarleyAtom("ok");
@@ -1116,6 +1120,24 @@ public class Modules {
                 e.printStackTrace();
             }
             return new BarleyAtom("ok");
+        });
+
+        file.put("write_bytes", args -> {
+            File outputFile = new File(args[0].toString());
+            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                LinkedList<BarleyValue> values = ((BarleyList) args[1]).getList();
+                byte[] bytes = new byte[values.size()];
+                for (int i = 0; i < values.size(); i++) {
+                    bytes[i] = values.get(i).asInteger().byteValue();
+                }
+                outputStream.write(bytes);
+                return new BarleyAtom(("ok"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("error");
         });
 
         put("file", file);
@@ -1517,6 +1539,78 @@ public class Modules {
         initUnit();
         initReflection();
         initBase();
+        initHttp();
+        initMonty();
+    }
+
+    public static void initMonty() {
+        HashMap<String, Function> monty = new HashMap<>();
+
+        monty.put("dispose_on_close", args -> new BarleyNumber(JFrame.DISPOSE_ON_CLOSE));
+        monty.put("do_nothing_on_close", args -> new BarleyNumber(JFrame.DO_NOTHING_ON_CLOSE));
+        monty.put("exit_on_close", args -> new BarleyNumber(JFrame.EXIT_ON_CLOSE));
+        monty.put("hide_on_close", args -> new BarleyNumber(JFrame.HIDE_ON_CLOSE));
+
+        // Swing constants
+
+        monty.put("swing_bottom", args -> new BarleyNumber(SwingConstants.BOTTOM));
+        monty.put("swing_center", args -> new BarleyNumber(SwingConstants.CENTER));
+        monty.put("swing_east", args -> new BarleyNumber(SwingConstants.EAST));
+        monty.put("swing_horiz", args -> new BarleyNumber(SwingConstants.HORIZONTAL));
+        monty.put("swing_leading", args -> new BarleyNumber(SwingConstants.LEADING));
+        monty.put("swing_left", args -> new BarleyNumber(SwingConstants.LEFT));
+        monty.put("swing_next", args -> new BarleyNumber(SwingConstants.NEXT));
+        monty.put("swing_north", args -> new BarleyNumber(SwingConstants.NORTH));
+        monty.put("swing_north_east", args -> new BarleyNumber(SwingConstants.NORTH_EAST));
+        monty.put("swing_north_west", args -> new BarleyNumber(SwingConstants.NORTH_WEST));
+        monty.put("swing_previous", args -> new BarleyNumber(SwingConstants.PREVIOUS));
+        monty.put("swing_right", args -> new BarleyNumber(SwingConstants.RIGHT));
+        monty.put("swing_south", args -> new BarleyNumber(SwingConstants.SOUTH));
+        monty.put("swing_south_east", args -> new BarleyNumber(SwingConstants.SOUTH_EAST));
+        monty.put("swing_south_west", args -> new BarleyNumber(SwingConstants.SOUTH_WEST));
+        monty.put("swing_top", args -> new BarleyNumber(SwingConstants.TOP));
+        monty.put("swing_trailing", args -> new BarleyNumber(SwingConstants.TRAILING));
+        monty.put("swing_vertical", args -> new BarleyNumber(SwingConstants.VERTICAL));
+        monty.put("swing_west", args -> new BarleyNumber(SwingConstants.WEST));
+
+        // Layout managers constants
+
+        monty.put("AFTER_LAST_LINE".toLowerCase(), args -> new BarleyString(BorderLayout.AFTER_LAST_LINE));
+        monty.put("AFTER_LINE_ENDS".toLowerCase(), args -> new BarleyString(BorderLayout.AFTER_LINE_ENDS));
+        monty.put("BEFORE_FIRST_LINE".toLowerCase(), args -> new BarleyString(BorderLayout.BEFORE_FIRST_LINE));
+        monty.put("BEFORE_LINE_BEGINS".toLowerCase(), args -> new BarleyString(BorderLayout.BEFORE_LINE_BEGINS));
+        monty.put("CENTER".toLowerCase(), args -> new BarleyString(BorderLayout.CENTER));
+        monty.put("EAST".toLowerCase(), args -> new BarleyString(BorderLayout.EAST));
+        monty.put("LINE_END".toLowerCase(), args ->new BarleyString(BorderLayout.LINE_END));
+        monty.put("LINE_START".toLowerCase(), args -> new BarleyString(BorderLayout.LINE_START));
+        monty.put("NORTH".toLowerCase(), args -> new BarleyString(BorderLayout.NORTH));
+        monty.put("PAGE_END.toLowerCase()",args -> new BarleyString(BorderLayout.PAGE_END));
+        monty.put("PAGE_START".toLowerCase(),args -> new BarleyString(BorderLayout.PAGE_START));
+        monty.put("SOUTH".toLowerCase(),args -> new BarleyString(BorderLayout.SOUTH));
+        monty.put("WEST".toLowerCase(),args -> new BarleyString(BorderLayout.WEST));
+
+        put("monty", monty);
+    }
+
+    private static void initHttp() {
+        HashMap<String, Function> http = new HashMap<>();
+
+        http.put("download", args -> {
+            OkHttpClient client = new OkHttpClient();
+            final Response response = client.newCall(
+                            new Request.Builder().url(args[0].toString()).build())
+                    .execute();
+            byte[] bytes = response.body().bytes();
+            LinkedList<BarleyValue> result = new LinkedList<>();
+            for (byte b : bytes) {
+                result.add(new BarleyNumber(b));
+            }
+            return new BarleyList(result);
+        });
+
+        http.put("http", new BarleyHTTP());
+
+        put("http", http);
     }
 
     private static void initBase() {
