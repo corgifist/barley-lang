@@ -1,12 +1,11 @@
 package com.barley.runtime;
 
-import com.annimon.ownlang.lib.ValueUtils;
+import com.barley.monty.Monty;
 import com.barley.reflection.Reflection;
 import com.barley.units.Unit;
 import com.barley.units.UnitBase;
 import com.barley.units.Units;
 import com.barley.utils.*;
-import io.socket.engineio.client.transports.PollingXHR;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -21,8 +20,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -1588,6 +1590,20 @@ public class Modules {
         monty.put("PAGE_START".toLowerCase(),args -> new BarleyString(BorderLayout.PAGE_START));
         monty.put("SOUTH".toLowerCase(),args -> new BarleyString(BorderLayout.SOUTH));
         monty.put("WEST".toLowerCase(),args -> new BarleyString(BorderLayout.WEST));
+
+        monty.put("instantiate_window", Monty::Window);
+        monty.put("set_border_layout", Monty::BorderLayout);
+        monty.put("set_flow_layout", Monty::FlowLayout);
+        monty.put("set_grid_layout", Monty::GridLayout);
+        monty.put("set_visible", Monty::SetVisible);
+        monty.put("set_resizable", Monty::SetResizable);
+        monty.put("new_panel", Monty::Panel);
+        monty.put("text_label", Monty::Text);
+        monty.put("set_size", Monty::SetSize);
+        monty.put("center", Monty::Center);
+        monty.put("action_button", Monty::ActionButton);
+        monty.put("button", Monty::Button);
+        monty.put("pack_awt", Monty::Pack);
 
         put("monty", monty);
     }
