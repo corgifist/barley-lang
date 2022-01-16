@@ -1604,6 +1604,7 @@ public class Modules {
         monty.put("action_button", Monty::ActionButton);
         monty.put("button", Monty::Button);
         monty.put("pack_awt", Monty::Pack);
+        monty.put("slider", Monty::Slider);
 
         put("monty", monty);
     }

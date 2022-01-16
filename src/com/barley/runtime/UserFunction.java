@@ -125,8 +125,7 @@ public class UserFunction implements Function, Serializable {
     }
 
     private boolean processList(ListPattern pattern, BarleyValue val, ArrayList<String> toDelete) {
-        if (!((val instanceof BarleyList))) throw new BarleyException("BadArg", "expected list in list pattern");
-        BarleyList list = (BarleyList) val;
+        if (!((val instanceof BarleyList list))) throw new BarleyException("BadArg", "expected list in list pattern");
         if (list.getList().size() != pattern.getArr().size())
             return false;
         for (int i = 0; i < pattern.getArr().size(); i++) {

@@ -1,12 +1,11 @@
 package com.barley.monty;
 
-import com.barley.runtime.BarleyAtom;
-import com.barley.runtime.BarleyFunction;
-import com.barley.runtime.BarleyReference;
-import com.barley.runtime.BarleyValue;
+import com.barley.runtime.*;
 import com.barley.utils.Arguments;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,6 +41,8 @@ public class Monty {
         String tittle = (args.length == 1) ? args[0].toString() : "";
         frame = new JFrame(tittle);
         frame.setLayout(null);
+        ImageIcon icon = new ImageIcon("monty/monty_icon.jpg");
+        frame.setIconImage(icon.getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         return new BarleyReference(frame);
     }
@@ -100,6 +101,18 @@ public class Monty {
         button.setBounds(args[1].asInteger().intValue(), args[2].asInteger().intValue(), args[3].asInteger().intValue(), args[4].asInteger().intValue());
         button.addActionListener((e) -> {((BarleyFunction) args[5]).execute();});
         frame.add(button);
+        return new BarleyReference(frame);
+    }
+
+    public static BarleyValue Slider(BarleyValue... args) {
+        Arguments.check(8, args.length);
+        final JSlider slider = new JSlider(args[0].asInteger().intValue(), args[1].asInteger().intValue(), args[2].asInteger().intValue());
+        slider.setBounds(args[3].asInteger().intValue(), args[4].asInteger().intValue(), args[5].asInteger().intValue(), args[6].asInteger().intValue());
+        slider.addChangeListener(e -> {
+            JSlider source = (JSlider) e.getSource();
+            ((BarleyFunction) args[7]).execute(new BarleyNumber(source.getValue()));
+        });
+        frame.add(slider);
         return new BarleyReference(frame);
     }
 
