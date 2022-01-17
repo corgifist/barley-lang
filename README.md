@@ -27,6 +27,7 @@
  - Two Barley instances can talk to each other by sending signals (see `examples/chat.barley`)
  - Clean syntax
  - Built-in terminal code editor
+ - `Monty` gui library!
 
 
 Barley is a interpreted erlang-like language based on JVM.
