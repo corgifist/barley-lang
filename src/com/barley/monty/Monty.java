@@ -9,11 +9,14 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Monty {
 
     private static JFrame frame;
     private static LayoutManager layoutManager = new BorderLayout();
+    private static int progressID = 0;
+    private static ArrayList<JProgressBar> bars = new ArrayList<>();
 
     // Layout functions
 
@@ -62,8 +65,9 @@ public class Monty {
     }
 
     public static BarleyValue Text(BarleyValue... args) {
-        Arguments.check(5, args.length);
+        Arguments.check(6, args.length);
         final JLabel text = new JLabel(args[0].toString());
+        text.setForeground((Color) ((BarleyReference) args[5]).getRef());
         text.setBounds(args[1].asInteger().intValue(), args[2].asInteger().intValue(), args[3].asInteger().intValue(), args[4].asInteger().intValue());
         frame.add(text);
         return new BarleyReference(frame);
@@ -119,5 +123,53 @@ public class Monty {
     public static BarleyValue Pack(BarleyValue... args) {
         frame.pack();
         return new BarleyReference(frame);
+    }
+
+    public static BarleyValue CheckBox(BarleyValue... args) {
+        Arguments.check(7, args.length);
+        final JCheckBox checkBox = new JCheckBox(args[0].toString(), args[1].toString().equals("true"));
+        checkBox.setBounds(args[2].asInteger().intValue(), args[3].asInteger().intValue(), args[4].asInteger().intValue(), args[5].asInteger().intValue());
+        checkBox.addActionListener((l) -> {
+            JCheckBox source = (JCheckBox) l.getSource();
+            ((BarleyFunction) args[6]).execute(new BarleyAtom(String.valueOf(source.isSelected())), new BarleyString(source.getText()));
+        });
+        frame.add(checkBox);
+        return new BarleyReference(frame);
+    }
+
+    public static BarleyValue ClearFrame(BarleyValue... args) {
+        synchronized (new Object()) {
+            frame.getContentPane().removeAll();
+            Modules.get("barley").get("sleep").execute(new BarleyNumber(10));
+        }
+        return new BarleyReference(frame);
+    }
+
+    public static BarleyValue Image(BarleyValue... args) {
+        ImageIcon icon = new ImageIcon(args[0].toString());
+        Image img = icon.getImage();
+        final JLabel labelPic = new JLabel("");
+        labelPic.setBounds(args[1].asInteger().intValue(), args[2].asInteger().intValue(), args[3].asInteger().intValue(), args[4].asInteger().intValue());
+        labelPic.setIcon(icon);
+        frame.add(labelPic);
+        return new BarleyReference(frame);
+    }
+
+    public static BarleyValue ProgressBar(BarleyValue... args) {
+        Arguments.check(6, args.length);
+        final JProgressBar progressBar = new JProgressBar(args[0].asInteger().intValue(), args[1].asInteger().intValue());
+        progressBar.setBounds(args[2].asInteger().intValue(), args[3].asInteger().intValue(), args[4].asInteger().intValue(), args[5].asInteger().intValue());
+        progressID++;
+        bars.add(progressBar);
+        frame.add(progressBar);
+        return new BarleyNumber(progressID - 1);
+    }
+
+    public static BarleyValue StepBar(BarleyValue... args) {
+        Arguments.check(2, args.length);
+        bars.get(args[0].asInteger().intValue()).setValue(bars.get(args[0].asInteger().intValue()).getValue() + args[1].asInteger().intValue());
+        frame.repaint();
+        frame.revalidate();
+        return args[0];
     }
 }

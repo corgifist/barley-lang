@@ -1605,6 +1605,12 @@ public class Modules {
         monty.put("button", Monty::Button);
         monty.put("pack_awt", Monty::Pack);
         monty.put("slider", Monty::Slider);
+        monty.put("check_box", Monty::CheckBox);
+        monty.put("clear_frame", Monty::ClearFrame);
+        monty.put("color", args -> new BarleyReference(new Color(args[0].asInteger().intValue(), args[1].asInteger().intValue(), args[2].asInteger().intValue(), args[3].asInteger().intValue())));
+        monty.put("image_render", Monty::Image);
+        monty.put("progress_bar", Monty::ProgressBar);
+        monty.put("step_bar", Monty::StepBar);
 
         put("monty", monty);
     }
