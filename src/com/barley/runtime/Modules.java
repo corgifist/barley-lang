@@ -1532,7 +1532,7 @@ public class Modules {
         initCode();
         initBarleyUnit();
         initFile();
-        initSocket();
+        // initSocket(); Deprecation
         initDist();
         initLists();
         initAmethyst();

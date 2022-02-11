@@ -11,6 +11,7 @@ import com.barley.units.Units;
 import com.barley.utils.*;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public final class Parser implements Serializable {
@@ -28,6 +29,8 @@ public final class Parser implements Serializable {
     private TableEmulator emulator;
     private boolean inPatterns = false;
     private ArrayList<String> badVars;
+    private static HashMap<TokenType, Function> binaryOperators = new HashMap<>();
+    private static HashMap<TokenType, Function> unaryOperators = new HashMap<>();
 
     public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -134,6 +137,23 @@ public final class Parser implements Serializable {
                 ast = true;
                 consume(TokenType.RPAREN, "expected ')' after ast");
             }
+            if (match(TokenType.BINARY_OPERATION)) {
+                consume(TokenType.LPAREN, "expected '(' before binary_operation");
+                TokenType type = consume(get(0).getType(), "expected qualified token").getType();
+                consume(TokenType.RPAREN, "expected ')' before binary_operation");
+                consume(TokenType.STABBER, "expected '->' after binary_operation");
+                AST expr = expression();
+                return parseBinaryExpr(type, expr);
+            }
+
+            if (match(TokenType.UNARY_OPERATION)) {
+                consume(TokenType.LPAREN, "expected '(' before unary_operation");
+                TokenType type = consume(get(0).getType(), "expected qualified token").getType();
+                consume(TokenType.RPAREN, "expected ')' before unary_operation");
+                consume(TokenType.STABBER, "expected '->' after unary_operation");
+                AST expr = expression();
+                return parseUnaryExpr(type, expr);
+            }
             match(TokenType.COMMA);
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
@@ -143,6 +163,27 @@ public final class Parser implements Serializable {
         } else if (match(TokenType.GLOBAL)) {
             return global();
         } else throw new BarleyException("BadCompiler", "bad declaration '" + current + "'");
+    }
+
+    private AST parseBinaryExpr(TokenType type, AST expr) {
+        ArrayList<AST> args = new ArrayList<>();
+        args.add(new ExtractBindAST("Left", line(), currentLine()));
+        args.add(new ExtractBindAST("Right", line(), currentLine()));
+        Clause clause = new Clause(args, null, expr);
+        ArrayList<Clause> clauses = new ArrayList<>();
+        clauses.add(clause);
+        binaryOperators.put(type, new UserFunction(clauses));
+        return new ConstantAST(new BarleyNumber(0));
+    }
+
+    private AST parseUnaryExpr(TokenType type, AST expr) {
+        ArrayList<AST> args = new ArrayList<>();
+        args.add(new ExtractBindAST("Operand", line(), currentLine()));
+        Clause clause = new Clause(args, null, expr);
+        ArrayList<Clause> clauses = new ArrayList<>();
+        clauses.add(clause);
+        unaryOperators.put(type, new UserFunction(clauses));
+        return new ConstantAST(new BarleyNumber(0));
     }
 
     private AST extern() {
@@ -319,6 +360,15 @@ public final class Parser implements Serializable {
         if (match(TokenType.EQEQ)) {
             return new BinaryAST(result, additive(), '=', line(), currentLine());
         }
+
+        if (binaryOperators.containsKey(get(0).getType())) {
+            TokenType type = get(0).getType();
+            match(get(0).getType());
+            AST right = additive();
+            ArrayList<AST> args = new ArrayList<>();
+            args.add(result); args.add(right);
+            return new CallAST(new ConstantAST(new BarleyFunction(binaryOperators.get(type))), args, line(), currentLine());
+        }
         return result;
     }
 
@@ -446,6 +496,15 @@ public final class Parser implements Serializable {
 
         if (match(TokenType.UNPOINT)) {
             return new UnPointAST(call(), line(), currentLine());
+        }
+
+        if (unaryOperators.containsKey(get(0).getType())) {
+            TokenType type = get(0).getType();
+            match(get(0).getType());
+            AST right = call();
+            ArrayList<AST> args = new ArrayList<>();
+            args.add(right);
+            return new CallAST(new ConstantAST(new BarleyFunction(unaryOperators.get(type))), args, line(), currentLine());
         }
 
         return call();

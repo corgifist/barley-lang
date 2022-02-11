@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class Lexer {
 
-    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.|?&";
+    private static final String OPERATOR_CHARS = "+-*/()!<>=;{}:#[],.|?&$@№";
     private static final Map<String, TokenType> OPERATORS;
     private static final Map<String, TokenType> KEYWORDS;
 
@@ -49,6 +49,9 @@ public final class Lexer {
         OPERATORS.put("&", TokenType.UNBIN);
         OPERATORS.put("#", TokenType.POINT);
         OPERATORS.put("##", TokenType.UNPOINT);
+        OPERATORS.put("№", TokenType.NUM);
+        OPERATORS.put("@", TokenType.DOG);
+        OPERATORS.put("$", TokenType.DOL);
     }
 
     static {
@@ -73,6 +76,8 @@ public final class Lexer {
         KEYWORDS.put("unpack", TokenType.UNPACK);
         KEYWORDS.put("ast", TokenType.AST);
         KEYWORDS.put("extern", TokenType.EXTERN);
+        KEYWORDS.put("binary_operation", TokenType.BINARY_OPERATION);
+        KEYWORDS.put("unary_operation", TokenType.UNARY_OPERATION);
     }
 
     private final String input;
