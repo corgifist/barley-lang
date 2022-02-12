@@ -2,7 +2,9 @@
 <p>
     <img width="80" src="https://github.com/corgifist/barley-lang/blob/main/dist/logo.png">
 </p>
+    
 <h1>The Barley Programming Language</h1>
+ <h1>PROJECT IS ALIVE, JUST GROWS SLOWLY</p>
  </div>
 
 [![CI](https://github.com/elixir-lang/elixir/workflows/CI/badge.svg?branch=main)](https://app.circleci.com/pipelines/github/corgifist/barley-lang/10/workflows/45b5d058-5c12-49f8-a44a-0a7f76fdf0c9)
