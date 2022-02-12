@@ -11,6 +11,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.fusesource.jansi.AnsiConsole;
 import org.jline.terminal.TerminalBuilder;
+import org.kohsuke.args4j.spi.ArgumentImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -487,6 +488,23 @@ public class Modules {
             } catch (IOException e) {
                 return new BarleyNumber(60);
             }
+        });
+
+        shell.put("os", args -> {
+            Arguments.check(1, args.length);
+            try {
+                ArrayList<String> acc = new ArrayList<>();
+                acc.add("cmd.exe"); acc.add("/c");
+                for (String str : args[0].toString().split(" ")) {
+                    acc.add(str);
+                }
+                ProcessBuilder builder = new ProcessBuilder(acc.toArray(new String[] {}));
+                builder.inheritIO();
+                Process p = builder.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new BarleyAtom("ok");
         });
 
         shell.put("height", args -> {
