@@ -8,6 +8,14 @@ NEWLINE = "\n"
 SPACE = " "
 COLON = ":"
 EXCL = "!"
+LBRACE = "{"
+RBRACE = "}"
+PERCENT = "%"
+COMMA = ","
+
+GT = ">"
+LT = "<"
+
 
 LPAREN = "("
 RPAREN = ")"
@@ -17,27 +25,69 @@ IS_ID = def (S) -> string:is_identifier(S). end
 
 Rules
 
-once PLUS -> [plus, Line, "+"]
-once MINUS -> [minus, Line, "-"]
-once STAR -> [star, Line, "*"]
-once SLASH -> [slash, Line, "/"]
-once EQ -> [eq, Line, "="]
+once PLUS -> make_plus(Parts, Symbol)
+once MINUS -> make_minus(Parts, Symbol)
+once STAR -> make_star(Parts, Symbol)
+once SLASH -> make_slash(Parts, Symbol)
+once EQ -> make_eq(Parts, Symbol)
+once GT -> make_gt(Parts, Symbol)
+once LT -> make_lt(Parts, Symbol)
 once LPAREN -> [lparen, Line, "("]
 once RPAREN -> [rparen, Line, ")"]
 once QUOTE -> make_string(Parts)
+once PERCENT -> [percent, Line, "%"]
 once NEWLINE -> newline()
-once SPACE -> space()
 once COLON -> [colon, Line, ":"]
 once EXCL -> [excl, Line, "!"]
+once LBRACE -> [lbrace, Line, "{"]
+once RBRACE -> [rbrace, Line, "}"]
+once COMMA -> [comma, Line, ","]
 
 no_advance_expr IS_DIGIT(Symbol) -> [number, Line, catch_while_numbers(Parts)]
 no_advance_expr IS_ID(Symbol) -> make_word(Parts)
+
+skip -> " "
 
 anyway -> strange(Symbol)
 
 Catches
 
 -opt().
+
+make_plus(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [pluseq, Line, "+="] :: [plus, Line, "+"]),
+    Result[0] == pluseq ? next(Parts) :: skip,
+    Result.
+
+make_minus(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [minuseq, Line, "-="] :: [minus, Line, "-"]),
+    Result[0] == minuseq ? next(Parts) :: skip,
+    Result.
+
+make_star(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [stareq, Line, "*="] :: [star, Line, "*"]),
+    Result[0] == stareq ? next(Parts) :: skip,
+    Result.
+
+make_slash(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [slasheq, Line, "/="] :: [slash, Line, "/"]),
+    Result[0] == slasheq ? next(Parts) :: skip,
+    Result.
+
+make_eq(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [eqeq, Line, "=="] :: [eq, Line, "="]),
+    Result[0] == eqeq ? next(Parts) :: skip,
+    Result.
+
+make_gt(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [gteq, Line, ">="] :: [gt, Line, ">"]),
+    Result[0] == gteq ? next(Parts) :: skip,
+    Result.
+
+make_lt(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [lteq, Line, "<="] :: [lt, Line, "<"]),
+    Result[0] == lteq ? next(Parts) :: skip,
+    Result.
 
 strange(Symbol) -> Pos = Pos + 1, [id, Line, Symbol].
 
@@ -86,4 +136,12 @@ reserved("Add") -> true.
 reserved("From") -> true.
 reserved("out") -> true.
 reserved("input") -> true.
+reserved("while") -> true.
+reserved("do") -> true.
+reserved("for") -> true.
+reserved("is") -> true.
+reserved("or") -> true.
+reserved("and") -> true.
+reserved("do") -> true.
+reserved("in") -> true.
 reserved(X) -> false.

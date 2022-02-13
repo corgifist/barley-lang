@@ -12,19 +12,51 @@ eval_master(Part) -> eval(Part).
 eval_not([Atom, Expr]) ->
     "not " + eval_master(Expr).
 
+eval([call, Expr, Args]) ->
+    ArgsExpr = "",
+    (ArgsExpr = ArgsExpr + eval_master(ArgsPart)) || ArgsPart -> Args,
+    eval_master(Expr) + "(" + ArgsExpr + ")".
+eval([for_legacy, Name, Init, Condition, Term, Body]) ->
+    TermExpr = "",
+    (TermExpr = TermExpr + eval_master(TermPart)) || TermPart -> Term,
+    Result = "",
+    Result = Result + Name + " = " + eval_master(Init) + "\n\n",
+    Result = Result + "while " + eval_master(Condition) + ":\n",
+    Result = Result + eval_master(Body) + "\n",
+    Result = Result + "    " + TermExpr,
+    Result.
+eval([for_in, Name, Expr, Body]) ->
+    AccExpr = "",
+    (AccExpr = AccExpr + eval_master(ExprPart)) || ExprPart -> Expr,
+    "for " + Name + " in " + AccExpr + ":\n" + eval_master(Body).
+eval([group, Exprs]) ->
+    Acc = "(",
+    (Acc = Acc + eval_master(Expr)) || Expr -> Exprs,
+    Acc = Acc + ")",
+    Acc.
+eval([block, Exprs]) ->
+    Acc = "",
+    (Acc = Acc + ("    " + eval_master(Expr))) || Expr -> Exprs,
+    Acc.
+eval([while, Expr, Body]) ->
+    "while " + eval_master(Expr) + ":\n" + eval_master(Body).
+eval([or_expr, Left, Right]) ->
+    "(" + eval_master(Left) + " and " + eval_master(Right) + ")".
+eval([and_expr, Left, Right]) ->
+     "(" + eval_master(Left) + " and " + eval_master(Right) + ")".
 eval([out, Expr]) ->
-    "print(#{spy_interpreter:eval_master(Expr)})".
+    "(print(" + eval_master(Expr) + "))".
 eval([input, Expr]) ->
-    "input(#{spy_interpreter:eval_master(Expr)})".
+    "(input(" + eval_master(Expr) + "))".
 eval([space]) -> " ".
 eval([newline]) -> "\n".
 eval([id, Symbol]) -> Symbol.
 eval([assign, Name, Expr]) ->
-    "#{Name} = #{spy_interpreter:eval_master(Expr)}".
+    Name + " = " + eval_master(Expr).
 eval([binary_op, Op, Left, Right]) ->
-    "(#{spy_interpreter:eval_master(Left)} #{Op} #{spy_interpreter:eval_master(Right)})".
+    eval_master(Left) + " " + Op + " " + eval_master(Right).
 eval([unary_op, Op, Operand]) ->
-    "#{Op}#{spy_interpreter:eval_master(Operand)}".
+    "(" + Op + eval_master(Operand) + ")".
 eval([add, Module]) ->
-    "import #{Module}".
-eval([string, Str]) -> "\"#{Str}\"".
+    "import " + Module.
+eval([string, Str]) -> "\"" + Str + "\"".

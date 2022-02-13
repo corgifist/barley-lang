@@ -1,27 +1,61 @@
 Root expression
 
 -opt().
--inline(csp) -> match(space).
 
 line() -> lists:nth(get(0), 1).
 
 consume(T) when advance(T) -> get(-1).
-consume(T) -> barley:throw("Expected #{T}, but got #{line()}").
+consume(T) -> barley:throw("Expected #{T}, but got #{spy_parser:get(0)} at line #{spy_parser:line()}").
 
 advance() -> match(type(get(0))).
 advance(T) ->
     match(space),
     match(T).
 
+block() -> advance(lbrace), block([]).
+block(Acc) when advance(rbrace) -> [block, Acc].
+block(Acc) -> block(Acc + [expression()]).
+
 bunch_till_token(T) ->
     bunch_till_token(T, []).
-bunch_till_token(T, A) when match(T) -> A.
+bunch_till_token(T, A) when advance(T) -> A.
 bunch_till_token(T, A) -> bunch_till_token(T, A + [expression()]).
 
 get_type(Index) -> type(get(Index)).
 
-%% Safe-Position state
-expression() -> additive().
+expression() -> postfix(grouping()).
+
+postfix(Expr) when match(lparen) ->
+    %% Call
+    Args = bunch_till_token(rparen),
+    [call, Expr, Args].
+
+postfix(Expr) -> Expr.
+
+grouping() when match(lparen) ->
+    Expr = bunch_till_token(rparen),
+    [group, Expr].
+grouping() -> or_expr(and_expr(conditional())).
+
+or_expr(Expr) when match(types:as_atom("or")) ->
+    [or_expr, Expr, expression()].
+or_expr(Expr) -> Expr.
+
+and_expr(Expr) when match(types:as_atom("and")) ->
+    [and_expr, Expr, conditional()].
+and_expr(Expr) -> Expr.
+
+conditional() -> make_cond(additive()).
+make_cond(Expr) when advance(gteq) -> make_cond([binary_op, ">=", Expr, additive()]).
+make_cond(Expr) when advance(lteq) -> make_cond([binary_op, "<=", Expr, additive()]).
+make_cond(Expr) when advance(lt) -> make_cond([binary_op, "<", Expr, additive()]).
+make_cond(Expr) when advance(gt) -> make_cond([binary_op, ">", Expr, additive()]).
+make_cond(Expr) when advance(eqeq) -> make_cond([binary_op, "==", Expr, additive()]).
+make_cond(Expr) when advance(pluseq) -> make_cond([binary_op, "+=", Expr, additive()]).
+make_cond(Expr) when advance(minuseq) -> make_cond([binary_op, "-=", Expr, additive()]).
+make_cond(Expr) when advance(stareq) -> make_cond([binary_op, "*=", Expr, additive()]).
+make_cond(Expr) when advance(minuseq) -> make_cond([binary_op, "-=", Expr, additive()]).
+make_cond(Expr) -> Expr.
 
 additive() ->  make_add(multiplicative()).
 make_add(Expr) when advance(plus) -> make_add([binary_op, "+", Expr, multiplicative()]).
@@ -31,6 +65,7 @@ make_add(Expr) -> Expr.
 multiplicative() -> make_mult(unary()).
 make_mult(Expr) when advance(star) -> make_mult([binary_op, "*", Expr, unary()]).
 make_mult(Expr) when advance(slash) -> make_mult([binary_op, "/", Expr, unary()]).
+make_mult(Expr) when advance(percent) -> make_mult([binary_op, "%", Expr, unary()]).
 make_mult(Expr) -> Expr.
 
 unary() when match(minus) -> [unary_op, "-", primary(text(get(0)))].
@@ -43,25 +78,48 @@ assignment() when advance(var) -> Text = text(consume(id)),
 assignment() -> statement().
 
 statement() when advance(out) ->
-    csp,
     consume(colon),
-    csp,
     [out, expression()].
 
 statement() when advance(input) ->
-    csp,
     consume(colon),
-    csp,
     [input, expression()].
 
 statement() when match(types:as_atom("Add")) ->
-    csp,
     [add, text(consume(id))].
+
+statement() when match(while) ->
+    Expr = expression(),
+    Block = block(),
+    [while, Expr, Block].
+
+statement() when match(do) ->
+    [while, [id, "True"], block()].
+
+statement() when match(for) ->
+    consume(var),
+    Name = text(consume(id)),
+    advance(in) ? parse_in_for(Name) :: parse_legacy_for(Name).
+
+parse_in_for(Name) ->
+    Expr = bunch_till_token(lbrace),
+    Body = block(),
+    [for_in, Name, Expr, Body].
+
+parse_legacy_for(Name) ->
+    consume(eq),
+    Init = expression(),
+    consume(comma),
+    Condition = expression(),
+    consume(comma),
+    Term = bunch_till_token(lbrace),
+    Body = block(),
+    [for_legacy, Name, Init, Condition, Term, Body].
 
 statement() -> primary(text(get(0))).
 
 primary(Text) when get_type(0) == types:as_atom("not") ->
-    advance(), csp, [types:as_atom("not"), expression()].
+    advance(), [types:as_atom("not"), expression()].
 primary(Text) when get_type(0) == space ->
     advance(), [space].
 primary(Text) when get_type(0) == newline ->

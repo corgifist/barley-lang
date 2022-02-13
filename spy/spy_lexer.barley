@@ -30,6 +30,24 @@ global COLON
 global EXCL
  = "!"
 .
+global LBRACE
+ = "{"
+.
+global RBRACE
+ = "}"
+.
+global PERCENT
+ = "%"
+.
+global COMMA
+ = ","
+.
+global GT
+ = ">"
+.
+global LT
+ = "<"
+.
 global LPAREN
  = "("
 .
@@ -45,6 +63,41 @@ global IS_ID
 
 
 -opt().
+
+make_plus(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [pluseq, Line, "+="] :: [plus, Line, "+"]),
+    Result[0] == pluseq ? next(Parts) :: skip,
+    Result.
+
+make_minus(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [minuseq, Line, "-="] :: [minus, Line, "-"]),
+    Result[0] == minuseq ? next(Parts) :: skip,
+    Result.
+
+make_star(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [stareq, Line, "*="] :: [star, Line, "*"]),
+    Result[0] == stareq ? next(Parts) :: skip,
+    Result.
+
+make_slash(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [slasheq, Line, "/="] :: [slash, Line, "/"]),
+    Result[0] == slasheq ? next(Parts) :: skip,
+    Result.
+
+make_eq(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [eqeq, Line, "=="] :: [eq, Line, "="]),
+    Result[0] == eqeq ? next(Parts) :: skip,
+    Result.
+
+make_gt(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [gteq, Line, ">="] :: [gt, Line, ">"]),
+    Result[0] == gteq ? next(Parts) :: skip,
+    Result.
+
+make_lt(Parts, Symbol) ->
+    Result = (peek(Parts, 0) == "=" ? [lteq, Line, "<="] :: [lt, Line, "<"]),
+    Result[0] == lteq ? next(Parts) :: skip,
+    Result.
 
 strange(Symbol) -> Pos = Pos + 1, [id, Line, Symbol].
 
@@ -93,6 +146,14 @@ reserved("Add") -> true.
 reserved("From") -> true.
 reserved("out") -> true.
 reserved("input") -> true.
+reserved("while") -> true.
+reserved("do") -> true.
+reserved("for") -> true.
+reserved("is") -> true.
+reserved("or") -> true.
+reserved("and") -> true.
+reserved("do") -> true.
+reserved("in") -> true.
 reserved(X) -> false.
 
 global Pos = 0.
@@ -119,31 +180,43 @@ process_part(Parts, Symbol) when Symbol ==
  PLUS 
  -> 
   next(Parts),
-  [plus, Line, "+"]
+  make_plus(Parts, Symbol)
 .
 process_part(Parts, Symbol) when Symbol == 
  MINUS 
  -> 
   next(Parts),
-  [minus, Line, "-"]
+  make_minus(Parts, Symbol)
 .
 process_part(Parts, Symbol) when Symbol == 
  STAR 
  -> 
   next(Parts),
-  [star, Line, "*"]
+  make_star(Parts, Symbol)
 .
 process_part(Parts, Symbol) when Symbol == 
  SLASH 
  -> 
   next(Parts),
-  [slash, Line, "/"]
+  make_slash(Parts, Symbol)
 .
 process_part(Parts, Symbol) when Symbol == 
  EQ 
  -> 
   next(Parts),
-  [eq, Line, "="]
+  make_eq(Parts, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ GT 
+ -> 
+  next(Parts),
+  make_gt(Parts, Symbol)
+.
+process_part(Parts, Symbol) when Symbol == 
+ LT 
+ -> 
+  next(Parts),
+  make_lt(Parts, Symbol)
 .
 process_part(Parts, Symbol) when Symbol == 
  LPAREN 
@@ -164,16 +237,16 @@ process_part(Parts, Symbol) when Symbol ==
   make_string(Parts)
 .
 process_part(Parts, Symbol) when Symbol == 
+ PERCENT 
+ -> 
+  next(Parts),
+  [percent, Line, "%"]
+.
+process_part(Parts, Symbol) when Symbol == 
  NEWLINE 
  -> 
   next(Parts),
   newline()
-.
-process_part(Parts, Symbol) when Symbol == 
- SPACE 
- -> 
-  next(Parts),
-  space()
 .
 process_part(Parts, Symbol) when Symbol == 
  COLON 
@@ -187,6 +260,24 @@ process_part(Parts, Symbol) when Symbol ==
   next(Parts),
   [excl, Line, "!"]
 .
+process_part(Parts, Symbol) when Symbol == 
+ LBRACE 
+ -> 
+  next(Parts),
+  [lbrace, Line, "{"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ RBRACE 
+ -> 
+  next(Parts),
+  [rbrace, Line, "}"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ COMMA 
+ -> 
+  next(Parts),
+  [comma, Line, ","]
+.
 process_part(Parts, Symbol) when 
 IS_DIGIT(Symbol) 
  -> 
@@ -197,6 +288,12 @@ IS_ID(Symbol)
  -> 
   make_word(Parts)
 .
+process_part(Parts, Symbol)
+ when Symbol == 
+  " "
+ -> 
+  next(Parts), 
+  [skip, Line, ""].
 process_part(Parts, Symbol) ->
     strange(Symbol)
 .

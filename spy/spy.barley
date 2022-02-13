@@ -5,6 +5,7 @@
    barley:reparse("spy/spy_parser.barley"),
    barley:reparse("spy/spy_lexer.barley"),
    barley:reparse("spy/spy_interpreter.barley"),
+   barley:reparse("spy/spy.barley"),
    io:fwriteln("SPY: initialization success!").
 
 read_line() ->
@@ -24,17 +25,24 @@ lexer_prompt() ->
 
 parse(Text, Filename) ->
     T = lex(Text),
-    io:fwriteln(T),
     TR = spy_parser:parse(T),
-    io:fwriteln(TR),
+    io:writeln(TR),
     Script = spy_interpreter:master(TR),
+    io:writeln(Script),
     file:write("spy/#{Filename}.py", Script),
     barley:os("python spy/#{Filename}.py").
 
 parse_prompt() ->
    Prompt = read_line(),
-   Prompt == "SPYFILE" ? parse_file(read_line("|>> "), read_line("|>> ")) :: parse(Prompt, "spy"),
+   parse_manager(Prompt),
    parse_prompt().
+
+parse_manager(P) when P == "SPYFILE" -> parse_file(read_line("|>> "), read_line("|>> ")).
+parse_manager(P) when P == "SPYRELOAD" -> parse_reload().
+parse_manager(P) -> parse(P, "spy").
+
+parse_reload() ->
+    prepare.
 
 parse_file(Name, Filename) ->
     parse(file:read(Name), Filename).
