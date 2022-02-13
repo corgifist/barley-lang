@@ -1,0 +1,71 @@
+Root expression
+
+-opt().
+-inline(csp) -> match(space).
+
+line() -> lists:nth(get(0), 1).
+
+consume(T) when advance(T) -> get(-1).
+consume(T) -> barley:throw("Expected #{T}, but got #{line()}").
+
+advance() -> match(type(get(0))).
+advance(T) ->
+    match(space),
+    match(T).
+
+bunch_till_token(T) ->
+    bunch_till_token(T, []).
+bunch_till_token(T, A) when match(T) -> A.
+bunch_till_token(T, A) -> bunch_till_token(T, A + [expression()]).
+
+get_type(Index) -> type(get(Index)).
+
+%% Safe-Position state
+expression() -> additive().
+
+additive() ->  make_add(multiplicative()).
+make_add(Expr) when advance(plus) -> make_add([binary_op, "+", Expr, multiplicative()]).
+make_add(Expr) when advance(minus) -> make_add([binary_op, "-", Expr, multiplicative()]).
+make_add(Expr) -> Expr.
+
+multiplicative() -> make_mult(unary()).
+make_mult(Expr) when advance(star) -> make_mult([binary_op, "*", Expr, unary()]).
+make_mult(Expr) when advance(slash) -> make_mult([binary_op, "/", Expr, unary()]).
+make_mult(Expr) -> Expr.
+
+unary() when match(minus) -> [unary_op, "-", primary(text(get(0)))].
+unary() -> assignment().
+
+assignment() when advance(var) -> Text = text(consume(id)),
+    consume(eq),
+    [assign, Text, expression()].
+
+assignment() -> statement().
+
+statement() when advance(out) ->
+    csp,
+    consume(colon),
+    csp,
+    [out, expression()].
+
+statement() when advance(input) ->
+    csp,
+    consume(colon),
+    csp,
+    [input, expression()].
+
+statement() when match(types:as_atom("Add")) ->
+    csp,
+    [add, text(consume(id))].
+
+statement() -> primary(text(get(0))).
+
+primary(Text) when get_type(0) == types:as_atom("not") ->
+    advance(), csp, [types:as_atom("not"), expression()].
+primary(Text) when get_type(0) == space ->
+    advance(), [space].
+primary(Text) when get_type(0) == newline ->
+    advance(), [newline].
+primary(Text) when get_type(0) == string ->
+    advance(), [string, Text].
+primary(Text) -> advance(), [id, Text].

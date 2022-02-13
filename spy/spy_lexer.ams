@@ -1,0 +1,89 @@
+MINUS = "-"
+PLUS = "+"
+STAR = "*"
+SLASH = "/"
+EQ = "="
+QUOTE = "\""
+NEWLINE = "\n"
+SPACE = " "
+COLON = ":"
+EXCL = "!"
+
+LPAREN = "("
+RPAREN = ")"
+
+IS_DIGIT = def (S) -> not (string:as_number(S) == error). end
+IS_ID = def (S) -> string:is_identifier(S). end
+
+Rules
+
+once PLUS -> [plus, Line, "+"]
+once MINUS -> [minus, Line, "-"]
+once STAR -> [star, Line, "*"]
+once SLASH -> [slash, Line, "/"]
+once EQ -> [eq, Line, "="]
+once LPAREN -> [lparen, Line, "("]
+once RPAREN -> [rparen, Line, ")"]
+once QUOTE -> make_string(Parts)
+once NEWLINE -> newline()
+once SPACE -> space()
+once COLON -> [colon, Line, ":"]
+once EXCL -> [excl, Line, "!"]
+
+no_advance_expr IS_DIGIT(Symbol) -> [number, Line, catch_while_numbers(Parts)]
+no_advance_expr IS_ID(Symbol) -> make_word(Parts)
+
+anyway -> strange(Symbol)
+
+Catches
+
+-opt().
+
+strange(Symbol) -> Pos = Pos + 1, [id, Line, Symbol].
+
+space() ->
+    [space].
+
+newline() ->
+    Line = Line + 1,
+    [newline].
+
+make_string(Parts) -> [string, Line, catch_while_string(Parts)].
+
+make_word(Parts) ->
+    Word = catch_while_id(Parts),
+    reserved(Word) ? [types:as_atom(Word), Word] :: [id, Line, Word].
+
+catch_while_string(Parts) -> catch_while_string(Parts, Pos, Pos).
+catch_while_string(Parts, OldPos, NewPos) when Parts[NewPos] == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_string(Parts, OldPos, NewPos) when Parts[NewPos] == "\"" ->
+    next(Parts),
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_string(Parts, OldPos, NewPos) ->
+    next(Parts),
+    catch_while_string(Parts, OldPos, NewPos + 1).
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
+catch_while_numbers(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_numbers(Parts, OldPos, NewPos) when not (string:as_number(lists:nth(Parts, NewPos)) == error) ->
+    next(Parts),
+    catch_while_numbers(Parts, OldPos, NewPos + 1).
+catch_while_numbers(Parts, OldPos, NewPos) -> Pos = NewPos, string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+reserved("not") -> true.
+reserved("var") -> true.
+reserved("Add") -> true.
+reserved("From") -> true.
+reserved("out") -> true.
+reserved("input") -> true.
+reserved(X) -> false.

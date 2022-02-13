@@ -1,0 +1,45 @@
+-module(spy).
+-inline(prepare) ->
+   amethyst:lexer("spy/spy_lexer.ams", "spy_lexer"),
+   amethyst:parser("spy/spy_parser.ams", "spy_parser"),
+   barley:reparse("spy/spy_parser.barley"),
+   barley:reparse("spy/spy_lexer.barley"),
+   barley:reparse("spy/spy_interpreter.barley"),
+   io:fwriteln("SPY: initialization success!").
+
+read_line() ->
+    read_line(">> ").
+
+read_line(Prompt) ->
+    io:write(Prompt), io:readline().
+
+lex(String) ->
+    Tokens = spy_lexer:lex(String),
+    Tokens = lists:filter(def (T) -> not (T[0] == id and T[2] == ""). end, Tokens),
+    Tokens = lists:filter(def (T) -> not (T[0] == string and T[2] == ""). end, Tokens).
+
+lexer_prompt() ->
+    io:fwriteln(lex(read_line())),
+    lexer_prompt().
+
+parse(Text, Filename) ->
+    T = lex(Text),
+    io:fwriteln(T),
+    TR = spy_parser:parse(T),
+    io:fwriteln(TR),
+    Script = spy_interpreter:master(TR),
+    file:write("spy/#{Filename}.py", Script),
+    barley:os("python spy/#{Filename}.py").
+
+parse_prompt() ->
+   Prompt = read_line(),
+   Prompt == "SPYFILE" ? parse_file(read_line("|>> "), read_line("|>> ")) :: parse(Prompt, "spy"),
+   parse_prompt().
+
+parse_file(Name, Filename) ->
+    parse(file:read(Name), Filename).
+
+main() ->
+    prepare,
+    parse_prompt().
+

@@ -1,0 +1,209 @@
+-module(spy_lexer).
+
+global MINUS
+ = "-"
+.
+global PLUS
+ = "+"
+.
+global STAR
+ = "*"
+.
+global SLASH
+ = "/"
+.
+global EQ
+ = "="
+.
+global QUOTE
+ = "\""
+.
+global NEWLINE
+ = "\n"
+.
+global SPACE
+ = " "
+.
+global COLON
+ = ":"
+.
+global EXCL
+ = "!"
+.
+global LPAREN
+ = "("
+.
+global RPAREN
+ = ")"
+.
+global IS_DIGIT
+ = def (S) -> not (string:as_number(S) == error). end
+.
+global IS_ID
+ = def (S) -> string:is_identifier(S). end
+.
+
+
+-opt().
+
+strange(Symbol) -> Pos = Pos + 1, [id, Line, Symbol].
+
+space() ->
+    [space].
+
+newline() ->
+    Line = Line + 1,
+    [newline].
+
+make_string(Parts) -> [string, Line, catch_while_string(Parts)].
+
+make_word(Parts) ->
+    Word = catch_while_id(Parts),
+    reserved(Word) ? [types:as_atom(Word), Word] :: [id, Line, Word].
+
+catch_while_string(Parts) -> catch_while_string(Parts, Pos, Pos).
+catch_while_string(Parts, OldPos, NewPos) when Parts[NewPos] == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_string(Parts, OldPos, NewPos) when Parts[NewPos] == "\"" ->
+    next(Parts),
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_string(Parts, OldPos, NewPos) ->
+    next(Parts),
+    catch_while_string(Parts, OldPos, NewPos + 1).
+
+catch_while_id(Parts) -> catch_while_id(Parts, Pos, Pos).
+catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
+catch_while_numbers(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_list ->
+    string:join(barley:sublist(Parts, OldPos, NewPos), "").
+catch_while_numbers(Parts, OldPos, NewPos) when not (string:as_number(lists:nth(Parts, NewPos)) == error) ->
+    next(Parts),
+    catch_while_numbers(Parts, OldPos, NewPos + 1).
+catch_while_numbers(Parts, OldPos, NewPos) -> Pos = NewPos, string:join(barley:sublist(Parts, OldPos, NewPos), "").
+
+reserved("not") -> true.
+reserved("var") -> true.
+reserved("Add") -> true.
+reserved("From") -> true.
+reserved("out") -> true.
+reserved("input") -> true.
+reserved(X) -> false.
+
+global Pos = 0.
+global Line = 1.
+global EOFToken = [eof, -1, ""].
+
+peek(Parts, RelativePos) ->
+    FinalPosition = RelativePos + Pos,
+    lists:nth(Parts, FinalPosition).
+
+next(Parts) ->
+    barley:define("Pos", Pos + 1),
+    peek(Parts, 0).
+illegal_character(S, L) -> barley:throw("illegal char '" + S + "' at line " + Line).
+
+lex(String) -> lex(String, 1).
+
+lex(String, Line) ->
+    Pos = 0,
+    Line = 1,
+    process_parts(string:split(String, "")).
+
+process_part(Parts, Symbol) when Symbol == 
+ PLUS 
+ -> 
+  next(Parts),
+  [plus, Line, "+"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ MINUS 
+ -> 
+  next(Parts),
+  [minus, Line, "-"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ STAR 
+ -> 
+  next(Parts),
+  [star, Line, "*"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ SLASH 
+ -> 
+  next(Parts),
+  [slash, Line, "/"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ EQ 
+ -> 
+  next(Parts),
+  [eq, Line, "="]
+.
+process_part(Parts, Symbol) when Symbol == 
+ LPAREN 
+ -> 
+  next(Parts),
+  [lparen, Line, "("]
+.
+process_part(Parts, Symbol) when Symbol == 
+ RPAREN 
+ -> 
+  next(Parts),
+  [rparen, Line, ")"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ QUOTE 
+ -> 
+  next(Parts),
+  make_string(Parts)
+.
+process_part(Parts, Symbol) when Symbol == 
+ NEWLINE 
+ -> 
+  next(Parts),
+  newline()
+.
+process_part(Parts, Symbol) when Symbol == 
+ SPACE 
+ -> 
+  next(Parts),
+  space()
+.
+process_part(Parts, Symbol) when Symbol == 
+ COLON 
+ -> 
+  next(Parts),
+  [colon, Line, ":"]
+.
+process_part(Parts, Symbol) when Symbol == 
+ EXCL 
+ -> 
+  next(Parts),
+  [excl, Line, "!"]
+.
+process_part(Parts, Symbol) when 
+IS_DIGIT(Symbol) 
+ -> 
+  [number, Line, catch_while_numbers(Parts)]
+.
+process_part(Parts, Symbol) when 
+IS_ID(Symbol) 
+ -> 
+  make_word(Parts)
+.
+process_part(Parts, Symbol) ->
+    strange(Symbol)
+.
+process_part(Parts, Symbol) when Symbol == end_of_list -> EOFToken.
+
+process_parts(Parts) ->
+    Result = lists:reduce(def (X, Acc) -> First = peek(Parts, 0), Acc + [process_part(Parts, First)]. end, Parts, []),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == eof)). end, Result),
+    WithoutEOF = lists:filter(def (X) -> (not (lists:nth(X, 0) == skip)). end, WithoutEOF),
+    WithoutEOF = WithoutEOF + [EOFToken].

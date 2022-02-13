@@ -1,0 +1,30 @@
+-module(spy_interpreter).
+
+master(Tree) ->
+    Result = "",
+    (Result = Result + eval_master(Part)) || Part -> Tree,
+    Result.
+
+eval_master(Part) when Part[0] == types:as_atom("not") ->
+    eval_not(Part).
+eval_master(Part) -> eval(Part).
+
+eval_not([Atom, Expr]) ->
+    "not " + eval_master(Expr).
+
+eval([out, Expr]) ->
+    "print(#{spy_interpreter:eval_master(Expr)})".
+eval([input, Expr]) ->
+    "input(#{spy_interpreter:eval_master(Expr)})".
+eval([space]) -> " ".
+eval([newline]) -> "\n".
+eval([id, Symbol]) -> Symbol.
+eval([assign, Name, Expr]) ->
+    "#{Name} = #{spy_interpreter:eval_master(Expr)}".
+eval([binary_op, Op, Left, Right]) ->
+    "(#{spy_interpreter:eval_master(Left)} #{Op} #{spy_interpreter:eval_master(Right)})".
+eval([unary_op, Op, Operand]) ->
+    "#{Op}#{spy_interpreter:eval_master(Operand)}".
+eval([add, Module]) ->
+    "import #{Module}".
+eval([string, Str]) -> "\"#{Str}\"".
