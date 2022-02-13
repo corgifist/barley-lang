@@ -492,16 +492,18 @@ public class Modules {
 
         shell.put("os", args -> {
             Arguments.check(1, args.length);
+            String cmd = args[0].toString();
+            Runtime run = Runtime.getRuntime();
+            Process pr = null;
             try {
-                ArrayList<String> acc = new ArrayList<>();
-                acc.add("cmd.exe"); acc.add("/c");
-                for (String str : args[0].toString().split(" ")) {
-                    acc.add(str);
+                pr = run.exec(cmd);
+                pr.waitFor();
+                BufferedReader buf = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line = "";
+                while ((line=buf.readLine())!=null) {
+                    System.out.println(line);
                 }
-                ProcessBuilder builder = new ProcessBuilder(acc.toArray(new String[] {}));
-                builder.inheritIO();
-                Process p = builder.start();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
             return new BarleyAtom("ok");
@@ -641,7 +643,7 @@ public class Modules {
         });
         string.put("is_identifier", args -> {
             Arguments.check(1, args.length);
-            return new BarleyAtom(String.valueOf(Character.isLetter(args[0].toString().charAt(0))));
+            return new BarleyAtom(String.valueOf(Character.isLetterOrDigit(Character.toLowerCase(args[0].toString().charAt(0)))));
         });
 
         string.put("split", args -> {
@@ -1374,7 +1376,7 @@ public class Modules {
                         "next(Parts) ->\n" +
                         "    barley:define(\"Pos\", Pos + 1),\n" +
                         "    peek(Parts, 0).\n";
-                result += "illegal_character(S, L) -> barley:throw(\"illegal char '\" + S + \"'\").\n" +
+                result += "illegal_character(S, L) -> barley:throw(\"illegal char '\" + S + \"' at line \" + Line).\n" +
                         "\n" +
                         "lex(String) -> lex(String, 1).\n" +
                         "\n" +

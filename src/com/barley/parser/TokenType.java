@@ -52,5 +52,5 @@ public enum TokenType implements Serializable {
     NOT, DEF, OPT, DEFGUARD, UNIT, STRICT, PACK, UNPACK, AST, EXTERN,
     BINARY_OPERATION, UNARY_OPERATION,
 
-    VAR, ATOM, NUM, DOG, DOL, EOF
+    VAR, ATOM, NUM, DOG, DOL, INLINE, EOF
 }

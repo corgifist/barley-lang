@@ -31,6 +31,7 @@ public final class Parser implements Serializable {
     private ArrayList<String> badVars;
     private static HashMap<TokenType, Function> binaryOperators = new HashMap<>();
     private static HashMap<TokenType, Function> unaryOperators = new HashMap<>();
+    private static HashMap<String, AST> inlines = new HashMap<>();
 
     public Parser(List<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -154,6 +155,14 @@ public final class Parser implements Serializable {
                 AST expr = expression();
                 return parseUnaryExpr(type, expr);
             }
+
+            if (match(TokenType.INLINE)) {
+                consume(TokenType.LPAREN, "expected '(' before inline");
+                String name = consume(TokenType.ATOM, "expected name after '('").getText();
+                consume(TokenType.RPAREN, "expected ')' before inline");
+                consume(TokenType.STABBER, "expected '->' after inline");
+                inlines.put(name, block());
+            }
             match(TokenType.COMMA);
             return new ConstantAST(new BarleyNumber(0));
         } else if (match(TokenType.RECIEVE)) {
@@ -237,6 +246,11 @@ public final class Parser implements Serializable {
     }
 
     private AST expression() {
+        if (inlines.containsKey(get(0).getText())) {
+            AST result = inlines.get(get(0).getText());
+            match(get(0).getType());
+            return result;
+        }
         return ternary();
     }
 
