@@ -24,7 +24,9 @@ lexer_prompt() ->
     lexer_prompt().
 
 parse(Text, Filename) ->
+    Text = string:replace(Text, "    ", "\t")
     T = lex(Text),
+    io:fwriteln(T),
     TR = spy_parser:parse(T),
     io:writeln(TR),
     Script = spy_interpreter:master(TR),

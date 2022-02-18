@@ -30,6 +30,8 @@ match(TokenType) ->
 expr() -> expression().
 
 
+-inline(csp) -> match(space).
+
 -opt().
 
 line() -> lists:nth(get(0), 1).
@@ -39,7 +41,6 @@ consume(T) -> barley:throw("Expected #{T}, but got #{spy_parser:get(0)} at line 
 
 advance() -> match(type(get(0))).
 advance(T) ->
-    match(space),
     match(T).
 
 block() -> advance(lbrace), block([]).
@@ -59,6 +60,11 @@ postfix(Expr) when match(lparen) ->
     %% Call
     Args = bunch_till_token(rparen),
     [call, Expr, Args].
+
+postfix(Expr) when match(incr) ->
+    [incr, Expr].
+postfix(Expr) when match(decr) ->
+    [decr, Expr].
 
 postfix(Expr) -> Expr.
 
@@ -108,28 +114,73 @@ assignment() when advance(var) -> Text = text(consume(id)),
 assignment() -> statement().
 
 statement() when advance(out) ->
+    csp,
     consume(colon),
+    csp,
     [out, expression()].
 
 statement() when advance(input) ->
+    csp,
     consume(colon),
+    csp,
     [input, expression()].
 
 statement() when match(types:as_atom("Add")) ->
+    csp,
     [add, text(consume(id))].
 
 statement() when match(while) ->
+    csp,
     Expr = expression(),
+    csp,
     Block = block(),
+    csp,
     [while, Expr, Block].
 
 statement() when match(do) ->
+    csp,
     [while, [id, "True"], block()].
+
+statement() when match(if) ->
+    csp,
+    Expr = bunch_till_token(lbrace),
+    csp
+    Block = block(),
+    ElseBody = (advance(else) ? parse_else() :: empty),
+    [if_else, Expr, Block, ElseBody].
+
+statement() when match(fun) ->
+    csp,
+    type(get(0)) == id ? parse_definition(text(consume(id))) :: parse_lambda().
+
+parse_lambda() ->
+    advance(lparen),
+    Args = bunch_till_token(lbrace),
+    Args = lists:sublist(Args, 0, barley:length(Args) - 1),
+    advance(rparen),
+    [lambda, Args, block()].
+
+parse_definition(Name) ->
+    DArgs = bunch_till_token(lbrace),
+    DBody = block(),
+    [fdef, Name, DArgs, DBody].
+
+parse_else() -> block().
+
+statement() when match(types:as_atom("From")) ->
+    Module = text(consume(id)),
+    consume(types:as_atom("Add")),
+    Function = text(consume(id)),
+    [from_add, Module, Function].
+
 
 statement() when match(for) ->
     consume(var),
     Name = text(consume(id)),
     advance(in) ? parse_in_for(Name) :: parse_legacy_for(Name).
+
+statement() when match(return) ->
+    [return, expression()].
 
 parse_in_for(Name) ->
     Expr = bunch_till_token(lbrace),
@@ -156,6 +207,8 @@ primary(Text) when get_type(0) == newline ->
     advance(), [newline].
 primary(Text) when get_type(0) == string ->
     advance(), [string, Text].
+primary(Text) when get_type(0) == tab ->
+    [tab].
 primary(Text) -> advance(), [id, Text].
 make_parse() when match(eof) -> Result.
 make_parse() -> Expr = [expr()],

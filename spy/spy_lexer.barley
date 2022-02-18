@@ -42,6 +42,12 @@ global PERCENT
 global COMMA
  = ","
 .
+global SPACE
+ = " "
+.
+global TAB
+ = "\t"
+.
 global GT
  = ">"
 .
@@ -64,14 +70,22 @@ global IS_ID
 
 -opt().
 
+tab() ->
+    Pos = Pos + 4,
+    [tab].
+
 make_plus(Parts, Symbol) ->
     Result = (peek(Parts, 0) == "=" ? [pluseq, Line, "+="] :: [plus, Line, "+"]),
+    Result = (peek(Parts, 0) == "+" ? [incr, Line, "++"] :: Result),
     Result[0] == pluseq ? next(Parts) :: skip,
+    Result[0] == incr ? next(Parts) :: skip,
     Result.
 
 make_minus(Parts, Symbol) ->
     Result = (peek(Parts, 0) == "=" ? [minuseq, Line, "-="] :: [minus, Line, "-"]),
+    Result = (peek(Parts, 0) == "-" ? [decr, Line, "--"] :: Result),
     Result[0] == minuseq ? next(Parts) :: skip,
+    Result[0] == decr ? next(Parts) :: skip,
     Result.
 
 make_star(Parts, Symbol) ->
@@ -130,6 +144,9 @@ catch_while_id(Parts, OldPos, NewPos) when lists:nth(Parts, NewPos) == end_of_li
 catch_while_id(Parts, OldPos, NewPos) when IS_ID(peek(Parts, 0)) ->
     next(Parts),
     catch_while_id(Parts, OldPos, NewPos + 1).
+catch_while_id(Parts, OldPos, NewPos) when peek(Parts, 0) == "_" ->
+    next(Parts),
+    catch_while_id(Parts, OldPos, NewPos + 1).
 catch_while_id(Parts, OldPos, NewPos) -> string:join(barley:sublist(Parts, OldPos, NewPos), "").
 
 catch_while_numbers(Parts) -> catch_while_numbers(Parts, Pos, Pos).
@@ -154,6 +171,10 @@ reserved("or") -> true.
 reserved("and") -> true.
 reserved("do") -> true.
 reserved("in") -> true.
+reserved("if") -> true.
+reserved("fun") -> true.
+reserved("else") -> true.
+reserved("return") -> true.
 reserved(X) -> false.
 
 global Pos = 0.
@@ -278,6 +299,12 @@ process_part(Parts, Symbol) when Symbol ==
   next(Parts),
   [comma, Line, ","]
 .
+process_part(Parts, Symbol) when Symbol == 
+ SPACE 
+ -> 
+  next(Parts),
+  space()
+.
 process_part(Parts, Symbol) when 
 IS_DIGIT(Symbol) 
  -> 
@@ -288,12 +315,6 @@ IS_ID(Symbol)
  -> 
   make_word(Parts)
 .
-process_part(Parts, Symbol)
- when Symbol == 
-  " "
- -> 
-  next(Parts), 
-  [skip, Line, ""].
 process_part(Parts, Symbol) ->
     strange(Symbol)
 .
