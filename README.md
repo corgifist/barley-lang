@@ -12,7 +12,6 @@
  ## Key features
     
  - Functional programming, manage data in functional style
- - Hand memory management
  - Supports Java interoperability
  - PKG Manager
  - Pattern matching 
